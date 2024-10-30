@@ -5,6 +5,7 @@ const usersRoutes = require("./routes/usersRoutes");
 const productsRoutes = require("./routes/mProductsRoutes");
 const ordersRoutes = require("./routes/tOrdersRoutes");
 const orderItemsRoutes = require("./routes/tOrderItemsRoutes");
+const expensesRoutes = require("./routes/vExpensesRoutes");
 const sequelize = require("./config/db");
 
 app.use(cors());
@@ -15,6 +16,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/orderItems", orderItemsRoutes);
+app.use("/api/expenses", expensesRoutes);
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;

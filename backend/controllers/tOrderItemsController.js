@@ -53,12 +53,3 @@ exports.deleteOrderItem = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-exports.getTotalEarnings = async (req, res) => {
-  try {
-    const total = await OrderItem.sum("price"); // Menghitung total kolom 'price'
-    res.json({ total });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};

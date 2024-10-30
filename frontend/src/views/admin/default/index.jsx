@@ -41,7 +41,9 @@ export default function UserReports() {
   // Chakra Color Mode
   const brandColor = useColorModeValue('brand.500', 'white');
   const boxBg = useColorModeValue('secondaryGray.300', 'whiteAlpha.100');
-  const [earnings, setEarnings] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalIngredientsCost, setTotalIngredientsCost] = useState(0);
+  const [totalOperationalCost, setTotalOperationalCost] = useState(0);
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -51,20 +53,28 @@ export default function UserReports() {
   };
 
   useEffect(() => {
-    const fetchEarnings = async () => {
+    const fetchMonthlySummary = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5000/api/orderItems/total-earnings',
+          'http://localhost:5000/api/expenses/dashboard-information-summary',
         );
-        console.log('Total Earnings dari API:', response.data.total); // Log respons untuk memeriksa hasilnya
-        setEarnings(response.data.total);
+        const data = response.data[0]; // Mengambil data bulan ini (misal data pertama)
+        console.log('Data Summary:', data);
+
+        setTotalSales(data.total_sales || 0);
+        console.log(
+          'total_ingredients_cost : ',
+          typeof data.total_ingredients_cost,
+        );
+
+        setTotalIngredientsCost(data.total_ingredients_cost || 0);
+        setTotalOperationalCost(data.total_operational_cost || 0);
       } catch (error) {
-        console.error('Error saat mengambil earnings:', error);
-        console.error(error);
+        console.error('Error fetching monthly summary:', error);
       }
     };
 
-    fetchEarnings();
+    fetchMonthlySummary();
   }, []);
   return (
     <Box pt={{ base: '130px', md: '80px', xl: '80px' }}>
@@ -85,7 +95,7 @@ export default function UserReports() {
             />
           }
           name="Pendapatan"
-          value={`${formatRupiah(earnings)}`}
+          value={`${formatRupiah(totalSales)}`}
         />
         <MiniStatistics
           startContent={
@@ -98,10 +108,16 @@ export default function UserReports() {
               }
             />
           }
-          name="Spend this month"
-          value="$642.39"
+          name="Pengeluaran bulan ini"
+          value={`${formatRupiah(
+            parseFloat(totalIngredientsCost) + parseFloat(totalOperationalCost),
+          )}`}
         />
-        <MiniStatistics growth="+23%" name="Sales" value="$574.34" />
+        <MiniStatistics
+          growth="+23%"
+          name="Penjualan"
+          value={`${formatRupiah(totalSales)}`}
+        />
         <MiniStatistics
           endContent={
             <Flex me="-16px" mt="10px">
