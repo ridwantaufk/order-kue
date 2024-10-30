@@ -1,24 +1,32 @@
-// models/TotalExpensesView.js
+// File: models/vExpenses.js
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db"); // Pastikan mengimpor konfigurasi database
+const db = require("../config/db"); // Sesuaikan path jika berbeda
 
-const TotalExpensesView = sequelize.define(
-  "TotalExpensesView",
+const vExpenses = db.define(
+  "vExpenses",
   {
+    created_date: {
+      type: DataTypes.DATEONLY,
+      primaryKey: true,
+      allowNull: false,
+    },
     total_ingredients_cost: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.NUMERIC,
+      allowNull: true,
     },
     total_operational_cost: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.NUMERIC,
+      allowNull: true,
     },
-    grand_total: {
-      type: DataTypes.DECIMAL(10, 2),
+    total_sales: {
+      type: DataTypes.NUMERIC,
+      allowNull: true,
     },
   },
   {
-    tableName: "v_total_expenses",
-    timestamps: false, // Karena view biasanya tidak memiliki timestamps
+    tableName: "v_expenses", // Nama view di database
+    timestamps: false, // Karena ini adalah view
   }
 );
 
-module.exports = TotalExpensesView;
+module.exports = vExpenses;
