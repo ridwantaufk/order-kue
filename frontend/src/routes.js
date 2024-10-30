@@ -50,7 +50,7 @@ const routes = [
     component: <DataTables />,
   },
   {
-    name: 'User List', // Rute untuk melihat daftar pengguna
+    name: 'Mastering & Transaksi', // Rute untuk melihat daftar pengguna
     layout: '/admin',
     path: '/user-list', // Tambahkan path baru
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,

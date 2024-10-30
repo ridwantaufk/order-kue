@@ -11,10 +11,21 @@ exports.getProducts = async (req, res) => {
 };
 
 // Menambahkan produk baru
+// Menambahkan produk baru
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price } = req.body;
-    const newProduct = await Product.create({ name, price });
+    const { product_name, description, price, stock, cost_price, icon } =
+      req.body;
+
+    const newProduct = await Product.create({
+      product_name,
+      description,
+      price,
+      stock,
+      cost_price,
+      icon, // Include icon if you are planning to use it
+    });
+
     res.status(201).json(newProduct);
   } catch (error) {
     res.status(400).json({ message: error.message });
