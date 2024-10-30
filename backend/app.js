@@ -1,0 +1,31 @@
+const express = require("express");
+const cors = require("cors");
+const app = express();
+const usersRoutes = require("./routes/usersRoutes");
+const productsRoutes = require("./routes/mProductsRoutes");
+const ordersRoutes = require("./routes/tOrdersRoutes");
+const orderItemsRoutes = require("./routes/tOrderItemsRoutes");
+const sequelize = require("./config/db");
+
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use("/api/users", usersRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/orders", ordersRoutes);
+app.use("/api/orderItems", orderItemsRoutes);
+
+// Sync database and start server
+const PORT = process.env.PORT || 5000;
+sequelize
+  .sync() // Sinkronisasi database
+  .then(() => {
+    console.log("Database synced");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error syncing database:", error);
+  });
