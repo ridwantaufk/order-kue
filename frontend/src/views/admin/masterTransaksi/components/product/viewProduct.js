@@ -15,10 +15,12 @@ import {
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function ViewProduct() {
   const [products, setProducts] = React.useState([]);
   const toast = useToast();
+  const navigate = useNavigate();
 
   // Fetch product data from API
   React.useEffect(() => {
@@ -40,6 +42,10 @@ export default function ViewProduct() {
     fetchProducts();
   }, []);
 
+  const handleEdit = (id) => {
+    navigate(`/products/update/${id}`); // Pastikan ID yang benar digunakan
+  };
+
   return (
     <Box bg={useColorModeValue('white', 'gray.800')} p={4}>
       <Table variant="simple" colorScheme="teal">
@@ -55,7 +61,9 @@ export default function ViewProduct() {
         </Thead>
         <Tbody>
           {products.map((product) => (
-            <Tr key={product.id}>
+            <Tr key={product.product_id}>
+              {' '}
+              {/* Ganti dengan product.product_id */}
               <Td>{product.product_name}</Td>
               <Td>{product.description}</Td>
               <Td isNumeric>{product.cost_price}</Td>
@@ -65,13 +73,15 @@ export default function ViewProduct() {
                 <Button
                   colorScheme="blue"
                   mr="2"
-                  onClick={() => console.log(`Edit product ${product.id}`)}
+                  onClick={() => handleEdit(product.product_id)} // Pastikan ID yang benar digunakan
                 >
                   Edit
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => console.log(`Delete product ${product.id}`)}
+                  onClick={() =>
+                    console.log(`Delete product ${product.product_id}`)
+                  }
                 >
                   Hapus
                 </Button>
