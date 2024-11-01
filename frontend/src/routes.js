@@ -14,6 +14,7 @@ import MainDashboard from 'views/admin/default';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
+import MasterTransaksi from 'views/admin/masterTransaksi';
 import UserList from 'views/admin/UserList';
 
 // Auth Imports
@@ -52,9 +53,9 @@ const routes = [
   {
     name: 'Mastering & Transaksi', // Rute untuk melihat daftar pengguna
     layout: '/admin',
-    path: '/user-list', // Tambahkan path baru
+    path: '/master-transaksi', // Tambahkan path baru
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <UserList />, // Komponen untuk melihat daftar pengguna
+    component: <MasterTransaksi />, // Komponen untuk melihat daftar pengguna
   },
   {
     name: 'Profile',

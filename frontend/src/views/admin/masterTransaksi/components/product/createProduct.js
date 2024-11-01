@@ -13,13 +13,10 @@ import {
   Textarea,
   useToast,
 } from '@chakra-ui/react';
-import Card from 'components/card/Card';
-import Menu from 'components/menu/MainMenu';
 import * as React from 'react';
 import axios from 'axios';
 
-export default function ComplexTable(props) {
-  const textColor = useColorModeValue('secondaryGray.900', 'white');
+export default function CreateProduct() {
   const [productData, setProductData] = React.useState({
     product_name: '',
     description: '',
@@ -142,100 +139,82 @@ export default function ComplexTable(props) {
   };
 
   return (
-    <Card
-      flexDirection="column"
-      w="100%"
-      px="0px"
-      overflowX={{ sm: 'scroll', lg: 'hidden' }}
-    >
-      <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
-        <Text
-          color={textColor}
-          fontSize="22px"
-          fontWeight="700"
-          lineHeight="100%"
-        >
-          Tambah Produk
-        </Text>
-        <Menu />
-      </Flex>
-      <Box bg={useColorModeValue('white', 'gray.800')} p={4}>
-        <form onSubmit={handleSubmit}>
-          <FormControl mb={4}>
-            <FormLabel>Nama Produk</FormLabel>
-            <Input
-              type="text"
-              name="product_name"
-              value={productData.product_name}
-              onChange={handleChange}
-              required
-              onInvalid={(e) =>
-                e.target.setCustomValidity('Nama produk harus diisi.')
-              }
-              onInput={(e) => e.target.setCustomValidity('')}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Deskripsi</FormLabel>
-            <Textarea
-              name="description"
-              value={productData.description}
-              onChange={handleChange}
-              placeholder="Deskripsi produk"
-              required
-              onInvalid={(e) =>
-                e.target.setCustomValidity('Deskripsi harus diisi.')
-              }
-              onInput={(e) => e.target.setCustomValidity('')}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Harga Biaya</FormLabel>
-            <Input
-              type="text"
-              name="cost_price"
-              value={productData.cost_price}
-              onChange={handleChange}
-              required
-              onInvalid={(e) =>
-                e.target.setCustomValidity('Harga biaya harus diisi.')
-              }
-              onInput={(e) => e.target.setCustomValidity('')}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Harga Jual</FormLabel>
-            <Input
-              type="text"
-              name="price"
-              value={productData.price}
-              onChange={handleChange}
-              required
-              onInvalid={(e) =>
-                e.target.setCustomValidity('Harga jual harus diisi.')
-              }
-              onInput={(e) => e.target.setCustomValidity('')}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Stok</FormLabel>
-            <Input
-              type="text"
-              name="stock"
-              value={productData.stock}
-              onChange={handleChange}
-              required
-              onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
-              onInput={(e) => e.target.setCustomValidity('')}
-            />
-          </FormControl>
-          <Flex justifyContent="flex-end">
-            <Button type="submit" colorScheme="teal">
-              Buat Produk
-            </Button>
-          </Flex>
-        </form>
-      </Box>
-    </Card>
+    <Box bg={useColorModeValue('white', 'gray.800')} p={4}>
+      <form onSubmit={handleSubmit}>
+        <FormControl mb={4}>
+          <FormLabel>Nama Produk</FormLabel>
+          <Input
+            type="text"
+            name="product_name"
+            value={productData.product_name}
+            onChange={handleChange}
+            required
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Nama produk harus diisi.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel>Deskripsi</FormLabel>
+          <Textarea
+            name="description"
+            value={productData.description}
+            onChange={handleChange}
+            placeholder="Deskripsi produk"
+            required
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Deskripsi harus diisi.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel>Harga Biaya</FormLabel>
+          <Input
+            type="text"
+            name="cost_price"
+            value={productData.cost_price}
+            onChange={handleChange}
+            required
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Harga biaya harus diisi.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel>Harga Jual</FormLabel>
+          <Input
+            type="text"
+            name="price"
+            value={productData.price}
+            onChange={handleChange}
+            required
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Harga jual harus diisi.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel>Stok</FormLabel>
+          <Input
+            type="text"
+            name="stock"
+            value={productData.stock}
+            onChange={handleChange}
+            required
+            onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
+            onInput={(e) => e.target.setCustomValidity('')}
+          />
+        </FormControl>
+        <Flex justifyContent="flex-end">
+          <Button type="submit" colorScheme="teal">
+            Buat Produk
+          </Button>
+        </Flex>
+      </form>
+    </Box>
   );
 }

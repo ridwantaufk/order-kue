@@ -37,12 +37,6 @@ export default function Main() {
             />
           }
         />
-        {/* <Route
-          path="rtl/*"
-          element={
-            <RTLLayout theme={currentTheme} setTheme={setCurrentTheme} />
-          }
-        /> */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
       </Routes>
     </ChakraProvider>
