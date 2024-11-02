@@ -23,6 +23,14 @@ export default function Products({ onExpand, isExpanded }) {
       w="100%"
       px="0px"
       overflowX={{ sm: 'scroll', lg: 'hidden' }}
+      overflowY="auto" // Enable vertical scrolling
+      maxHeight={{
+        base: '450px',
+        sm: '500px',
+        md: '550px',
+        lg: '600px',
+        xl: '650px',
+      }} // Responsive max height
     >
       <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
         <Text

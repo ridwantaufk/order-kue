@@ -24,27 +24,43 @@ export default function CreateProduct() {
     price: '',
     stock: '',
   });
+  const [isReadOnly, setIsReadOnly] = React.useState(false);
+  const [countdown, setCountdown] = React.useState(0);
   const toast = useToast();
+
+  React.useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (countdown === 0 && isReadOnly) {
+      setIsReadOnly(false);
+      setProductData({
+        product_name: '',
+        description: '',
+        cost_price: '',
+        price: '',
+        stock: '',
+      });
+    }
+    return () => clearInterval(timer);
+  }, [countdown, isReadOnly]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Set the product data immediately to reflect the user's input
     setProductData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
 
-    // Allow only numeric input for cost_price, price, and stock
     if (name === 'cost_price' || name === 'price' || name === 'stock') {
-      // Check for non-numeric characters
       const nonNumericCharacters = value.replace(/[0-9.]/g, '');
 
       if (nonNumericCharacters.length > 0) {
-        // Display the non-numeric character temporarily
         const displayedChar = nonNumericCharacters[0];
 
-        // Show the character alert
         toast({
           title: 'Warning.',
           description: `Character "${displayedChar}" will be removed.`,
@@ -53,23 +69,20 @@ export default function CreateProduct() {
           isClosable: true,
         });
 
-        // Use setTimeout to remove non-numeric characters after 1 second
         setTimeout(() => {
-          const numericValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+          const numericValue = value.replace(/[^0-9]/g, '');
           setProductData((prevData) => ({
             ...prevData,
             [name]: numericValue,
           }));
-        }, 1000); // Show for 1 second
+        }, 1000);
       } else {
-        // If the input is numeric, format as currency (Rupiah)
-        const numericValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+        const numericValue = value.replace(/[^0-9]/g, '');
         const formattedValue = new Intl.NumberFormat('id-ID', {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2,
-        }).format(numericValue); // Format to IDR style without 'Rp'
+        }).format(numericValue);
 
-        // Update state with the formatted value
         setProductData((prevData) => ({
           ...prevData,
           [name]: formattedValue,
@@ -101,9 +114,9 @@ export default function CreateProduct() {
       const response = await axios.post('http://localhost:5000/api/products', {
         product_name: productData.product_name,
         description: productData.description,
-        cost_price: parseFloat(productData.cost_price),
-        price: parseFloat(productData.price),
-        stock: parseInt(productData.stock),
+        cost_price: parseFloat(productData.cost_price.replace(/[^0-9]/g, '')),
+        price: parseFloat(productData.price.replace(/[^0-9]/g, '')),
+        stock: parseInt(productData.stock.replace(/[^0-9]/g, '')),
         icon: null,
       });
 
@@ -116,13 +129,9 @@ export default function CreateProduct() {
         isClosable: true,
       });
 
-      setProductData({
-        product_name: '',
-        description: '',
-        cost_price: '',
-        price: '',
-        stock: '',
-      });
+      // Set read-only mode and start countdown
+      setIsReadOnly(true);
+      setCountdown(5); // Start countdown from 5 seconds
     } catch (error) {
       console.error(
         'Error adding product:',
@@ -140,6 +149,11 @@ export default function CreateProduct() {
 
   return (
     <Box bg={useColorModeValue('white', 'gray.800')} p={4}>
+      {countdown > 0 && (
+        <Text mb={4} color="green.500">
+          {`Pritinjau dalam waktu ${countdown} detik...`}
+        </Text>
+      )}
       <form onSubmit={handleSubmit}>
         <FormControl mb={4}>
           <FormLabel>Nama Produk</FormLabel>
@@ -148,7 +162,10 @@ export default function CreateProduct() {
             name="product_name"
             value={productData.product_name}
             onChange={handleChange}
+            placeholder="Nama produk"
             required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : undefined}
             onInvalid={(e) =>
               e.target.setCustomValidity('Nama produk harus diisi.')
             }
@@ -163,6 +180,8 @@ export default function CreateProduct() {
             onChange={handleChange}
             placeholder="Deskripsi produk"
             required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : undefined}
             onInvalid={(e) =>
               e.target.setCustomValidity('Deskripsi harus diisi.')
             }
@@ -176,7 +195,10 @@ export default function CreateProduct() {
             name="cost_price"
             value={productData.cost_price}
             onChange={handleChange}
+            placeholder="Harga biaya"
             required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : undefined}
             onInvalid={(e) =>
               e.target.setCustomValidity('Harga biaya harus diisi.')
             }
@@ -190,7 +212,10 @@ export default function CreateProduct() {
             name="price"
             value={productData.price}
             onChange={handleChange}
+            placeholder="Harga jual"
             required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : undefined}
             onInvalid={(e) =>
               e.target.setCustomValidity('Harga jual harus diisi.')
             }
@@ -204,13 +229,16 @@ export default function CreateProduct() {
             name="stock"
             value={productData.stock}
             onChange={handleChange}
+            placeholder="Stok"
             required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : undefined}
             onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
             onInput={(e) => e.target.setCustomValidity('')}
           />
         </FormControl>
         <Flex justifyContent="flex-end">
-          <Button type="submit" colorScheme="teal">
+          <Button type="submit" colorScheme="teal" isDisabled={isReadOnly}>
             Buat Produk
           </Button>
         </Flex>

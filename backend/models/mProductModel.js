@@ -33,7 +33,7 @@ const Product = sequelize.define(
     },
     available: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
     },
     created_at: {
       // Mengganti nama kolom menjadi created_at
