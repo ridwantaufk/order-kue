@@ -74,13 +74,22 @@ exports.updateProduct = async (req, res) => {
 };
 
 // Menghapus produk
+// Menghapus produk (soft delete)
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-    await product.destroy();
-    res.status(204).send();
+    // Melakukan soft delete dengan mengatur stock ke 0 dan available ke false
+    await product.update({
+      stock: 0,
+      available: false,
+      updated_at: new Date(), // Mengatur waktu pembaruan
+    });
+
+    res.status(204).send(); // Mengirim status 204 No Content
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
