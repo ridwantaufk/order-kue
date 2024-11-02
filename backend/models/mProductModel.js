@@ -31,6 +31,10 @@ const Product = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    available: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
     created_at: {
       // Mengganti nama kolom menjadi created_at
       type: DataTypes.DATE,
