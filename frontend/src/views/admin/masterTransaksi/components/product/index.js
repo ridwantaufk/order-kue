@@ -1,20 +1,32 @@
 import { Flex, Text, useColorModeValue } from '@chakra-ui/react';
 import { useState } from 'react';
 import Card from 'components/card/Card';
-import MainMenu from 'components/menu/MainMenu'; // Ensure component name is correct
+import MainMenu from 'components/menu/MainMenu';
 import CreateProduct from './createProduct';
 import ViewProduct from './viewProduct';
+import UpdateProduct from './updateProduct';
 
 export default function Products({ onExpand, isExpanded }) {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const [activeView, setActiveView] = useState('view');
+  const [productToEdit, setProductToEdit] = useState(null);
 
   const handleMenuClick = (view) => {
     if (view === 'expand') {
-      onExpand(); // Call the onExpand function passed from the parent
+      onExpand();
     } else {
       setActiveView(view);
+      setProductToEdit(null);
     }
+  };
+
+  const handleEdit = (product) => {
+    setProductToEdit(product); // Pass product data to edit
+    setActiveView('edit');
+  };
+
+  const handleUpdateComplete = () => {
+    setActiveView('view');
   };
 
   return (
@@ -39,12 +51,21 @@ export default function Products({ onExpand, isExpanded }) {
           fontWeight="700"
           lineHeight="100%"
         >
-          Products
+          Produk : {activeView === 'create' && 'Tambah'}
+          {activeView === 'view' && 'Informasi'}
+          {activeView === 'edit' && 'Edit'}
         </Text>
         <MainMenu onMenuClick={handleMenuClick} isExpanded={isExpanded} />
       </Flex>
 
-      {activeView === 'create' ? <CreateProduct /> : <ViewProduct />}
+      {activeView === 'create' && <CreateProduct />}
+      {activeView === 'view' && <ViewProduct onEdit={handleEdit} />}
+      {activeView === 'edit' && (
+        <UpdateProduct
+          product={productToEdit}
+          onUpdateComplete={handleUpdateComplete}
+        />
+      )}
     </Card>
   );
 }

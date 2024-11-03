@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box,
@@ -10,47 +10,17 @@ import {
   useToast,
 } from '@chakra-ui/react';
 
-const UpdateProduct = () => {
-  const { id } = useParams(); // Mengambil id dari URL
-  const [product, setProduct] = useState({
-    product_name: '',
-    description: '',
-    price: '',
-    cost_price: '',
-    stock: '',
-  });
+const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
+  const [product, setProduct] = useState(productToEdit);
+  const [isReadOnly, setIsReadOnly] = useState(false); // State untuk mengatur readonly
+  const [countdown, setCountdown] = useState(3); // State untuk hitung mundur
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Fetch data produk berdasarkan ID
   useEffect(() => {
-    const fetchProduct = async () => {
-      console.log('Fetching product with ID:', id); // Debugging ID
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/products/${id}`,
-        );
-        console.log('API Response:', response.data); // Debugging respons API
-        setProduct(response.data); // Set data produk
-      } catch (error) {
-        console.error(
-          'Error fetching product:',
-          error.response ? error.response.data : error.message,
-        );
-        toast({
-          title: 'Error.',
-          description: 'Failed to load product.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    };
+    setProduct(productToEdit);
+  }, [productToEdit]);
 
-    fetchProduct();
-  }, [id, toast]);
-
-  // Handle form input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prevProduct) => ({
@@ -59,24 +29,35 @@ const UpdateProduct = () => {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/products/${id}`, product);
+      await axios.put(
+        `http://localhost:5000/api/products/${product.product_id}`,
+        product,
+      );
       toast({
         title: 'Success.',
-        description: 'Product updated successfully.',
+        description: 'Perbarui produk berhasil',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      navigate('/admin/master-transaksi'); // Navigasi kembali ke daftar produk setelah berhasil
+      setIsReadOnly(true); // Set field menjadi read-only
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(timer);
+            onUpdateComplete();
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error) {
       console.error('Error updating product:', error);
       toast({
         title: 'Error.',
-        description: 'Failed to update product.',
+        description: 'Gagal perbarui produk.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -86,15 +67,16 @@ const UpdateProduct = () => {
 
   return (
     <Box p={4}>
-      <h1>Update Product {id}</h1>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
           <FormLabel>Nama Produk</FormLabel>
           <Input
             type="text"
             name="product_name"
-            value={product.product_name}
+            value={product?.product_name || ''}
             onChange={handleChange}
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : 'white'} // Background gelap saat read-only
           />
         </FormControl>
         <FormControl isRequired>
@@ -102,8 +84,10 @@ const UpdateProduct = () => {
           <Input
             type="text"
             name="description"
-            value={product.description}
+            value={product?.description || ''}
             onChange={handleChange}
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : 'white'}
           />
         </FormControl>
         <FormControl isRequired>
@@ -111,8 +95,10 @@ const UpdateProduct = () => {
           <Input
             type="number"
             name="cost_price"
-            value={product.cost_price}
+            value={product?.cost_price || ''}
             onChange={handleChange}
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : 'white'}
             step="0.01"
           />
         </FormControl>
@@ -121,8 +107,10 @@ const UpdateProduct = () => {
           <Input
             type="number"
             name="price"
-            value={product.price}
+            value={product?.price || ''}
             onChange={handleChange}
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : 'white'}
             step="0.01"
           />
         </FormControl>
@@ -131,12 +119,16 @@ const UpdateProduct = () => {
           <Input
             type="number"
             name="stock"
-            value={product.stock}
+            value={product?.stock || ''}
             onChange={handleChange}
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? 'gray.200' : 'white'}
           />
         </FormControl>
-        <Button mt={4} colorScheme="blue" type="submit">
-          Update Product
+        <Button mt={4} colorScheme="blue" type="submit" isDisabled={isReadOnly}>
+          {isReadOnly
+            ? `Kembali ke informasi dalam ${countdown} detik...`
+            : 'Perbarui Produk'}
         </Button>
       </form>
     </Box>
