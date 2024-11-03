@@ -6,7 +6,6 @@ import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
 import axios from 'axios'; // Import Axios
-import UpdateProduct from './views/admin/masterTransaksi/components/product/updateProduct'; // Impor komponen UpdateProduct
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
@@ -38,7 +37,6 @@ export default function Main() {
             />
           }
         />
-        <Route path="/products/update/:id" element={<UpdateProduct />} />
         <Route path="/" element={<Navigate to="/admin" replace />} />
       </Routes>
     </ChakraProvider>

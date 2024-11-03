@@ -21,15 +21,13 @@ import {
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
-export default function ViewProduct() {
+export default function ViewProduct({ onEdit }) {
   const [products, setProducts] = React.useState([]);
   const [isOpen, setIsOpen] = React.useState(false);
   const [productToDelete, setProductToDelete] = React.useState(null);
   const cancelRef = React.useRef();
   const toast = useToast();
-  const navigate = useNavigate();
 
   // Fungsi untuk membuka dialog konfirmasi
   const handleDeleteClick = (product) => {
@@ -43,7 +41,7 @@ export default function ViewProduct() {
     try {
       // Mengupdate produk untuk mengatur stock ke 0 dan available ke false
       await axios.put(
-        `http://localhost:5000/api/products/delete/${productToDelete.product_id}`, // Ubah sesuai dengan endpoint baru
+        `http://localhost:5000/api/products/delete/${productToDelete.product_id}`,
         {
           stock: 0,
           available: false,
@@ -100,10 +98,6 @@ export default function ViewProduct() {
     };
     fetchProducts();
   }, []);
-
-  const handleEdit = (id) => {
-    navigate(`/products/update/${id}`); // Pastikan ID yang benar digunakan
-  };
 
   return (
     <Box bg={useColorModeValue('white', 'gray.800')} p={4}>
@@ -180,7 +174,7 @@ export default function ViewProduct() {
                 <Button
                   colorScheme="blue"
                   mr="2"
-                  onClick={() => handleEdit(product.product_id)} // Pastikan ID yang benar digunakan
+                  onClick={() => onEdit(product)}
                 >
                   Edit
                 </Button>
