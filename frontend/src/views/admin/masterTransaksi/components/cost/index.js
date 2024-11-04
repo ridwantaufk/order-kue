@@ -34,8 +34,8 @@ export default function Products({ onExpand, isExpanded }) {
       flexDirection="column"
       w="100%"
       px="0px"
-      overflowX={{ sm: 'scroll', md: 'scroll', lg: 'scroll' }}
-      overflowY="auto"
+      overflowX={{ sm: 'scroll', lg: 'hidden' }}
+      overflowY="auto" // Enable vertical scrolling
       maxHeight={{
         base: '450px',
         sm: '500px',
@@ -44,16 +44,7 @@ export default function Products({ onExpand, isExpanded }) {
         xl: '650px',
       }}
     >
-      <Flex
-        px="25px"
-        mb="8px"
-        justifyContent="space-between"
-        align="center"
-        position="sticky" // Menjadikan elemen sticky
-        top="0" // Memastikan elemen berada di bagian atas
-        zIndex="1000" // Mengatur z-index agar berada di atas elemen lain
-        whiteSpace="nowrap" // Mencegah teks terpotong
-      >
+      <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
         <Text
           color={textColor}
           fontSize="22px"
@@ -67,18 +58,14 @@ export default function Products({ onExpand, isExpanded }) {
         <MainMenu onMenuClick={handleMenuClick} isExpanded={isExpanded} />
       </Flex>
 
-      <Flex overflowX="auto">
-        {' '}
-        {/* Menambahkan Flex di sekitar konten untuk scroll horizontal */}
-        {activeView === 'create' && <CreateProduct />}
-        {activeView === 'view' && <ViewProduct onEdit={handleEdit} />}
-        {activeView === 'edit' && (
-          <UpdateProduct
-            product={productToEdit}
-            onUpdateComplete={handleUpdateComplete}
-          />
-        )}
-      </Flex>
+      {activeView === 'create' && <CreateProduct />}
+      {activeView === 'view' && <ViewProduct onEdit={handleEdit} />}
+      {activeView === 'edit' && (
+        <UpdateProduct
+          product={productToEdit}
+          onUpdateComplete={handleUpdateComplete}
+        />
+      )}
     </Card>
   );
 }

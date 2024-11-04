@@ -10,20 +10,6 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-exports.getProductById = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Menambahkan produk baru
 // Menambahkan produk baru
 exports.createProduct = async (req, res) => {
   try {
@@ -36,7 +22,7 @@ exports.createProduct = async (req, res) => {
       price,
       stock,
       cost_price,
-      icon, // Include icon if you are planning to use it
+      icon,
     });
 
     res.status(201).json(newProduct);
@@ -58,14 +44,12 @@ exports.updateProduct = async (req, res) => {
 
     // Update produk dengan data baru
     await product.update({
-      product_name, // Gunakan nama kolom sesuai dengan model
+      product_name,
       description,
       price,
       cost_price,
       stock,
-      updated_at: new Date(), // Atur tanggal update
     });
-
     // Kembalikan produk yang telah diperbarui
     res.json(product);
   } catch (error) {
@@ -74,7 +58,6 @@ exports.updateProduct = async (req, res) => {
 };
 
 // Menghapus produk
-// Menghapus produk (soft delete)
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
@@ -86,7 +69,6 @@ exports.deleteProduct = async (req, res) => {
     await product.update({
       stock: 0,
       available: false,
-      updated_at: new Date(), // Mengatur waktu pembaruan
     });
 
     res.status(204).send(); // Mengirim status 204 No Content

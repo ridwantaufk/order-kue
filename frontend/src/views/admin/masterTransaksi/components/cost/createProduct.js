@@ -142,7 +142,7 @@ export default function CreateProduct() {
         error.response?.data?.message || error.message,
       );
       toast({
-        title: 'Error!',
+        title: 'Error.',
         description: error.response?.data?.message || 'Gagal menambah produk.',
         status: 'error',
         duration: 3000,
@@ -152,7 +152,7 @@ export default function CreateProduct() {
   };
 
   return (
-    <Box w="100%" p={4}>
+    <Box p={4}>
       {countdown > 0 && (
         <Text mb={4} color="green.500">
           {`Pritinjau dalam waktu ${countdown} detik...`}

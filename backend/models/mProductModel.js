@@ -1,4 +1,3 @@
-// models/productModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -36,21 +35,21 @@ const Product = sequelize.define(
       allowNull: true,
     },
     created_at: {
-      // Mengganti nama kolom menjadi created_at
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: DataTypes.DATE(0), // Menghilangkan milidetik
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     updated_at: {
-      // Mengganti nama kolom menjadi updated_at
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: DataTypes.DATE(0), // Menghilangkan milidetik
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
     tableName: "m_products",
-    timestamps: false,
+    timestamps: true,
+    updatedAt: "updated_at",
+    createdAt: "created_at",
   }
 );
 
