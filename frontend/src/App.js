@@ -11,18 +11,6 @@ export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
   const [data, setData] = useState([]); // State untuk menyimpan data
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/data'); // Ganti URL jika perlu
-        setData(response.data); // Simpan data di state
-      } catch (error) {
-        console.error('Error fetching data', error);
-      }
-    };
-    fetchData();
-  }, []); // Fetch data saat komponen di-mount
-
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>

@@ -82,7 +82,7 @@ export default function ViewProduct({ onEdit }) {
         const response = await axios.get('http://localhost:5000/api/products');
         setProducts(response.data);
       } catch (error) {
-        console.error('Error fetching products:', error.response);
+        console.error('Error fetching products:', error);
         toast({
           title: 'Error.',
           description: 'Failed to load products.',
@@ -131,7 +131,7 @@ export default function ViewProduct({ onEdit }) {
   };
 
   return (
-    <Box w="100%" p={4}>
+    <Box p={4}>
       <Table variant="simple" colorScheme="teal">
         <Thead>
           <Tr>

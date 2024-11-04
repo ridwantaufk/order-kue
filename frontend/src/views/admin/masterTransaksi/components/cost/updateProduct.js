@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box,
@@ -15,7 +16,9 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const toast = useToast();
+  const navigate = useNavigate();
 
+  // Use color mode values unconditionally
   const readOnlyBg = useColorModeValue('gray.200', 'gray.600');
   const editableBg = useColorModeValue('white', 'gray.900');
   const textColor = useColorModeValue('black', 'white');
@@ -25,10 +28,11 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
     setProduct(productToEdit);
   }, [productToEdit]);
 
-  // Function to display currency without modifying actual value
   const formatCurrency = (value) => {
     if (!value) return '';
-    return new Intl.NumberFormat('id-ID').format(parseFloat(value));
+    const numberValue = parseFloat(value);
+    if (isNaN(numberValue)) return '';
+    return new Intl.NumberFormat('id-ID').format(numberValue);
   };
 
   const handleChange = (e) => {
@@ -47,38 +51,20 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      // Cek apakah ada perubahan pada cost_price atau price dari nilai aslinya
-      const hasCostPriceChanged =
-        product.cost_price !== productToEdit.cost_price;
-      const hasPriceChanged = product.price !== productToEdit.price;
-
-      // Jika tidak ada perubahan, gunakan nilai asli
-      const cost_price = hasCostPriceChanged
-        ? parseFloat(product.cost_price.replace(/[^\d.-]/g, ''))
-        : productToEdit.cost_price;
-
-      const price = hasPriceChanged
-        ? parseFloat(product.price.replace(/[^\d.-]/g, ''))
-        : productToEdit.price;
-
-      // Jika stock berubah, lakukan parsing, atau gunakan nilai aslinya
-      const stock =
-        product.stock !== productToEdit.stock
-          ? parseInt(product.stock.replace(/\D/g, ''), 10)
-          : productToEdit.stock;
-
       await axios.put(
         `http://localhost:5000/api/products/${product.product_id}`,
         {
           ...product,
-          cost_price,
-          price,
-          stock,
+          cost_price:
+            parseFloat(
+              product.cost_price.replace(/\./g, '').replace(',', '.'),
+            ) || 0,
+          price:
+            parseFloat(product.price.replace(/\./g, '').replace(',', '.')) || 0,
+          stock: parseInt(product.stock.replace(/\./g, ''), 10) || 0,
         },
       );
-
       toast({
         title: 'Berhasil.',
         description: 'Perbarui produk berhasil',
@@ -86,9 +72,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
         duration: 3000,
         isClosable: true,
       });
-
       setIsReadOnly(true);
-
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev === 1) {
@@ -99,10 +83,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
         });
       }, 1000);
     } catch (error) {
-      console.error(
-        'Error updating product:',
-        error.response?.data || error.message,
-      );
+      console.error('Error updating product:', error);
       toast({
         title: 'Gagal.',
         description: 'Gagal perbarui produk.',
@@ -114,7 +95,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
   };
 
   return (
-    <Box w="100%" p={4}>
+    <Box p={4}>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
           <FormLabel>Nama Produk</FormLabel>
