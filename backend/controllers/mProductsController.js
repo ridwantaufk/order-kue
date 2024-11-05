@@ -13,8 +13,8 @@ exports.getProducts = async (req, res) => {
 // Menambahkan produk baru
 exports.createProduct = async (req, res) => {
   try {
-    const { product_name, description, price, stock, cost_price, icon } =
-      req.body;
+    const { product_name, description, price, stock, cost_price } = req.body;
+    const icon = req.file ? req.file.filename : null;
 
     const newProduct = await Product.create({
       product_name,
