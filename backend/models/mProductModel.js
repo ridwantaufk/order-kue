@@ -34,6 +34,10 @@ const Product = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: true,
     },
+    icon: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
     created_at: {
       type: DataTypes.DATE(0), // Menghilangkan milidetik
       allowNull: false,
