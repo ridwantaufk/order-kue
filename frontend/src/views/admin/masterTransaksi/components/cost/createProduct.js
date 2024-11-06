@@ -30,7 +30,9 @@ export default function CreateProduct() {
   });
   const [isReadOnly, setIsReadOnly] = React.useState(false);
   const [countdown, setCountdown] = React.useState(0);
+  const [iconFile, setIconFile] = React.useState(null);
   const toast = useToast();
+  const iconInputRef = React.useRef(null);
 
   React.useEffect(() => {
     let timer;
@@ -47,6 +49,10 @@ export default function CreateProduct() {
         price: '',
         stock: '',
       });
+      setIconFile(null);
+      if (iconInputRef.current) {
+        iconInputRef.current.value = ''; // Mengosongkan nilai input file
+      }
     }
     return () => clearInterval(timer);
   }, [countdown, isReadOnly]);
@@ -95,6 +101,10 @@ export default function CreateProduct() {
     }
   };
 
+  const handleIconUpload = (e) => {
+    setIconFile(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (
@@ -115,16 +125,41 @@ export default function CreateProduct() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/products', {
-        product_name: productData.product_name,
-        description: productData.description,
-        cost_price: parseFloat(productData.cost_price.replace(/[^0-9]/g, '')),
-        price: parseFloat(productData.price.replace(/[^0-9]/g, '')),
-        stock: parseInt(productData.stock.replace(/[^0-9]/g, '')),
-        icon: null,
-      });
+      const formData = new FormData();
+      formData.append('product_name', productData.product_name);
+      formData.append('description', productData.description);
+      formData.append(
+        'cost_price',
+        parseFloat(productData.cost_price.replace(/[^0-9]/g, '')),
+      );
+      formData.append(
+        'price',
+        parseFloat(productData.price.replace(/[^0-9]/g, '')),
+      );
+      formData.append(
+        'stock',
+        parseInt(productData.stock.replace(/[^0-9]/g, '')),
+      );
+      if (iconFile) {
+        formData.append('icon', iconFile);
+      }
+
+      console.log('ISI : ', formData);
+
+      // return;
+
+      const response = await axios.post(
+        'http://localhost:5000/api/products',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
 
       console.log('Product added:', response.data);
+
       toast({
         title: 'Berhasil!',
         description: 'Berhasil menambahkan produk',
@@ -133,16 +168,15 @@ export default function CreateProduct() {
         isClosable: true,
       });
 
-      // Set read-only mode and start countdown
       setIsReadOnly(true);
-      setCountdown(5); // Start countdown from 5 seconds
+      setCountdown(5);
     } catch (error) {
       console.error(
         'Error adding product:',
         error.response?.data?.message || error.message,
       );
       toast({
-        title: 'Error.',
+        title: 'Error!',
         description: error.response?.data?.message || 'Gagal menambah produk.',
         status: 'error',
         duration: 3000,
@@ -152,7 +186,7 @@ export default function CreateProduct() {
   };
 
   return (
-    <Box p={4}>
+    <Box w="100%" p={4}>
       {countdown > 0 && (
         <Text mb={4} color="green.500">
           {`Pritinjau dalam waktu ${countdown} detik...`}
@@ -255,6 +289,24 @@ export default function CreateProduct() {
             onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
             onInput={(e) => e.target.setCustomValidity('')}
           />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel color={useColorModeValue('gray.800', 'white')}>
+            Unggah Icon
+          </FormLabel>
+          <Input
+            ref={iconInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleIconUpload}
+            isDisabled={isReadOnly}
+            bg={isReadOnly ? readOnlyBg : createTableBg}
+            color={isReadOnly ? readOnlyColor : textColor}
+            p={2}
+          />
+          <Text color="gray.500" fontSize="sm">
+            Format yang diterima: JPG, JPEG, PNG
+          </Text>
         </FormControl>
         <Flex justifyContent="flex-end">
           <Button

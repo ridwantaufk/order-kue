@@ -51,7 +51,7 @@ export default function Products({ onExpand, isExpanded }) {
         align="center"
         position="sticky" // Menjadikan elemen sticky
         top="0" // Memastikan elemen berada di bagian atas
-        zIndex="1000" // Mengatur z-index agar berada di atas elemen lain
+        zIndex="1" // Mengatur z-index agar berada di atas elemen lain
         whiteSpace="nowrap" // Mencegah teks terpotong
       >
         <Text
