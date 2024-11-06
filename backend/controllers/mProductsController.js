@@ -1,4 +1,6 @@
 const Product = require("../models/mProductModel");
+const fs = require("fs");
+const path = require("path");
 
 // Mendapatkan semua produk
 exports.getProducts = async (req, res) => {
@@ -40,7 +42,52 @@ exports.updateProduct = async (req, res) => {
     }
 
     // Ambil data dari body permintaan
-    const { product_name, description, price, cost_price, stock } = req.body;
+    const { product_name, description, price, cost_price, stock, icon } =
+      req.body;
+    let iconFile = product.icon;
+
+    // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama
+    console.log("TESSSSSSS : ", icon, product.icon, req.file);
+    // return;
+    if (icon === "delete" && product.icon) {
+      const iconPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "frontend",
+        "src",
+        "assets",
+        "img",
+        "products",
+        product.icon
+      );
+      if (fs.existsSync(iconPath)) {
+        fs.unlinkSync(iconPath);
+      }
+      iconFile = null; // Set icon ke null di database
+    }
+
+    if (req.file) {
+      // Hapus ikon lama jika ada
+      if (product.icon) {
+        const oldIconPath = path.join(
+          __dirname,
+          "..",
+          "..",
+          "frontend",
+          "src",
+          "assets",
+          "img",
+          "products",
+          product.icon
+        );
+        if (fs.existsSync(oldIconPath)) {
+          fs.unlinkSync(oldIconPath);
+        }
+      }
+
+      iconFile = req.file.filename; // Simpan nama file baru ke dalam variabel
+    }
 
     // Update produk dengan data baru
     await product.update({
@@ -49,6 +96,7 @@ exports.updateProduct = async (req, res) => {
       price,
       cost_price,
       stock,
+      icon: iconFile,
     });
     // Kembalikan produk yang telah diperbarui
     res.json(product);

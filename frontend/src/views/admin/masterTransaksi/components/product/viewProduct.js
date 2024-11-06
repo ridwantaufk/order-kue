@@ -20,9 +20,12 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Image,
+  DarkMode,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
+import notFoundImage from '../../../../../assets/img/products/no-image.png';
 
 export default function ViewProduct({ onEdit }) {
   const [products, setProducts] = React.useState([]);
@@ -254,6 +257,7 @@ export default function ViewProduct({ onEdit }) {
             <Th cursor="pointer" isNumeric onClick={() => handleSort('stock')}>
               Stok
             </Th>
+            <Th>Gambar</Th>
             <Th>Aksi</Th>
           </Tr>
         </Thead>
@@ -349,6 +353,27 @@ export default function ViewProduct({ onEdit }) {
                 }
               >
                 {formatStock(product.stock)}{' '}
+              </Td>
+              <Td>
+                <Image
+                  src={
+                    product.icon
+                      ? require(`../../../../../assets/img/products/${product.icon}`)
+                      : notFoundImage
+                  }
+                  alt={
+                    product.icon
+                      ? `Icon ${product.name}`
+                      : 'Gambar Tidak Ditemukan'
+                  }
+                  boxSize="50px"
+                  objectFit="cover"
+                  filter={
+                    product.stock === 0 && product.available === false
+                      ? 'grayscale(100%)'
+                      : 'none'
+                  }
+                />
               </Td>
               <Td>
                 <HStack spacing={2}>

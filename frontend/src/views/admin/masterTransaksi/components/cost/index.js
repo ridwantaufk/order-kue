@@ -34,8 +34,8 @@ export default function Products({ onExpand, isExpanded }) {
       flexDirection="column"
       w="100%"
       px="0px"
-      overflowX={{ sm: 'scroll', lg: 'hidden' }}
-      overflowY="auto" // Enable vertical scrolling
+      overflowX={{ sm: 'scroll', md: 'scroll', lg: 'scroll' }}
+      overflowY="auto"
       maxHeight={{
         base: '450px',
         sm: '500px',
@@ -44,28 +44,41 @@ export default function Products({ onExpand, isExpanded }) {
         xl: '650px',
       }}
     >
-      <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
+      <Flex
+        px="25px"
+        mb="8px"
+        justifyContent="space-between"
+        align="center"
+        position="sticky" // Menjadikan elemen sticky
+        top="0" // Memastikan elemen berada di bagian atas
+        zIndex="1" // Mengatur z-index agar berada di atas elemen lain
+        whiteSpace="nowrap" // Mencegah teks terpotong
+      >
         <Text
           color={textColor}
           fontSize="22px"
           fontWeight="700"
           lineHeight="100%"
         >
-          Produk : {activeView === 'create' && 'Tambah'}
+          Bahan-bahan : {activeView === 'create' && 'Tambah'}
           {activeView === 'view' && 'Informasi'}
           {activeView === 'edit' && 'Edit'}
         </Text>
         <MainMenu onMenuClick={handleMenuClick} isExpanded={isExpanded} />
       </Flex>
 
-      {activeView === 'create' && <CreateProduct />}
-      {activeView === 'view' && <ViewProduct onEdit={handleEdit} />}
-      {activeView === 'edit' && (
-        <UpdateProduct
-          product={productToEdit}
-          onUpdateComplete={handleUpdateComplete}
-        />
-      )}
+      <Flex overflowX="auto">
+        {' '}
+        {/* Menambahkan Flex di sekitar konten untuk scroll horizontal */}
+        {activeView === 'create' && <CreateProduct />}
+        {activeView === 'view' && <ViewProduct onEdit={handleEdit} />}
+        {activeView === 'edit' && (
+          <UpdateProduct
+            product={productToEdit}
+            onUpdateComplete={handleUpdateComplete}
+          />
+        )}
+      </Flex>
     </Card>
   );
 }

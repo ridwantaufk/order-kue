@@ -300,7 +300,8 @@ export default function CreateProduct() {
             accept="image/*"
             onChange={handleIconUpload}
             isDisabled={isReadOnly}
-            bg={useColorModeValue('gray.100', 'gray.700')}
+            bg={isReadOnly ? readOnlyBg : createTableBg}
+            color={isReadOnly ? readOnlyColor : textColor}
             p={2}
           />
           <Text color="gray.500" fontSize="sm">
