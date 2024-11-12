@@ -48,14 +48,14 @@ exports.updateProduct = async (req, res) => {
 
     // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama
     console.log("TESSSSSSS : ", icon, product.icon, req.file);
-    // return;
+
     if (icon === "delete" && product.icon) {
       const iconPath = path.join(
         __dirname,
         "..",
         "..",
         "frontend",
-        "src",
+        "public",
         "assets",
         "img",
         "products",
@@ -75,7 +75,7 @@ exports.updateProduct = async (req, res) => {
           "..",
           "..",
           "frontend",
-          "src",
+          "public",
           "assets",
           "img",
           "products",
@@ -98,7 +98,7 @@ exports.updateProduct = async (req, res) => {
       stock,
       icon: iconFile,
     });
-    // Kembalikan produk yang telah diperbarui
+
     res.json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });

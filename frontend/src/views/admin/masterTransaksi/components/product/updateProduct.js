@@ -269,8 +269,8 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
                 previewIconFile instanceof File
                   ? URL.createObjectURL(previewIconFile)
                   : iconFile
-                  ? require(`../../../../../assets/img/products/${iconFile}`) // Ganti ini jika Anda ingin menggunakan ikon yang sudah ada
-                  : require('../../../../../assets/img/products/no-image.png')
+                  ? `/assets/img/products/${iconFile}`
+                  : '/assets/img/products/no-image.png'
               }
               alt={iconFile ? 'Gambar produk' : 'Gambar kosong'}
               boxSize="100px"
