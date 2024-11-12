@@ -21,11 +21,9 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Image,
-  DarkMode,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
-import notFoundImage from '../../../../../assets/img/products/no-image.png';
 
 export default function ViewProduct({ onEdit }) {
   const [products, setProducts] = React.useState([]);
@@ -34,9 +32,11 @@ export default function ViewProduct({ onEdit }) {
   const [isAllSelected, setIsAllSelected] = React.useState(false);
   const [sortColumn, setSortColumn] = React.useState(null);
   const [sortDirection, setSortDirection] = React.useState('asc');
-  const [productToDelete, setProductToDelete] = React.useState(null); // State for individual delete product
+  const [productToDelete, setProductToDelete] = React.useState(null);
   const cancelRef = React.useRef();
   const toast = useToast();
+  const rowBgColorTr = useColorModeValue('red.100', 'red.300');
+  const rowBgColorTd = useColorModeValue('gray.500', 'gray.300');
 
   const handleDeleteClick = (product = null) => {
     setProductToDelete(product);
@@ -48,7 +48,7 @@ export default function ViewProduct({ onEdit }) {
       const productsToDelete =
         selectedProducts.length > 0 ? selectedProducts : [productToDelete];
 
-      if (productsToDelete.length === 0) {
+      if (!productToDelete && productsToDelete.length === 0) {
         throw new Error('Tidak ada produk yang dipilih untuk dihapus.');
       }
 
@@ -136,10 +136,6 @@ export default function ViewProduct({ onEdit }) {
     const allProducts = products.filter(
       (product) => product.stock > 0 && product.available,
     );
-
-    console.log('All Products:', allProducts);
-    console.log('Selected Products:', selectedProducts);
-
     setIsAllSelected(
       allProducts.length > 0 &&
         allProducts.every((product) =>
@@ -148,8 +144,6 @@ export default function ViewProduct({ onEdit }) {
           ),
         ),
     );
-
-    console.log('Is All Selected:', isAllSelected);
   }, [selectedProducts, products]);
 
   const handleSort = (column) => {
@@ -176,6 +170,7 @@ export default function ViewProduct({ onEdit }) {
   };
 
   const formatCurrency = (value) => {
+    if (value == null) return 'Rp 0';
     const formatter = new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
@@ -267,7 +262,7 @@ export default function ViewProduct({ onEdit }) {
               key={product.product_id}
               bg={
                 product.stock === 0 && product.available === false
-                  ? useColorModeValue('red.100', 'red.300')
+                  ? rowBgColorTr
                   : undefined
               }
             >
@@ -289,7 +284,7 @@ export default function ViewProduct({ onEdit }) {
                 }
                 color={
                   product.stock === 0 && product.available === false
-                    ? useColorModeValue('gray.500', 'gray.300')
+                    ? rowBgColorTd
                     : undefined
                 }
               >
@@ -303,7 +298,7 @@ export default function ViewProduct({ onEdit }) {
                 }
                 color={
                   product.stock === 0 && product.available === false
-                    ? useColorModeValue('gray.500', 'gray.300')
+                    ? rowBgColorTd
                     : undefined
                 }
               >
@@ -318,7 +313,7 @@ export default function ViewProduct({ onEdit }) {
                 isNumeric
                 color={
                   product.stock === 0 && product.available === false
-                    ? useColorModeValue('gray.500', 'gray.300')
+                    ? rowBgColorTd
                     : undefined
                 }
               >
@@ -333,7 +328,7 @@ export default function ViewProduct({ onEdit }) {
                 isNumeric
                 color={
                   product.stock === 0 && product.available === false
-                    ? useColorModeValue('gray.500', 'gray.300')
+                    ? rowBgColorTd
                     : undefined
                 }
               >
@@ -348,7 +343,7 @@ export default function ViewProduct({ onEdit }) {
                 isNumeric
                 color={
                   product.stock === 0 && product.available === false
-                    ? useColorModeValue('gray.500', 'gray.300')
+                    ? rowBgColorTd
                     : undefined
                 }
               >
@@ -358,8 +353,8 @@ export default function ViewProduct({ onEdit }) {
                 <Image
                   src={
                     product.icon
-                      ? require(`../../../../../assets/img/products/${product.icon}`)
-                      : notFoundImage
+                      ? `/assets/img/products/${product.icon}`
+                      : '/assets/img/products/no-image.png'
                   }
                   alt={
                     product.icon

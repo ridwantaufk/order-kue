@@ -7,7 +7,7 @@ const path = require("path");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Tentukan folder tujuan penyimpanan
-    cb(null, path.join(__dirname, "../../frontend/src/assets/img/products")); // Ubah path sesuai dengan kebutuhan
+    cb(null, path.join(__dirname, "../../frontend/public/assets/img/products"));
   },
   filename: (req, file, cb) => {
     // Menggunakan timestamp untuk nama file agar unik
