@@ -3,7 +3,7 @@ import { Box, SimpleGrid } from '@chakra-ui/react';
 
 import React from 'react';
 import Products from './components/product';
-// import Costs from './components/cost';
+import Costs from './components/cost';
 
 export default function Settings() {
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -20,7 +20,7 @@ export default function Settings() {
         spacing={{ base: '20px', xl: '20px' }}
       >
         <Products onExpand={handleExpand} isExpanded={isExpanded} />
-        {/* <Costs onExpand={handleExpand} isExpanded={isExpanded} /> */}
+        <Costs onExpand={handleExpand} isExpanded={isExpanded} />
       </SimpleGrid>
     </Box>
   );

@@ -368,6 +368,9 @@ export default function ViewProduct({ onEdit }) {
                       ? 'grayscale(100%)'
                       : 'none'
                   }
+                  onError={(e) => {
+                    e.target.src = '/assets/img/products/no-image.png';
+                  }}
                 />
               </Td>
               <Td>
