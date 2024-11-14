@@ -12,19 +12,27 @@ import {
   Input,
   Textarea,
   useToast,
+  InputGroup,
+  InputLeftElement,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import { format, parse } from 'date-fns';
+import 'react-datepicker/dist/react-datepicker.css';
+import { FaCalendar } from 'react-icons/fa';
 
 export default function CreateCost() {
   const readOnlyBg = useColorModeValue('gray.200', 'gray.600');
   const createTableBg = useColorModeValue('white', 'gray.900');
   const textColor = useColorModeValue('black', 'white');
   const readOnlyColor = useColorModeValue('gray.500', 'gray.500');
-  const [costData, setCostData] = React.useState({
+  const date = format(new Date(), 'dd MMM yyyy');
+  const [cost, setCost] = React.useState({
     cost_name: '',
-    description: '',
+    cost_description: '',
     amount: '',
+    cost_date: date, // Format as "10 Oktober 2024"
   });
   const [isReadOnly, setIsReadOnly] = React.useState(false);
   const [countdown, setCountdown] = React.useState(0);
@@ -38,10 +46,11 @@ export default function CreateCost() {
       }, 1000);
     } else if (countdown === 0 && isReadOnly) {
       setIsReadOnly(false);
-      setCostData({
+      setCost({
         cost_name: '',
-        description: '',
+        cost_description: '',
         amount: '',
+        cost_date: date,
       });
     }
     return () => clearInterval(timer);
@@ -50,7 +59,7 @@ export default function CreateCost() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setCostData((prevData) => ({
+    setCost((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -71,7 +80,7 @@ export default function CreateCost() {
 
         setTimeout(() => {
           const numericValue = value.replace(/[^0-9]/g, '');
-          setCostData((prevData) => ({
+          setCost((prevData) => ({
             ...prevData,
             [name]: numericValue,
           }));
@@ -83,7 +92,7 @@ export default function CreateCost() {
           maximumFractionDigits: 2,
         }).format(numericValue);
 
-        setCostData((prevData) => ({
+        setCost((prevData) => ({
           ...prevData,
           [name]: formattedValue,
         }));
@@ -93,7 +102,7 @@ export default function CreateCost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!costData.cost_name || !costData.description || !costData.amount) {
+    if (!cost.cost_name || !cost.cost_description || !cost.amount) {
       toast({
         title: 'Error.',
         description: 'Silahkan isi semua inputan',
@@ -106,24 +115,22 @@ export default function CreateCost() {
 
     try {
       const formData = new FormData();
-      formData.append('cost_name', costData.cost_name);
-      formData.append('description', costData.description);
-      formData.append(
-        'amount',
-        parseFloat(costData.amount.replace(/[^0-9]/g, '')),
-      );
+      formData.append('cost_name', cost.cost_name);
+      formData.append('cost_description', cost.cost_description);
+      formData.append('amount', parseFloat(cost.amount.replace(/[^0-9]/g, '')));
+      formData.append('cost_date', format(cost.cost_date, 'yyyy-M-dd'));
+      console.log('formData : ', formData);
+      // return;
 
       const response = await axios.post(
         'http://localhost:5000/api/costs',
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         },
       );
-
-      console.log('Cost added:', response.data);
 
       toast({
         title: 'Berhasil!',
@@ -136,10 +143,6 @@ export default function CreateCost() {
       setIsReadOnly(true);
       setCountdown(5);
     } catch (error) {
-      console.error(
-        'Error adding cost:',
-        error.response?.data?.message || error.message,
-      );
       toast({
         title: 'Error!',
         description: error.response?.data?.message || 'Gagal menambah biaya.',
@@ -165,7 +168,7 @@ export default function CreateCost() {
           <Input
             type="text"
             name="cost_name"
-            value={costData.cost_name}
+            value={cost.cost_name}
             onChange={handleChange}
             placeholder="Nama biaya"
             required
@@ -179,8 +182,8 @@ export default function CreateCost() {
             Deskripsi
           </FormLabel>
           <Textarea
-            name="description"
-            value={costData.description}
+            name="cost_description"
+            value={cost.cost_description}
             onChange={handleChange}
             placeholder="Deskripsi biaya"
             required
@@ -196,7 +199,7 @@ export default function CreateCost() {
           <Input
             type="text"
             name="amount"
-            value={costData.amount}
+            value={cost.amount}
             onChange={handleChange}
             placeholder="Jumlah biaya"
             required
@@ -205,6 +208,45 @@ export default function CreateCost() {
             color={isReadOnly ? readOnlyColor : textColor}
           />
         </FormControl>
+        <FormControl mb={4} w="100%">
+          <FormLabel color={useColorModeValue('gray.800', 'white')}>
+            Tanggal
+          </FormLabel>
+          <InputGroup w="100%" display="flex">
+            <InputLeftElement pointerEvents="none">
+              <FaCalendar color={useColorModeValue('gray.500', 'gray.300')} />
+            </InputLeftElement>
+            <DatePicker
+              selected={
+                cost?.cost_date
+                  ? parse(cost.cost_date, 'dd MMM yyyy', new Date())
+                  : new Date() // Default to today's date if cost_date is not set
+              }
+              onChange={(date) =>
+                handleChange({
+                  target: {
+                    name: 'cost_date',
+                    value: format(date, 'dd MMM yyyy'), // Display as "10 Oktober 2024"
+                  },
+                })
+              }
+              dateFormat="dd MMM yyyy"
+              customInput={
+                <Input
+                  pl="2rem" // Padding-left to avoid overlap with the icon
+                  name="cost_date"
+                  value={cost.cost_date}
+                  isReadOnly={isReadOnly}
+                  sx={{ width: '100%' }} // Ensures full width
+                  bg={isReadOnly ? readOnlyBg : createTableBg}
+                  color={isReadOnly ? readOnlyColor : textColor}
+                  placeholder="DD MMM YYYY"
+                />
+              }
+            />
+          </InputGroup>
+        </FormControl>
+
         <Flex justifyContent="flex-end">
           <Button
             type="submit"

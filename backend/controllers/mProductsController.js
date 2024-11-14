@@ -47,8 +47,6 @@ exports.updateProduct = async (req, res) => {
     let iconFile = product.icon;
 
     // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama
-    console.log("TESSSSSSS : ", icon, product.icon, req.file);
-
     if (icon === "delete" && product.icon) {
       const iconPath = path.join(
         __dirname,

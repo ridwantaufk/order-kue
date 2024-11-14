@@ -237,7 +237,7 @@ export default function ViewProduct({ onEdit }) {
               Nama Produk
             </Th>
             <Th cursor="pointer" onClick={() => handleSort('description')}>
-              Deskripsi
+              Deskripsi Produk
             </Th>
             <Th
               cursor="pointer"

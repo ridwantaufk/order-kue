@@ -77,18 +77,17 @@ exports.updateCost = async (req, res) => {
 // Menghapus data cost berdasarkan ID
 exports.deleteCost = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const cost = await Cost.findByPk(id);
+    const cost = await Cost.findByPk(req.params.id);
     if (!cost) {
       return res.status(404).json({ message: "Cost not found" });
     }
 
-    await cost.destroy();
-    res.status(200).json({ message: "Cost deleted successfully" });
+    await cost.update({
+      active: req.body.active,
+    });
+
+    res.status(204).send(); // Mengirim status 204 No Content
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to delete cost", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
