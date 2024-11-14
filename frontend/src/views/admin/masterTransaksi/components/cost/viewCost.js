@@ -20,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  Image,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
@@ -58,8 +57,7 @@ export default function ViewCost({ onEdit }) {
             await axios.put(
               `http://localhost:5000/api/costs/delete/${cost.cost_id}`,
               {
-                amount: 0,
-                available: false,
+                active: false,
               },
             );
           } else {
@@ -73,7 +71,7 @@ export default function ViewCost({ onEdit }) {
       setCosts((prevCosts) =>
         prevCosts.map((c) =>
           costsToDelete.some((selected) => selected.cost_id === c.cost_id)
-            ? { ...c, amount: 0, available: false }
+            ? { ...c, active: false }
             : c,
         ),
       );
@@ -114,6 +112,7 @@ export default function ViewCost({ onEdit }) {
         const sortedCosts = response.data.sort((a, b) =>
           a.cost_name.localeCompare(b.cost_name),
         );
+        console.log('result :', sortedCosts);
         setCosts(sortedCosts);
       } catch (error) {
         console.error('Error fetching costs:', error.response);
@@ -144,9 +143,9 @@ export default function ViewCost({ onEdit }) {
       sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
     setSortColumn(column);
     setSortDirection(direction);
-
     const sortedCosts = [...costs].sort((a, b) => {
-      const isNumericColumn = ['amount', 'price'].includes(column);
+      console.log('a : ', a, 'b : ', b);
+      const isNumericColumn = ['amount'].includes(column);
       const valA = isNumericColumn
         ? parseFloat(a[column])
         : a[column].toLowerCase();
@@ -215,8 +214,8 @@ export default function ViewCost({ onEdit }) {
             <Th cursor="pointer" onClick={() => handleSort('cost_name')}>
               Nama Biaya
             </Th>
-            <Th cursor="pointer" onClick={() => handleSort('description')}>
-              Deskripsi
+            <Th cursor="pointer" onClick={() => handleSort('cost_description')}>
+              Deskripsi Biaya
             </Th>
             <Th cursor="pointer" isNumeric onClick={() => handleSort('amount')}>
               Jumlah Biaya
@@ -228,11 +227,7 @@ export default function ViewCost({ onEdit }) {
           {costs.map((cost) => (
             <Tr
               key={cost.cost_id}
-              bg={
-                cost.amount === 0 && cost.available === false
-                  ? rowBgColorTr
-                  : undefined
-              }
+              bg={cost.active == false ? rowBgColorTr : undefined}
             >
               <Td>
                 <Checkbox
@@ -245,45 +240,21 @@ export default function ViewCost({ onEdit }) {
                 />
               </Td>
               <Td
-                textDecoration={
-                  cost.amount === 0 && cost.available === false
-                    ? 'line-through'
-                    : 'none'
-                }
-                color={
-                  cost.amount === 0 && cost.available === false
-                    ? rowBgColorTd
-                    : undefined
-                }
+                textDecoration={cost.active == false ? 'line-through' : 'none'}
+                color={cost.active == false ? rowBgColorTd : undefined}
               >
                 {cost.cost_name}
               </Td>
               <Td
-                textDecoration={
-                  cost.amount === 0 && cost.available === false
-                    ? 'line-through'
-                    : 'none'
-                }
-                color={
-                  cost.amount === 0 && cost.available === false
-                    ? rowBgColorTd
-                    : undefined
-                }
+                textDecoration={cost.active == false ? 'line-through' : 'none'}
+                color={cost.active == false ? rowBgColorTd : undefined}
               >
-                {cost.description}
+                {cost.cost_description}
               </Td>
               <Td
-                textDecoration={
-                  cost.amount === 0 && cost.available === false
-                    ? 'line-through'
-                    : 'none'
-                }
+                textDecoration={cost.active == false ? 'line-through' : 'none'}
                 isNumeric
-                color={
-                  cost.amount === 0 && cost.available === false
-                    ? rowBgColorTd
-                    : undefined
-                }
+                color={cost.active == false ? rowBgColorTd : undefined}
               >
                 {formatCurrency(cost.amount)}{' '}
               </Td>
@@ -295,7 +266,7 @@ export default function ViewCost({ onEdit }) {
                   <Button
                     colorScheme="red"
                     onClick={() => handleDeleteClick(cost)}
-                    isDisabled={cost.amount === 0 && cost.available === false}
+                    isDisabled={cost.active == false}
                   >
                     Hapus
                   </Button>
@@ -310,7 +281,10 @@ export default function ViewCost({ onEdit }) {
         leastDestructiveRef={cancelRef}
         onClose={() => setIsOpen(false)}
       >
-        <AlertDialogOverlay>
+        <AlertDialogOverlay
+          bg="rgba(0, 0, 0, 0.8)"
+          sx={{ backdropFilter: 'blur(1px)' }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>Konfirmasi Hapus Biaya</AlertDialogHeader>
             <AlertDialogBody>

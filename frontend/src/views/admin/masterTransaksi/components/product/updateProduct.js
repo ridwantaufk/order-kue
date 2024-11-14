@@ -13,6 +13,7 @@ import {
   IconButton,
   Tooltip,
   Spinner,
+  Textarea,
 } from '@chakra-ui/react';
 import { CloseIcon, RepeatIcon } from '@chakra-ui/icons';
 
@@ -196,11 +197,14 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             isReadOnly={isReadOnly}
             bg={isReadOnly ? readOnlyBg : editableBg}
             color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Nama produk harus diisi.')
+            }
           />
         </FormControl>
         <FormControl isRequired>
-          <FormLabel>Deskripsi</FormLabel>
-          <Input
+          <FormLabel>Deskripsi Biaya</FormLabel>
+          <Textarea
             type="text"
             name="description"
             value={product?.description || ''}
@@ -208,6 +212,9 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             isReadOnly={isReadOnly}
             bg={isReadOnly ? readOnlyBg : editableBg}
             color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Deskripsi biaya harus diisi.')
+            }
           />
         </FormControl>
         <FormControl isRequired>
@@ -220,6 +227,9 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             isReadOnly={isReadOnly}
             bg={isReadOnly ? readOnlyBg : editableBg}
             color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Harga biaya harus diisi.')
+            }
           />
         </FormControl>
         <FormControl isRequired>
@@ -232,6 +242,9 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             isReadOnly={isReadOnly}
             bg={isReadOnly ? readOnlyBg : editableBg}
             color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Harga jual harus diisi.')
+            }
           />
         </FormControl>
         <FormControl isRequired>
@@ -244,6 +257,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             isReadOnly={isReadOnly}
             bg={isReadOnly ? readOnlyBg : editableBg}
             color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
           />
         </FormControl>
         <FormControl mb={4}>

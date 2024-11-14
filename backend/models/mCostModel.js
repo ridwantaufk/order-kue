@@ -36,6 +36,10 @@ const Cost = sequelize.define(
       allowNull: false,
       defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
     },
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
   },
   {
     tableName: "m_costs",
