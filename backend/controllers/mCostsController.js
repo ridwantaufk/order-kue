@@ -52,7 +52,7 @@ exports.getCostById = async (req, res) => {
 exports.updateCost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { cost_name, cost_description, amount, cost_date } = req.body;
+    const { cost_name, cost_description, amount, cost_date, active } = req.body;
 
     const cost = await Cost.findByPk(id);
     if (!cost) {
@@ -64,6 +64,7 @@ exports.updateCost = async (req, res) => {
       cost_description,
       amount,
       cost_date,
+      active,
     });
 
     res.status(200).json({ message: "Cost updated successfully", data: cost });
