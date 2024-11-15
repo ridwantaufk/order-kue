@@ -6,6 +6,8 @@ import {
   FormLabel,
   Input,
   Textarea,
+  Checkbox,
+  Text,
   Button,
   useToast,
   useColorModeValue,
@@ -19,12 +21,12 @@ import { format, parse } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
-  console.log('cost update file :', costToEdit);
   const [cost, setCost] = useState(costToEdit);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const toast = useToast();
+  const [isActive, setIsActive] = useState(false);
 
   const readOnlyBg = useColorModeValue('gray.200', 'gray.600');
   const editableBg = useColorModeValue('white', 'gray.900');
@@ -59,14 +61,14 @@ const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
       const { name, value } = e.target;
       const isNumericInput = name === 'amount';
       const formattedValue = isNumericInput
-        ? value.replace(/[^0-9]/g, '') // Remove non-numeric characters
+        ? value.replace(/[^0-9]/g, '')
         : value;
       setCost((prevCost) => ({
         ...prevCost,
         [name]: formattedValue,
       }));
     } else if (e instanceof Date) {
-      const formattedDate = format(e, 'yyyy-MM-dd'); // Format for saving in backend
+      const formattedDate = format(e, 'yyyy-MM-dd');
       setCost((prevCost) => ({
         ...prevCost,
         cost_date: formattedDate,
@@ -82,9 +84,7 @@ const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
     formData.append('cost_description', cost.cost_description);
     formData.append('amount', parseFloat(cost.amount.replace(/[^\d.-]/g, '')));
     formData.append('cost_date', cost.cost_date);
-
-    console.log('formData : ', cost.cost_id);
-    // return;
+    formData.append('active', isActive);
 
     try {
       await axios.put(
@@ -199,42 +199,58 @@ const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
             }
           />
         </FormControl>
-        <FormControl isRequired>
+        <FormControl>
           <FormLabel>Tanggal</FormLabel>
-          <DatePicker
-            selected={
-              cost?.cost_date
-                ? parse(cost.cost_date, 'yyyy-MM-dd', new Date()) // Parse to Date object
-                : null
-            }
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: 'cost_date',
-                  value: format(date, 'yyyy-MM-dd'), // Save in yyyy-MM-dd format for backend
-                },
-              })
-            }
-            dateFormat="dd MMM yyyy" // Display date as dd MMM yyyy, e.g., "12 Okt 2024"
-            customInput={
-              <Input
-                name="cost_date"
-                value={
-                  cost?.cost_date
-                    ? format(
-                        parse(cost.cost_date, 'yyyy-MM-dd', new Date()),
-                        'dd MMM yyyy', // Format for display: dd MMM yyyy
-                      )
-                    : ''
-                }
-                isReadOnly={isReadOnly}
-                bg={isReadOnly ? readOnlyBg : editableBg}
-                color={isReadOnly ? readOnlyColor : textColor}
-                placeholder="DD MMM YYYY"
-              />
-            }
-          />
+          <Box display="flex" alignItems="center">
+            <DatePicker
+              selected={
+                cost?.cost_date
+                  ? parse(cost.cost_date, 'yyyy-MM-dd', new Date())
+                  : null
+              }
+              onChange={(date) =>
+                handleChange({
+                  target: {
+                    name: 'cost_date',
+                    value: format(date, 'yyyy-MM-dd'),
+                  },
+                })
+              }
+              dateFormat="dd MMM yyyy"
+              customInput={
+                <Input
+                  name="cost_date"
+                  value={
+                    cost?.cost_date
+                      ? format(
+                          parse(cost.cost_date, 'yyyy-MM-dd', new Date()),
+                          'dd MMM yyyy',
+                        )
+                      : ''
+                  }
+                  isReadOnly={isReadOnly}
+                  bg={isReadOnly ? readOnlyBg : editableBg}
+                  color={isReadOnly ? readOnlyColor : textColor}
+                  placeholder="DD MMM YYYY"
+                />
+              }
+            />
+            {cost?.active === false && (
+              <Checkbox
+                ml={4}
+                isChecked={isActive}
+                onChange={(e) => {
+                  setIsActive(e.target.checked);
+                }}
+              >
+                <Text color={textColor} ml={2}>
+                  {isActive ? 'Aktif' : 'Non-Aktif'}
+                </Text>
+              </Checkbox>
+            )}
+          </Box>
         </FormControl>
+
         <Button mt={4} colorScheme="blue" type="submit" isDisabled={isReadOnly}>
           {isReadOnly
             ? `Form tidak dapat diedit dalam ${countdown} detik`

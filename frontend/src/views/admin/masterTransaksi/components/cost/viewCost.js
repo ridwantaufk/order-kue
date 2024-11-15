@@ -129,7 +129,7 @@ export default function ViewCost({ onEdit }) {
   }, []);
 
   React.useEffect(() => {
-    const allCosts = costs.filter((cost) => cost.amount > 0 && cost.available);
+    const allCosts = costs.filter((cost) => cost.active == false);
     setIsAllSelected(
       allCosts.length > 0 &&
         allCosts.every((cost) =>
@@ -173,7 +173,7 @@ export default function ViewCost({ onEdit }) {
   };
 
   const handleSelectAll = () => {
-    const allCosts = costs.filter((cost) => cost.amount > 0 && cost.available);
+    const allCosts = costs.filter((cost) => cost.active == false);
     if (isAllSelected) {
       setSelectedCosts([]);
     } else {
@@ -236,7 +236,7 @@ export default function ViewCost({ onEdit }) {
                   )}
                   onChange={() => handleSelectCost(cost)}
                   colorScheme="red"
-                  isDisabled={cost.amount === 0 && !cost.available}
+                  isDisabled={cost.active === false}
                 />
               </Td>
               <Td
