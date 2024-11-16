@@ -51,7 +51,7 @@ const routes = [
     component: <DataTables />,
   },
   {
-    name: 'Mastering & Transaksi', // Rute untuk melihat daftar pengguna
+    name: 'Mastering', // Rute untuk melihat daftar pengguna
     layout: '/admin',
     path: '/master-transaksi', // Tambahkan path baru
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,

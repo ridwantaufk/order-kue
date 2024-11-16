@@ -84,7 +84,9 @@ const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
     formData.append('cost_description', cost.cost_description);
     formData.append('amount', parseFloat(cost.amount.replace(/[^\d.-]/g, '')));
     formData.append('cost_date', cost.cost_date);
-    formData.append('active', isActive);
+    if (cost.active === false) {
+      formData.append('active', isActive);
+    }
 
     try {
       await axios.put(
