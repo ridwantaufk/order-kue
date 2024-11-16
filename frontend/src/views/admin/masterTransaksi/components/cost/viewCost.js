@@ -129,13 +129,14 @@ export default function ViewCost({ onEdit }) {
   }, []);
 
   React.useEffect(() => {
-    const allCosts = costs.filter((cost) => cost.active == false);
-    setIsAllSelected(
-      allCosts.length > 0 &&
-        allCosts.every((cost) =>
-          selectedCosts.some((selected) => selected.cost_id === cost.cost_id),
-        ),
-    );
+    const activeCosts = costs.filter((cost) => cost.active === true);
+    const allSelected =
+      activeCosts.length > 0 &&
+      activeCosts.every((cost) =>
+        selectedCosts.some((selected) => selected.cost_id === cost.cost_id),
+      );
+
+    setIsAllSelected(allSelected);
   }, [selectedCosts, costs]);
 
   const handleSort = (column) => {
@@ -173,11 +174,16 @@ export default function ViewCost({ onEdit }) {
   };
 
   const handleSelectAll = () => {
-    const allCosts = costs.filter((cost) => cost.active == false);
+    const allCosts = costs.filter((cost) => cost.active === true);
+
     if (isAllSelected) {
+      // Jika semua dipilih, maka uncheck semua
       setSelectedCosts([]);
+      setIsAllSelected(false);
     } else {
+      // Jika belum semua dipilih, pilih semua
       setSelectedCosts(allCosts);
+      setIsAllSelected(true);
     }
   };
 

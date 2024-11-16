@@ -8,6 +8,8 @@ const ordersRoutes = require("./routes/tOrdersRoutes");
 const orderItemsRoutes = require("./routes/tOrderItemsRoutes");
 const expensesRoutes = require("./routes/vExpensesRoutes");
 const costRoutes = require("./routes/mCostsRoutes");
+const ingredientRoutes = require("./routes/mIngredientsRoutes");
+const toolRoutes = require("./routes/mToolsRoutes");
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +21,8 @@ app.use("/api/orders", ordersRoutes);
 app.use("/api/orderItems", orderItemsRoutes);
 app.use("/api/expenses", expensesRoutes);
 app.use("/api/costs", costRoutes);
+app.use("/api/ingredients", ingredientRoutes);
+app.use("/api/tools", toolRoutes);
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
