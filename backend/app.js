@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const sequelize = require("./config/db");
+const bodyParser = require("body-parser");
+require("dotenv").config();
+
 const usersRoutes = require("./routes/usersRoutes");
 const productsRoutes = require("./routes/mProductsRoutes");
 const ordersRoutes = require("./routes/tOrdersRoutes");
@@ -13,6 +16,7 @@ const toolRoutes = require("./routes/mToolsRoutes");
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
 // Routes
 app.use("/api/users", usersRoutes);

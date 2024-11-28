@@ -15,9 +15,13 @@ const User = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
-    email: {
-      type: DataTypes.STRING(100),
+    username: {
+      type: DataTypes.STRING(50),
       unique: true,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     age: {
@@ -25,20 +29,18 @@ const User = sequelize.define(
       allowNull: true,
     },
     created_at: {
-      // Sesuaikan nama kolom
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
     updated_at: {
-      // Sesuaikan nama kolom
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
   },
   {
-    tableName: "users", // Menentukan nama tabel
+    tableName: "users", // Nama tabel di database
     timestamps: false, // Nonaktifkan automatic timestamps
   }
 );

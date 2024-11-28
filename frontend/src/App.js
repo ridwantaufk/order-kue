@@ -5,7 +5,6 @@ import AdminLayout from './layouts/admin';
 import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
-import axios from 'axios'; // Import Axios
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);

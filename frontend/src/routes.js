@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { Icon } from '@chakra-ui/react';
 import {
   MdBarChart,
@@ -8,17 +7,22 @@ import {
   MdLock,
   MdOutlineShoppingCart,
 } from 'react-icons/md';
+import { Navigate } from 'react-router-dom'; // Import Navigate untuk redireksi
 
-// Admin Imports
 import MainDashboard from 'views/admin/default';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
 import MasterTransaksi from 'views/admin/masterTransaksi';
-import UserList from 'views/admin/UserList';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
+
+// Function to check if the user is logged in
+const isAuthenticated = () => {
+  const token = localStorage.getItem('token');
+  return !!token; // Return true if token exists (user is logged in)
+};
 
 const routes = [
   {
@@ -46,23 +50,38 @@ const routes = [
   {
     name: 'Ringkasan Data',
     layout: '/admin',
+    roles: ['admin1'],
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     path: '/data-tables',
-    component: <DataTables />,
+    component: isAuthenticated() ? (
+      <DataTables />
+    ) : (
+      <Navigate to="/auth/sign-in" />
+    ), // Redirect to login if not authenticated
   },
   {
-    name: 'Mastering', // Rute untuk melihat daftar pengguna
+    name: 'Mastering',
     layout: '/admin',
-    path: '/master-transaksi', // Tambahkan path baru
+    roles: ['admin1'],
+    path: '/master-transaksi',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <MasterTransaksi />, // Komponen untuk melihat daftar pengguna
+    component: isAuthenticated() ? (
+      <MasterTransaksi />
+    ) : (
+      <Navigate to="/auth/sign-in" />
+    ), // Redirect to login if not authenticated
   },
   {
     name: 'Profil',
     layout: '/admin',
+    roles: ['admin1'],
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <Profile />,
+    component: isAuthenticated() ? (
+      <Profile />
+    ) : (
+      <Navigate to="/auth/sign-in" />
+    ), // Redirect to login if not authenticated
   },
   {
     name: 'Masuk',
