@@ -57,7 +57,7 @@ export default function ViewProduct({ onEdit }) {
           if (product.product_id) {
             // Pastikan product_id valid
             await axios.put(
-              `http://192.168.1.4:5000/api/products/delete/${product.product_id}`,
+              `https://1590-149-113-194-138.ngrok-free.app/api/products/delete/${product.product_id}`,
               {
                 stock: 0,
                 available: false,
@@ -113,7 +113,11 @@ export default function ViewProduct({ onEdit }) {
   React.useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/products');
+        const response = await axios.get('http://localhost:5000/api/products', {
+          headers: {
+            'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
+          },
+        });
         const sortedProducts = response.data.sort((a, b) =>
           a.product_name.localeCompare(b.product_name),
         );
