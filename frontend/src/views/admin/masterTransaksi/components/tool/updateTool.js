@@ -45,9 +45,13 @@ const UpdateTool = ({ tool: toolToEdit, onUpdateComplete }) => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:5000/api/tools/${tool.tool_id}`, tool, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      await axios.put(
+        `https://2b5b-149-113-194-138.ngrok-free.app/api/tools/${tool.tool_id}`,
+        tool,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
 
       toast({
         title: 'Success.',

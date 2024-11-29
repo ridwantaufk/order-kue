@@ -123,7 +123,7 @@ export default function CreateCost() {
       // return;
 
       const response = await axios.post(
-        'http://localhost:5000/api/costs',
+        'https://2b5b-149-113-194-138.ngrok-free.app/api/costs',
         formData,
         {
           headers: {

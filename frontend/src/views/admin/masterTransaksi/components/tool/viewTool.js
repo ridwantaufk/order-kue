@@ -40,7 +40,9 @@ export default function ViewTools({ onEdit }) {
 
   const fetchTools = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/tools');
+      const response = await axios.get(
+        'https://2b5b-149-113-194-138.ngrok-free.app/api/tools',
+      );
       const sortedTools = response.data.sort((a, b) =>
         a.tool_name.localeCompare(b.tool_name),
       );
@@ -107,7 +109,7 @@ export default function ViewTools({ onEdit }) {
         toolsToDelete.map(async (tool) => {
           if (tool.tool_id) {
             await axios.put(
-              `http://localhost:5000/api/tools/delete/${tool.tool_id}`,
+              `https://2b5b-149-113-194-138.ngrok-free.app/api/tools/delete/${tool.tool_id}`,
               {
                 available: false,
               },

@@ -55,7 +55,7 @@ export default function ViewCost({ onEdit }) {
         costsToDelete.map(async (cost) => {
           if (cost.cost_id) {
             await axios.put(
-              `http://localhost:5000/api/costs/delete/${cost.cost_id}`,
+              `https://2b5b-149-113-194-138.ngrok-free.app/api/costs/delete/${cost.cost_id}`,
               {
                 active: false,
               },
@@ -108,7 +108,9 @@ export default function ViewCost({ onEdit }) {
   React.useEffect(() => {
     const fetchCosts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/costs');
+        const response = await axios.get(
+          'https://2b5b-149-113-194-138.ngrok-free.app/api/costs',
+        );
         const sortedCosts = response.data.sort((a, b) =>
           a.cost_name.localeCompare(b.cost_name),
         );

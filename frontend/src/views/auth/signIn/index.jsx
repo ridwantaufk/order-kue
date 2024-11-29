@@ -49,7 +49,9 @@ function SignIn() {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/users/login',
+        'https://2b5b-149-113-194-138.ngrok-free.app/api/users/login',
+        // 'http://192.168.1.4:5000/api/users/login',
+        // 'https://2b5b-149-113-194-138.ngrok-free.app/api/users/login',
         {
           username: 'admin1',
           password: 'admin',
@@ -71,7 +73,8 @@ function SignIn() {
       // Redirect setelah beberapa detik
       setTimeout(() => {
         setLoading(false);
-        window.location.reload(navigate('/admin/default'));
+        navigate('/admin/default');
+        window.location.reload();
       }, 1000);
     } catch (err) {
       setLoading(false);

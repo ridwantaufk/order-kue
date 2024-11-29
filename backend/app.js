@@ -14,11 +14,21 @@ const costRoutes = require("./routes/mCostsRoutes");
 const ingredientRoutes = require("./routes/mIngredientsRoutes");
 const toolRoutes = require("./routes/mToolsRoutes");
 
-app.use(cors());
+const corsOptions = {
+  origin: ["https://order-kue-brownies.vercel.app"], // Ganti dengan domain Vercel Anda
+  methods: ["GET", "POST", "PUT", "DELETE"], // Sesuaikan dengan metode yang diperlukan
+  allowedHeaders: ["Content-Type", "Authorization"], // Header yang diizinkan
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("Welcome to the API root endpoint!");
+});
+
 app.use("/api/users", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/orders", ordersRoutes);
