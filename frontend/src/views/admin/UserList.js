@@ -30,11 +30,11 @@ const UserList = () => {
           ordersResponse,
           orderItemsResponse,
         ] = await Promise.all([
-          axios.get('https://2b5b-149-113-194-138.ngrok-free.app/api/users'),
-          axios.get('https://2b5b-149-113-194-138.ngrok-free.app/api/products'),
-          axios.get('https://2b5b-149-113-194-138.ngrok-free.app/api/orders'),
+          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/users'),
+          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/products'),
+          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/orders'),
           axios.get(
-            'https://2b5b-149-113-194-138.ngrok-free.app/api/orderItems',
+            'https://1590-149-113-194-138.ngrok-free.app/api/orderItems',
           ),
         ]);
 

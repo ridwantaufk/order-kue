@@ -149,7 +149,7 @@ export default function CreateProduct() {
       // return;
 
       const response = await axios.post(
-        'https://2b5b-149-113-194-138.ngrok-free.app/api/products',
+        'https://1590-149-113-194-138.ngrok-free.app/api/products',
         formData,
         {
           headers: {

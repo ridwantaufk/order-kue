@@ -67,7 +67,7 @@ export default function CreateTool() {
 
     try {
       await axios.post(
-        'https://2b5b-149-113-194-138.ngrok-free.app/api/tools',
+        'https://1590-149-113-194-138.ngrok-free.app/api/tools',
         {
           tool_name,
           quantity: parseFloat(quantity),
