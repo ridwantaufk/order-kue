@@ -38,7 +38,7 @@ sequelize
   .sync() // Sinkronisasi database
   .then(() => {
     console.log("Database synced");
-    app.listen(PORT, "0.0.0.0", () => {
+    app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
