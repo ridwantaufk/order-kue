@@ -16,7 +16,7 @@ const sequelize = new Sequelize(
 
 sequelize
   .authenticate()
-  .then(() => console.log("Database connected..."))
+  .then(() => console.log("Database terhubung..."))
   .catch((err) => console.error("Tidak dapat terhubung ke database : ", err));
 
 module.exports = sequelize;

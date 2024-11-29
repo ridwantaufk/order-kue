@@ -25,6 +25,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("Welcome to the API root endpoint!");
+});
+
 app.use("/api/users", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/orders", ordersRoutes);

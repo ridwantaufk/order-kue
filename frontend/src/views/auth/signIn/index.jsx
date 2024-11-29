@@ -73,7 +73,8 @@ function SignIn() {
       // Redirect setelah beberapa detik
       setTimeout(() => {
         setLoading(false);
-        window.location.reload(navigate('/admin/default'));
+        navigate('/admin/default');
+        window.location.reload();
       }, 1000);
     } catch (err) {
       setLoading(false);
