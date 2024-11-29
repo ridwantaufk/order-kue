@@ -14,7 +14,15 @@ const costRoutes = require("./routes/mCostsRoutes");
 const ingredientRoutes = require("./routes/mIngredientsRoutes");
 const toolRoutes = require("./routes/mToolsRoutes");
 
-app.use(cors());
+const corsOptions = {
+  origin: "https://1590-149-113-194-138.ngrok-free.app", // Hanya izinkan ngrok URL ini
+  methods: ["GET", "POST", "PUT", "DELETE"], // Tentukan metode HTTP yang diizinkan
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"], // Tentukan headers yang diizinkan
+  preflightContinue: false, // Preflight akan direspons secara otomatis oleh Express
+  optionsSuccessStatus: 204, // Status success untuk preflight OPTIONS request
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
