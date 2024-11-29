@@ -30,12 +30,10 @@ const UserList = () => {
           ordersResponse,
           orderItemsResponse,
         ] = await Promise.all([
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/users'),
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/products'),
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/orders'),
-          axios.get(
-            'https://1590-149-113-194-138.ngrok-free.app/api/orderItems',
-          ),
+          axios.get('http://192.168.1.4:5000/api/users'),
+          axios.get('http://192.168.1.4:5000/api/products'),
+          axios.get('http://192.168.1.4:5000/api/orders'),
+          axios.get('http://192.168.1.4:5000/api/orderItems'),
         ]);
 
         setUsers(usersResponse.data);

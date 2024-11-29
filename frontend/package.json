@@ -72,5 +72,5 @@
     "gh-pages": "^6.1.1",
     "micromatch": "^4.0.7"
   },
-  "proxy": "https://1590-149-113-194-138.ngrok-free.app"
+  "proxy": "http://192.168.1.4:5000"
 }

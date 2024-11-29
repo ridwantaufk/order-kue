@@ -57,7 +57,7 @@ export default function ViewIngredient({ onEdit }) {
         ingredientsToDelete.map(async (ingredient) => {
           if (ingredient.ingredient_id) {
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/ingredients/delete/${ingredient.ingredient_id}`,
+              `http://192.168.1.4:5000/api/ingredients/delete/${ingredient.ingredient_id}`,
               {
                 available: false,
               },
@@ -113,7 +113,7 @@ export default function ViewIngredient({ onEdit }) {
     const fetchIngredients = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/ingredients',
+          'http://192.168.1.4:5000/api/ingredients',
         );
         const sortedIngredients = response.data.sort((a, b) =>
           a.ingredient_name.localeCompare(b.ingredient_name),

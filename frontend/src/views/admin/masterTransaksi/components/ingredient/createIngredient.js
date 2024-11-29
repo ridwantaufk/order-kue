@@ -91,7 +91,7 @@ export default function CreateIngredient() {
       };
 
       const response = await axios.post(
-        'https://1590-149-113-194-138.ngrok-free.app/api/ingredients',
+        'http://192.168.1.4:5000/api/ingredients',
         formattedData,
       );
 

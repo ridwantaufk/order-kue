@@ -55,7 +55,7 @@ export default function ViewCost({ onEdit }) {
         costsToDelete.map(async (cost) => {
           if (cost.cost_id) {
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/costs/delete/${cost.cost_id}`,
+              `http://192.168.1.4:5000/api/costs/delete/${cost.cost_id}`,
               {
                 active: false,
               },
@@ -108,16 +108,16 @@ export default function ViewCost({ onEdit }) {
   React.useEffect(() => {
     const fetchCosts = async () => {
       try {
-        const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/costs',
-        );
+        const response = await axios.get('http://192.168.1.4:5000/api/costs');
+        console.log('response : ', response);
+        // return;
         const sortedCosts = response.data.sort((a, b) =>
           a.cost_name.localeCompare(b.cost_name),
         );
         console.log('result :', sortedCosts);
         setCosts(sortedCosts);
       } catch (error) {
-        console.error('Error fetching costs:', error.response);
+        console.error('Error fetching costs:', error);
         toast({
           title: 'Error.',
           description: 'Failed to load costs.',

@@ -57,7 +57,7 @@ export default function ViewProduct({ onEdit }) {
           if (product.product_id) {
             // Pastikan product_id valid
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/products/delete/${product.product_id}`,
+              `http://192.168.1.4:5000/api/products/delete/${product.product_id}`,
               {
                 stock: 0,
                 available: false,
