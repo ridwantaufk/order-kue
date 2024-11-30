@@ -97,26 +97,39 @@ const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    // Mencari user berdasarkan username
     const user = await User.findOne({ where: { username } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(404).json({ message: "Pengguna tidak ditemukan" });
+
+    if (!user) {
+      return res.status(404).json({ message: "Username tidak ditemukan" });
     }
 
+    // Verifikasi password
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res
+        .status(401)
+        .json({ message: "Password yang anda masukkan salah" });
+    }
+
+    // Buat token JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      }
+      process.env.JWT_SECRET || "default_secret_key",
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
     );
 
-    res
-      .status(200)
-      .json({ message: "Login berhasil", token, username: user.username });
+    // Kirimkan respons dengan token
+    res.status(200).json({
+      message: "Login berhasil",
+      token,
+      username: user.username,
+    });
   } catch (error) {
+    console.error(error.message);
     res
       .status(500)
-      .json({ message: "Terjadi kesalahan", error: error.message });
+      .json({ message: "Terjadi kesalahan server", error: error.message });
   }
 };
 

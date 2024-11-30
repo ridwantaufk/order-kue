@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -38,28 +38,43 @@ function SignIn() {
   const brandStars = useColorModeValue('brand.500', 'brand.400');
 
   const [show, setShow] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const passwordInputRef = useRef();
 
   const handleClick = () => setShow(!show);
 
+  const handleUsernameChange = (e) => {
+    setUsernameInput(e.target.value);
+    if (error && !e.target.value.trim()) {
+      setError(null);
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswordInput(e.target.value);
+    if (error && !e.target.value.trim()) {
+      setError(null);
+    }
+  };
+
   const handleLogin = async () => {
+    setError(null);
+    setLoading(true);
+
     try {
       const response = await axios.post(
         'https://1590-149-113-194-138.ngrok-free.app/api/users/login',
-        // 'https://1590-149-113-194-138.ngrok-free.app/api/users/login',
-        // 'http://localhost:5000/api/users/login',
         {
-          username: 'admin1',
-          password: 'admin',
+          username: usernameInput,
+          password: passwordInput,
         },
       );
 
       console.log('response : ', response.data);
-      // return;
 
       const { token, username } = response.data;
 
@@ -70,7 +85,6 @@ function SignIn() {
         position: 'top-right',
       });
 
-      // Redirect setelah beberapa detik
       setTimeout(() => {
         setLoading(false);
         navigate('/admin/default');
@@ -79,15 +93,14 @@ function SignIn() {
     } catch (err) {
       setLoading(false);
       if (err.response) {
-        // Jika ada error respons dari server
+        setError(err.response.data.message);
         console.error('Error response:', err.response.data);
         console.error('Error status:', err.response.status);
       } else {
-        // Jika tidak ada response (misalnya kesalahan jaringan)
         console.error('Error message:', err.message);
+        setError('Terjadi kesalahan, silakan coba lagi.');
       }
 
-      setError('Login gagal, periksa kembali username dan password Anda.');
       toast.error('Login gagal. Periksa kembali username dan password Anda.', {
         position: 'top-right',
       });
@@ -126,7 +139,7 @@ function SignIn() {
             me="auto"
             mb={{ base: '20px', md: 'auto' }}
           >
-            <FormControl>
+            <FormControl isInvalid={error && !usernameInput.trim()} mb="24px">
               <FormLabel
                 display="flex"
                 ms="4px"
@@ -143,12 +156,40 @@ function SignIn() {
                 fontSize="sm"
                 type="text"
                 placeholder="Masukkan username"
-                mb="24px"
                 fontWeight="500"
                 size="lg"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={usernameInput}
+                onChange={handleUsernameChange}
+                onInput={() => setError(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    passwordInputRef.current.focus();
+                  }
+                }}
+                borderColor={
+                  error && !usernameInput.trim() ? 'red.500' : 'inherit'
+                }
+                _focus={{
+                  borderColor:
+                    error && !usernameInput.trim() ? 'red.500' : 'blue.500',
+                  boxShadow:
+                    error && !usernameInput.trim()
+                      ? '0 0 0 1px red'
+                      : '0 0 0 1px blue',
+                }}
               />
+              {error && !usernameInput.trim() ? (
+                <Text color="red.500" fontSize="sm" mt="2">
+                  Harap isi username.
+                </Text>
+              ) : (
+                <Text color="red.500" fontSize="sm" mt="2">
+                  {error && error.includes('Username') ? error : ''}
+                </Text>
+              )}
+            </FormControl>
+
+            <FormControl isInvalid={error && !passwordInput.trim()} mb="24px">
               <FormLabel
                 ms="4px"
                 fontSize="sm"
@@ -163,12 +204,29 @@ function SignIn() {
                   isRequired={true}
                   fontSize="sm"
                   placeholder="Min. 8 karakter"
-                  mb="24px"
                   size="lg"
                   type={show ? 'text' : 'password'}
                   variant="auth"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={passwordInput}
+                  onChange={handlePasswordChange}
+                  onInput={() => setError(null)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  ref={passwordInputRef}
+                  borderColor={
+                    error && usernameInput == '' && !passwordInput.trim()
+                      ? 'red.500'
+                      : 'inherit'
+                  }
+                  _focus={{
+                    borderColor:
+                      error && usernameInput == '' && !passwordInput.trim()
+                        ? 'red.500'
+                        : 'blue.500',
+                    boxShadow:
+                      error && usernameInput == '' && !passwordInput.trim()
+                        ? '0 0 0 1px red'
+                        : '0 0 0 1px blue',
+                  }}
                 />
                 <InputRightElement display="flex" alignItems="center" mt="4px">
                   <Icon
@@ -179,41 +237,47 @@ function SignIn() {
                   />
                 </InputRightElement>
               </InputGroup>
-              {error && (
-                <Text color="red.500" fontSize="sm">
-                  {error}
+              {error && !error.includes('Username') && !passwordInput.trim() ? (
+                <Text color="red.500" fontSize="sm" mt="2">
+                  Harap isi password.
+                </Text>
+              ) : (
+                <Text color="red.500" fontSize="sm" mt="2">
+                  {error && error.includes('Password') ? error : ''}
                 </Text>
               )}
-              <Flex justifyContent="space-between" align="center" mb="24px">
-                <FormControl display="flex" alignItems="center">
-                  <Checkbox
-                    id="remember-login"
-                    colorScheme="brandScheme"
-                    me="10px"
-                  />
-                  <FormLabel
-                    htmlFor="remember-login"
-                    mb="0"
-                    fontWeight="normal"
-                    color={textColor}
-                    fontSize="sm"
-                  >
-                    Biarkan saya tetap masuk
-                  </FormLabel>
-                </FormControl>
-              </Flex>
-              <Button
-                fontSize="sm"
-                variant="brand"
-                fontWeight="500"
-                w="100%"
-                h="50"
-                mb="24px"
-                onClick={handleLogin}
-              >
-                Masuk
-              </Button>
             </FormControl>
+
+            <Flex justifyContent="space-between" align="center" mb="24px">
+              <FormControl display="flex" alignItems="center">
+                <Checkbox
+                  id="remember-login"
+                  colorScheme="brandScheme"
+                  me="10px"
+                />
+                <FormLabel
+                  htmlFor="remember-login"
+                  mb="0"
+                  fontWeight="normal"
+                  color={textColor}
+                  fontSize="sm"
+                >
+                  Biarkan saya tetap masuk
+                </FormLabel>
+              </FormControl>
+            </Flex>
+
+            <Button
+              fontSize="sm"
+              variant="brand"
+              fontWeight="500"
+              w="100%"
+              h="50"
+              mb="24px"
+              onClick={handleLogin}
+            >
+              Masuk
+            </Button>
           </Flex>
         </Flex>
       )}
