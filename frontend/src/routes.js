@@ -10,7 +10,7 @@ import {
 import { Navigate } from 'react-router-dom'; // Import Navigate untuk redireksi
 
 import MainDashboard from 'views/admin/default';
-import NFTMarketplace from 'views/admin/marketplace';
+import Orderan from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
 import MasterTransaksi from 'views/admin/masterTransaksi';
@@ -44,7 +44,7 @@ const routes = [
         color="inherit"
       />
     ),
-    component: <NFTMarketplace />,
+    component: <Orderan />,
     secondary: true,
   },
   {
