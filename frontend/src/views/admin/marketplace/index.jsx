@@ -62,7 +62,7 @@ export default function Marketplace() {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/products',
+          `${process.env.REACT_APP_BACKEND_URL}/api/products`,
           {
             headers: {
               'ngrok-skip-browser-warning': 'true',

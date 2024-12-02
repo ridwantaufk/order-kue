@@ -56,7 +56,7 @@ export default function UserReports() {
     const fetchMonthlySummary = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/expenses/dashboard-information-summary',
+          `${process.env.REACT_APP_BACKEND_URL}/api/expenses/dashboard-information-summary`,
         );
         const data = response.data[0]; // Mengambil data bulan ini (misal data pertama)
         console.log('Data Summary:', data);
