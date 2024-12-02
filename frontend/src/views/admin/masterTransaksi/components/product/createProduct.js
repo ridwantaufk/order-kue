@@ -149,7 +149,7 @@ export default function CreateProduct() {
       // return;
 
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/products',
+        `${process.env.REACT_APP_BACKEND_URL}/api/products`,
         formData,
         {
           headers: {
