@@ -116,7 +116,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
 
     try {
       await axios.put(
-        `https://1590-149-113-194-138.ngrok-free.app/api/products/${product.product_id}`,
+        `process.env.REACT_APP_BACKEND_URL/api/products/${product.product_id}`,
         formData,
         {
           headers: {

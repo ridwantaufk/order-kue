@@ -46,7 +46,7 @@ const UpdateTool = ({ tool: toolToEdit, onUpdateComplete }) => {
 
     try {
       await axios.put(
-        `https://1590-149-113-194-138.ngrok-free.app/api/tools/${tool.tool_id}`,
+        `process.env.REACT_APP_BACKEND_URL/api/tools/${tool.tool_id}`,
         tool,
         {
           headers: { 'Content-Type': 'application/json' },

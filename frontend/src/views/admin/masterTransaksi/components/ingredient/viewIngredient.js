@@ -57,7 +57,7 @@ export default function ViewIngredient({ onEdit }) {
         ingredientsToDelete.map(async (ingredient) => {
           if (ingredient.ingredient_id) {
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/ingredients/delete/${ingredient.ingredient_id}`,
+              `process.env.REACT_APP_BACKEND_URL/api/ingredients/delete/${ingredient.ingredient_id}`,
               {
                 available: false,
               },
@@ -113,7 +113,7 @@ export default function ViewIngredient({ onEdit }) {
     const fetchIngredients = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/ingredients',
+          `${process.env.REACT_APP_BACKEND_URL}/api/ingredients`,
           {
             headers: {
               'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran

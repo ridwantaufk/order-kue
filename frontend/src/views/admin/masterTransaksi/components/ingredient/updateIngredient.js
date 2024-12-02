@@ -91,7 +91,7 @@ const UpdateIngredient = ({
 
     try {
       await axios.put(
-        `https://1590-149-113-194-138.ngrok-free.app/api/ingredients/${ingredient.ingredient_id}`,
+        `process.env.REACT_APP_BACKEND_URL/api/ingredients/${ingredient.ingredient_id}`,
         formData,
         {
           headers: { 'Content-Type': 'application/json' },

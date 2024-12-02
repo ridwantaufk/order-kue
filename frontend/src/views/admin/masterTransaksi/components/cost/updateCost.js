@@ -90,7 +90,7 @@ const UpdateCost = ({ cost: costToEdit, onUpdateComplete }) => {
 
     try {
       await axios.put(
-        `https://1590-149-113-194-138.ngrok-free.app/api/costs/${cost.cost_id}`,
+        `process.env.REACT_APP_BACKEND_URL/api/costs/${cost.cost_id}`,
         formData,
         {
           headers: { 'Content-Type': 'application/json' },

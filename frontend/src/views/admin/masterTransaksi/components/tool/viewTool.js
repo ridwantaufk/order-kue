@@ -41,7 +41,7 @@ export default function ViewTools({ onEdit }) {
   const fetchTools = async () => {
     try {
       const response = await axios.get(
-        'https://1590-149-113-194-138.ngrok-free.app/api/tools',
+        `${process.env.REACT_APP_BACKEND_URL}/api/tools`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
@@ -114,7 +114,7 @@ export default function ViewTools({ onEdit }) {
         toolsToDelete.map(async (tool) => {
           if (tool.tool_id) {
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/tools/delete/${tool.tool_id}`,
+              `process.env.REACT_APP_BACKEND_URL/api/tools/delete/${tool.tool_id}`,
               {
                 available: false,
               },

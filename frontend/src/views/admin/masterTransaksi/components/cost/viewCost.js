@@ -55,7 +55,7 @@ export default function ViewCost({ onEdit }) {
         costsToDelete.map(async (cost) => {
           if (cost.cost_id) {
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/costs/delete/${cost.cost_id}`,
+              `process.env.REACT_APP_BACKEND_URL/api/costs/delete/${cost.cost_id}`,
               {
                 active: false,
               },
@@ -109,7 +109,7 @@ export default function ViewCost({ onEdit }) {
     const fetchCosts = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/costs',
+          `${process.env.REACT_APP_BACKEND_URL}/api/costs`,
           {
             headers: {
               'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran

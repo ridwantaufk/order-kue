@@ -30,12 +30,10 @@ const UserList = () => {
           ordersResponse,
           orderItemsResponse,
         ] = await Promise.all([
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/users'),
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/products'),
-          axios.get('https://1590-149-113-194-138.ngrok-free.app/api/orders'),
-          axios.get(
-            'https://1590-149-113-194-138.ngrok-free.app/api/orderItems',
-          ),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/products`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`),
         ]);
 
         setUsers(usersResponse.data);

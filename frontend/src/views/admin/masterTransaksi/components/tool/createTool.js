@@ -66,14 +66,11 @@ export default function CreateTool() {
     }
 
     try {
-      await axios.post(
-        'https://1590-149-113-194-138.ngrok-free.app/api/tools',
-        {
-          tool_name,
-          quantity: parseFloat(quantity),
-          unit_price: parseFloat(unit_price),
-        },
-      );
+      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/tools`, {
+        tool_name,
+        quantity: parseFloat(quantity),
+        unit_price: parseFloat(unit_price),
+      });
 
       toast({
         title: 'Berhasil',

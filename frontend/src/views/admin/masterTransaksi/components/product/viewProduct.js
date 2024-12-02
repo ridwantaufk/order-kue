@@ -57,7 +57,7 @@ export default function ViewProduct({ onEdit }) {
           if (product.product_id) {
             // Pastikan product_id valid
             await axios.put(
-              `https://1590-149-113-194-138.ngrok-free.app/api/products/delete/${product.product_id}`,
+              `process.env.REACT_APP_BACKEND_URL/api/products/delete/${product.product_id}`,
               {
                 stock: 0,
                 available: false,
@@ -114,7 +114,7 @@ export default function ViewProduct({ onEdit }) {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          'https://1590-149-113-194-138.ngrok-free.app/api/products',
+          `${process.env.REACT_APP_BACKEND_URL}/api/products`,
           {
             headers: {
               'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
