@@ -2,6 +2,8 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
 
+// GUNAKAN SALAH SATU AKSES, LOKAL SERVER ATAU PUBLIC <PUBLIC SAAT INI BISA AKSES DATABASE SECARA RAILWAY ATAU SERVEO ATAU TUNNEL>
+
 // SET DATABASE PUBLIC
 // const dbUrl = process.env.DB_URL;
 // const { username, password, hostname, port, pathname } = new URL(dbUrl);
@@ -21,17 +23,33 @@ const { Sequelize } = require("sequelize");
 //   logging: console.log, // Opsional
 // });
 
-// SET DATABASE LOCAL
+// SET DATABASE RAILWAY POSTGRES
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
     timezone: process.env.DB_TIMEZONE,
+    ssl: {
+      rejectUnauthorized: false, // Untuk koneksi SSL (jika diperlukan oleh Railway)
+    },
   }
 );
+
+// SET DATABASE LOCAL
+// const sequelize = new Sequelize(
+//   process.env.DB_NAME,
+//   process.env.DB_USER,
+//   process.env.DB_PASSWORD,
+//   {
+//     host: process.env.DB_HOST,
+//     dialect: process.env.DB_DIALECT,
+//     timezone: process.env.DB_TIMEZONE,
+//   }
+// );
 
 sequelize
   .authenticate()
