@@ -1,6 +1,7 @@
 const Product = require("../models/mProductModel");
 const fs = require("fs");
 const path = require("path");
+const { uploadToGitHub } = require("../utils/githubUpload");
 
 // Mendapatkan semua produk
 exports.getProducts = async (req, res) => {
@@ -66,6 +67,19 @@ exports.updateProduct = async (req, res) => {
     }
 
     if (req.file) {
+      const filePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "frontend",
+        "public",
+        "assets",
+        "img",
+        "products",
+        req.file.filename
+      );
+      const githubUrl = await uploadToGitHub(filePath, req.file.filename);
+
       // Hapus ikon lama jika ada
       if (product.icon) {
         const oldIconPath = path.join(
@@ -84,7 +98,10 @@ exports.updateProduct = async (req, res) => {
         }
       }
 
-      iconFile = req.file.filename; // Simpan nama file baru ke dalam variabel
+      // aktifkan kalo database lokal
+      // iconFile = req.file.filename;
+
+      iconFile = githubUrl;
     }
 
     // Update produk dengan data baru
