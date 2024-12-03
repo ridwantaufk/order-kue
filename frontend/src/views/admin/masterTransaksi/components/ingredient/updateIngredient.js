@@ -91,7 +91,7 @@ const UpdateIngredient = ({
 
     try {
       await axios.put(
-        `process.env.REACT_APP_BACKEND_URL/api/ingredients/${ingredient.ingredient_id}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/ingredients/${ingredient.ingredient_id}`,
         formData,
         {
           headers: { 'Content-Type': 'application/json' },

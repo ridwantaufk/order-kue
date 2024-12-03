@@ -57,7 +57,7 @@ export default function ViewProduct({ onEdit }) {
           if (product.product_id) {
             // Pastikan product_id valid
             await axios.put(
-              `process.env.REACT_APP_BACKEND_URL/api/products/delete/${product.product_id}`,
+              `${process.env.REACT_APP_BACKEND_URL}/api/products/delete/${product.product_id}`,
               {
                 stock: 0,
                 available: false,

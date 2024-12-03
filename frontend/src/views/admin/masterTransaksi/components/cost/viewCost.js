@@ -55,7 +55,7 @@ export default function ViewCost({ onEdit }) {
         costsToDelete.map(async (cost) => {
           if (cost.cost_id) {
             await axios.put(
-              `process.env.REACT_APP_BACKEND_URL/api/costs/delete/${cost.cost_id}`,
+              `${process.env.REACT_APP_BACKEND_URL}/api/costs/delete/${cost.cost_id}`,
               {
                 active: false,
               },

@@ -114,7 +114,7 @@ export default function ViewTools({ onEdit }) {
         toolsToDelete.map(async (tool) => {
           if (tool.tool_id) {
             await axios.put(
-              `process.env.REACT_APP_BACKEND_URL/api/tools/delete/${tool.tool_id}`,
+              `${process.env.REACT_APP_BACKEND_UR}L/api/tools/delete/${tool.tool_id}`,
               {
                 available: false,
               },

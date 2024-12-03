@@ -46,7 +46,7 @@ const UpdateTool = ({ tool: toolToEdit, onUpdateComplete }) => {
 
     try {
       await axios.put(
-        `process.env.REACT_APP_BACKEND_URL/api/tools/${tool.tool_id}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/tools/${tool.tool_id}`,
         tool,
         {
           headers: { 'Content-Type': 'application/json' },
