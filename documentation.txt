@@ -1,0 +1,22 @@
+Catatan Ridwan
+
+import database postgreSQL local ke railway :
+1. Create PostgreSQL di railway
+2. dapatkan informasi variable dan akses postgres public network
+3. Sesuaikan perintah di terminal & directory sql-nya :
+psql -h junction.proxy.rlwy.net -U postgres -p 50686 -d railway -f "db_orderkue.sql"
+4. Masukkan password yang diminta
+5. Selesai !
+
+Aktifkan ngrok (jika backend menggunakan ip/url ngrok) :
+1. Buka terminal sembarang/bebas
+2. Sesuaikan port di backend (misal app.js)
+3. commandline : ngrok http 5000
+
+Jalankan development reactJs :
+1. Buka terminal di directory frontend
+2. commandline : npm start
+Jalankan development nodeJs/expressJs :
+1. Buka terminal di directory backend
+2. cek file route parent, misal app.js atau server.js
+3. commandline : node app.js (jika menggunakan nodemon : nodemon app.js)
