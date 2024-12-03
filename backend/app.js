@@ -44,6 +44,7 @@ app.use("/api/tools", toolRoutes);
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
+console.log("process.env.PORT : ", process.env.PORT);
 
 sequelize
   .sync() // Sinkronisasi database
@@ -53,19 +54,20 @@ sequelize
       console.log(`Server running on port ${PORT}`);
 
       // Update .env in frontend with backend production URL
-      const backendUrl = `https://your-backend.railway.app`;
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
-        const backendUrl = `https://your-backend.railway.app`;
+        const backendUrl = `https://order-kue-production.up.railway.app`;
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
-        console.log("Backend URL updated in frontend .env");
+        console.log(
+          "URL Backend terupdate di frontend .env (berarti ini pake ngrok backend-nya)"
+        );
       } else {
-        console.log(".env file not found in frontend directory");
+        console.log(
+          ".env file ga ada di frontend directory (berarti ini pake railway backend-nya)"
+        );
       }
-
-      console.log("Backend URL updated in frontend .env");
     });
   })
   .catch((error) => {
-    console.error("Error syncing database:", error);
+    console.error("Error sinkronisasi database: ", error);
   });
