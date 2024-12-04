@@ -26,3 +26,20 @@ Pemanggilan API di backend :
 1. Kalo deploy atau menjalankan menggunakan railway maka pake app.js yg backendUrl nya railway. kalo belum deploy maka deploy dulu project backend-nya
 2. Kalo deploy di vercel itu hanya frontend, untuk backend harus pake ngrok, sudah saya atur. Caranya ubah file 'backend/app(inipakengrokbackendnnya).js' menjadi app.js. Dan 'app.js' (konfigurasi railway) rename saja.
 3. Atur sesuai kebutuhan
+
+Upload file atau icon di GitHub :
+1. Saat ini file yg berhubungan ada di backend/controlleres/mProductsController.js
+2. konfigurasi dengan comment dan uncomment code yg sudah diatur di keterangan masing-masing comment. Untuk GitHub dan untuk repo local
+
+====================================================================================================
+Konsep penyimpanan data :
+text, file(jpg, png, pdf, excel, txt, dsb) harus ditaruh di penyimpanan storage(local atau cloud), bukan di database (database hanya data berbentuk huruf dan bilangan).
+
+Konsep penyimpanan folder/project frontend :
+ditempatkan di GitHub atau local
+
+Konsep penyimpanan folder/project backend :
+ditempatkan di GitHub atau local
+
+Adapun untuk deploy agar diakses oleh user dalam bentuk UI Frontend perlu dideploy, dapat di vercel atau railway, begitu juga backend. Saat ini saya men-deploy frontend di vecel, men-deploy backend di railway
+====================================================================================================
