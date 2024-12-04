@@ -56,7 +56,8 @@ sequelize
       // Update .env in frontend with backend production URL
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
-        const backendUrl = `https://order-kue-production.up.railway.app`;
+        const backendUrl = `https://order-kue-production.up.railway.app`; // railway
+        // const backendUrl = `https://158d-149-113-206-114.ngrok-free.app`; // ngrok
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
         console.log(
           "URL Backend terupdate di frontend .env (berarti ini pake ngrok backend-nya)"

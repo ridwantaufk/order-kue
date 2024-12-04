@@ -1,7 +1,10 @@
 const Product = require("../models/mProductModel");
 const fs = require("fs");
 const path = require("path");
-const { uploadToGitHub } = require("../utils/githubUpload");
+const {
+  uploadToGitHub,
+  deleteFileFromGitHub,
+} = require("../utils/githubUploadDelete");
 
 // Mendapatkan semua produk
 exports.getProducts = async (req, res) => {
@@ -36,6 +39,7 @@ exports.createProduct = async (req, res) => {
 
 // Mengupdate produk
 exports.updateProduct = async (req, res) => {
+  console.log("kesini");
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
@@ -47,61 +51,65 @@ exports.updateProduct = async (req, res) => {
       req.body;
     let iconFile = product.icon;
 
-    // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama
+    // // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama (berlaku di project local, bukan github. Perhatikan penyimpanan untuk kebutuhan github atau project lokal)
+    // if (icon === "delete" && product.icon) {
+    //   const iconPath = path.join(
+    //     __dirname,
+    //     "..",
+    //     "..",
+    //     "frontend",
+    //     "public",
+    //     "assets",
+    //     "img",
+    //     "products",
+    //     product.icon
+    //   );
+    //   if (fs.existsSync(iconPath)) {
+    //     fs.unlinkSync(iconPath);
+    //   }
+    //   iconFile = null; // Set icon ke null di database
+    // }
+
+    console.log("reqfile : ", req.file);
+    console.log("icon : ", icon);
+    console.log("product.icon : ", product.icon);
+    console.log("icon && product.icon : ", icon === "delete" && product.icon);
+
+    // 1. Jika `icon` dihapus
+    // // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama (berlaku di project github, bukan local. Perhatikan penyimpanan untuk kebutuhan github atau project lokal)
     if (icon === "delete" && product.icon) {
-      const iconPath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "frontend",
-        "public",
-        "assets",
-        "img",
-        "products",
-        product.icon
-      );
-      if (fs.existsSync(iconPath)) {
-        fs.unlinkSync(iconPath);
+      const filePath = `frontend/public/assets/img/products/${product.icon}`;
+      console.log("Menghapus icon dari GitHub:", filePath);
+
+      try {
+        // Hapus file ikon dari GitHub
+        await deleteFileFromGitHub(filePath);
+        console.log("Icon di GitHub berhasil dihapus");
+      } catch (error) {
+        console.error("Gagal menghapus icon di GitHub:", error.message);
+        return res
+          .status(500)
+          .json({ message: "Gagal menghapus icon di GitHub" });
       }
-      iconFile = null; // Set icon ke null di database
+
+      // Set `icon` di database menjadi null setelah dihapus
+      iconFile = null;
     }
 
+    // 2. Jika ada file baru yang diupload
+    // Hapus icon lama jika ada (berlaku di project github, bukan local. Perhatikan repo/projectnya sesuai kebutuhan)
     if (req.file) {
-      const filePath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "frontend",
-        "public",
-        "assets",
-        "img",
-        "products",
-        req.file.filename
-      );
-      const githubUrl = await uploadToGitHub(filePath, req.file.filename);
+      const timestamp = Date.now();
+      const uniqueFilename = `${timestamp}-${req.file.originalname}`;
+      req.file.filename = uniqueFilename;
+      const githubUrl = await uploadToGitHub(req.file, req.file.filename);
+      console.log("URL icon di GitHub:", githubUrl);
 
-      // Hapus ikon lama jika ada
-      if (product.icon) {
-        const oldIconPath = path.join(
-          __dirname,
-          "..",
-          "..",
-          "frontend",
-          "public",
-          "assets",
-          "img",
-          "products",
-          product.icon
-        );
-        if (fs.existsSync(oldIconPath)) {
-          fs.unlinkSync(oldIconPath);
-        }
-      }
+      // aktifkan kalo mau simpan nama file saja
+      iconFile = req.file.filename;
 
-      // aktifkan kalo database lokal
-      // iconFile = req.file.filename;
-
-      iconFile = githubUrl;
+      // aktifkan jika ingin url gambar github
+      // iconFile = githubUrl;
     }
 
     // Update produk dengan data baru
@@ -114,7 +122,7 @@ exports.updateProduct = async (req, res) => {
       icon: iconFile,
     });
 
-    res.json(product);
+    res.status(200).json({ success: true, product });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
