@@ -34,6 +34,9 @@ const getUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   const { id } = req.params;
+  if (req.user.id !== parseInt(id)) {
+    return res.status(403).json({ message: "Forbidden!" });
+  }
 
   try {
     const user = await User.findByPk(id, {
@@ -122,6 +125,7 @@ const loginUser = async (req, res) => {
     // Kirimkan respons dengan token
     res.status(200).json({
       message: "Login berhasil",
+      id: user.id,
       token,
       username: user.username,
     });

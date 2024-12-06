@@ -1,4 +1,3 @@
-// Chakra Imports
 import {
   Avatar,
   Button,
@@ -14,72 +13,23 @@ import {
   useColorModeValue,
   useColorMode,
 } from '@chakra-ui/react';
-// Custom Components
 import { ItemContent } from 'components/menu/ItemContent';
 import { SearchBar } from 'components/navbar/searchBar/SearchBar';
 import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import noImage from '../../assets/img/avatars/no-profil.png';
-// Assets
+import React from 'react';
 import navImage from 'assets/img/layout/Navbar.png';
 import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
-import axios from 'axios';
+
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
-  const [imageHovered, setImageHovered] = useState(false);
-  const [nama, setNama] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleMouseEnter = () => {
-    setImageHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setImageHovered(false);
-  };
-
-  useEffect(() => {
-    const user_id = localStorage.getItem('user_id');
-    if (user_id) {
-      console.log('token : ', localStorage.getItem('token'));
-      const fetchLoginUser = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BACKEND_URL}/api/users/privateUser/${user_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-                'ngrok-skip-browser-warning': 'true',
-              },
-            },
-          );
-          const nama_user = response.data.name;
-          setNama(nama_user);
-          setIsLoggedIn(true);
-        } catch (error) {
-          console.error('Error message : ', error.message);
-          if (error.response.data.message) {
-            console.error(
-              'Error response Auth MiddleWare : ',
-              error.response.data.message,
-            );
-          }
-        }
-      };
-
-      fetchLoginUser();
-    }
-  }, []);
-
   // Chakra Color Mode
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
-  let menuBgHovered = useColorModeValue('#e2e8f0', 'navy.700');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.700', 'brand.400');
   const ethColor = useColorModeValue('gray.700', 'white');
@@ -287,55 +237,16 @@ export default function HeaderLinks(props) {
         />
       </Button>
       <Menu>
-        <MenuButton
-          p="0px"
-          onMouseEnter={() => {
-            handleMouseEnter();
-          }}
-          onMouseLeave={() => {
-            handleMouseLeave();
-          }}
-          _hover={{
-            boxShadow: '0px 0px 20px #0c34c7',
-            transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
-            borderRadius: '50%',
-          }}
-          borderRadius={'50%'}
-          transition={'background-color 0.3s ease, box-shadow 0s'}
-        >
-          {nama !== '' ? (
-            <Avatar
-              _hover={{
-                cursor: 'pointer',
-              }}
-              color="white"
-              name={nama}
-              bg="linear-gradient(45deg, #02124a, #0c34c7)"
-              size="sm"
-              w="40px"
-              h="40px"
-            />
-          ) : (
-            <Avatar
-              _hover={{ cursor: 'pointer' }}
-              color="white"
-              src={imageHovered ? '' : noImage}
-              name={''}
-              alt="no profile"
-              bg={
-                imageHovered
-                  ? 'linear-gradient(45deg, #02124a, #0c34c7)'
-                  : colorMode === 'light'
-                  ? 'white'
-                  : 'navy.800'
-              }
-              objectFit="cover"
-              w="30px"
-              h="30px"
-              borderRadius={imageHovered ? '50%' : '0%'}
-            />
-          )}
-          {/* {console.log('imageHovered : ', imageHovered)} */}
+        <MenuButton p="0px">
+          <Avatar
+            _hover={{ cursor: 'pointer' }}
+            color="white"
+            name="Adela Parkson"
+            bg="#11047A"
+            size="sm"
+            w="40px"
+            h="40px"
+          />
         </MenuButton>
         <MenuList
           boxShadow={shadow}
@@ -357,55 +268,34 @@ export default function HeaderLinks(props) {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; {nama ? `Hey, ${nama}` : `Hey !`}
+              👋&nbsp; Hey, Adela
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
             <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
+              _hover={{ bg: 'none' }}
+              _focus={{ bg: 'none' }}
               borderRadius="8px"
               px="14px"
-              bg={menuBg}
             >
               <Text fontSize="sm">Profile Settings</Text>
             </MenuItem>
             <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
+              _hover={{ bg: 'none' }}
+              _focus={{ bg: 'none' }}
               borderRadius="8px"
               px="14px"
-              bg={menuBg}
             >
               <Text fontSize="sm">Newsletter Settings</Text>
             </MenuItem>
             <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
+              _hover={{ bg: 'none' }}
+              _focus={{ bg: 'none' }}
               color="red.400"
               borderRadius="8px"
               px="14px"
-              bg={menuBg}
-              onClick={() => {
-                if (isLoggedIn) {
-                  localStorage.clear();
-                  setIsLoggedIn(false); // Set login state to false
-                  window.location.reload(); // Force page reload to reflect changes
-                } else {
-                  window.location.href = '/auth/sign-in';
-                }
-              }}
             >
-              <Text fontSize="sm">{isLoggedIn ? 'Keluar' : 'Masuk'}</Text>
+              <Text fontSize="sm">Log out</Text>
             </MenuItem>
           </Flex>
         </MenuList>
@@ -413,7 +303,6 @@ export default function HeaderLinks(props) {
     </Flex>
   );
 }
-
 HeaderLinks.propTypes = {
   variant: PropTypes.string,
   fixed: PropTypes.bool,

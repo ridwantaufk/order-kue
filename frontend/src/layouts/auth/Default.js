@@ -31,7 +31,7 @@ function AuthIllustration(props) {
         direction="column"
       >
         <NavLink
-          to="/admin"
+          to="/orderan"
           style={() => ({
             width: 'fit-content',
             marginTop: '40px',

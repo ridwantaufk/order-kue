@@ -9,8 +9,9 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
+    console.log("process.env.JWT_SECRET : ", process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Simpan informasi pengguna
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ message: "Token tidak valid" });

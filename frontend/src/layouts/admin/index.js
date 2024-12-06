@@ -94,12 +94,19 @@ export default function Dashboard(props) {
         return (
           <Route path={`${route.path}`} element={route.component} key={key} />
         );
+      } else if (route.layout === '/orderan') {
+        console.log(
+          'window.location.pathname : ',
+          window.location.pathname === '/admin',
+        );
+        if (window.location.pathname === route.layout)
+          return <Route path="/" element={route.component} key={key} />;
       }
-      if (route.collapse) {
-        return getRoutes(route.items);
-      } else {
-        return null;
-      }
+      // if (route.collapse) {
+      //   return getRoutes(route.items);
+      // } else {
+      //   return null;
+      // }
     });
   };
   document.documentElement.dir = 'ltr';
@@ -133,7 +140,7 @@ export default function Dashboard(props) {
               <Box>
                 <Navbar
                   onOpen={onOpen}
-                  logoText={'Horizon UI Dashboard PRO'}
+                  logoText={'Annisa Brownies'}
                   brandText={getActiveRoute(routes)}
                   secondary={getActiveNavbar(routes)}
                   message={getActiveNavbarText(routes)}
@@ -153,10 +160,15 @@ export default function Dashboard(props) {
               >
                 <Routes>
                   {getRoutes(routes)}
-                  <Route
-                    path="/"
-                    element={<Navigate to="/admin/default" replace />}
-                  />
+                  {['/admin', '/admin/'].includes(window.location.pathname) ? (
+                    ''
+                  ) : (
+                    <Route
+                      path="/"
+                      element={<Navigate to="/orderan" replace />}
+                      // element={<Navigate to="/admin/default" replace />}
+                    />
+                  )}
                 </Routes>
               </Box>
             ) : null}
