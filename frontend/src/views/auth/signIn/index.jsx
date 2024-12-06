@@ -76,19 +76,19 @@ function SignIn() {
 
       console.log('response : ', response.data);
 
-      const { token, username } = response.data;
+      const { id, token, username } = response.data;
 
+      localStorage.setItem('user_id', id);
       localStorage.setItem('token', token);
       localStorage.setItem('role', username);
-
+      // return;
       toast.success('Login berhasil!', {
         position: 'top-right',
       });
 
       setTimeout(() => {
         setLoading(false);
-        navigate('/admin/default');
-        window.location.reload();
+        window.location.href = '/orderan';
       }, 1000);
     } catch (err) {
       setLoading(false);

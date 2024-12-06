@@ -13,9 +13,9 @@ const {
 // Route definitions
 router.post("/register", createUser); // Register new user
 router.get("/users", authMiddleware, getUsers);
-router.get("/users/:id", getUserById); // Get user by ID
-router.put("/users/:id", authMiddleware, updateUser);
-router.delete("/users/:id", authMiddleware, deleteUser);
+router.get("/privateUser/:id", authMiddleware, getUserById); // Get user by ID
+router.put("/privateUser/:id", authMiddleware, updateUser);
+router.delete("/privateUser/:id", authMiddleware, deleteUser);
 router.post("/login", loginUser); // Login user
 
 module.exports = router;

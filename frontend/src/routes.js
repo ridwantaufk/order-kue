@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@chakra-ui/react';
 import {
   MdBarChart,
@@ -24,18 +24,41 @@ const isAuthenticated = () => {
   return !!token; // Return true if token exists (user is logged in)
 };
 
+const highAccessRighted = () => {
+  return localStorage.getItem('role') === 'admin';
+};
+
+const accessRighted = () => {
+  if (localStorage.getItem('role') === 'ridwan') {
+    return localStorage.getItem('role');
+  } else if (localStorage.getItem('role') === 'andri') {
+    return localStorage.getItem('role');
+  } else if (localStorage.getItem('role') === 'asri') {
+    return localStorage.getItem('role');
+  }
+  return null;
+};
+
 const routes = [
   {
     name: 'Beranda Utama',
     layout: '/admin',
     path: '/default',
+    roles: ['admin'],
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
-    component: <MainDashboard />,
+    component: isAuthenticated() ? (
+      highAccessRighted() ? (
+        <MainDashboard />
+      ) : (
+        <Navigate to={window.location.pathname} />
+      )
+    ) : (
+      <Navigate to="/auth/sign-in" />
+    ),
   },
   {
     name: 'Orderan',
-    layout: '/admin',
-    path: '/nft-marketplace',
+    layout: '/orderan',
     icon: (
       <Icon
         as={MdOutlineShoppingCart}
@@ -50,11 +73,15 @@ const routes = [
   {
     name: 'Ringkasan Data',
     layout: '/admin',
-    roles: ['admin1'],
+    roles: ['admin', 'ridwan', 'asri'],
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     path: '/data-tables',
     component: isAuthenticated() ? (
-      <DataTables />
+      ['admin', 'ridwan', 'asri'].includes(accessRighted()) ? (
+        <DataTables />
+      ) : (
+        <Navigate to={window.location.pathname} />
+      )
     ) : (
       <Navigate to="/auth/sign-in" />
     ), // Redirect to login if not authenticated
@@ -62,11 +89,15 @@ const routes = [
   {
     name: 'Mastering',
     layout: '/admin',
-    roles: ['admin1'],
+    roles: ['admin', 'ridwan', 'andri'],
     path: '/master-transaksi',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: isAuthenticated() ? (
-      <MasterTransaksi />
+      ['admin', 'ridwan', 'andri'].includes(accessRighted()) ? (
+        <MasterTransaksi />
+      ) : (
+        <Navigate to={window.location.pathname} />
+      )
     ) : (
       <Navigate to="/auth/sign-in" />
     ), // Redirect to login if not authenticated
@@ -74,11 +105,15 @@ const routes = [
   {
     name: 'Profil',
     layout: '/admin',
-    roles: ['admin1'],
+    roles: ['admin', 'ridwan', 'andri', 'asri'],
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: isAuthenticated() ? (
-      <Profile />
+      ['admin', 'ridwan', 'andri', 'asri'].includes(accessRighted()) ? (
+        <Profile />
+      ) : (
+        <Navigate to={window.location.pathname} />
+      )
     ) : (
       <Navigate to="/auth/sign-in" />
     ), // Redirect to login if not authenticated
