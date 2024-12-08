@@ -35,6 +35,8 @@ const accessRighted = () => {
     return localStorage.getItem('role');
   } else if (localStorage.getItem('role') === 'asri') {
     return localStorage.getItem('role');
+  } else if (localStorage.getItem('role') === 'admin') {
+    return localStorage.getItem('role');
   }
   return null;
 };

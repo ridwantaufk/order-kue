@@ -10,6 +10,7 @@ import {
   Link,
   Text,
   useColorModeValue,
+  Input,
 } from '@chakra-ui/react';
 // Custom components
 import Card from 'components/card/Card.js';
@@ -26,12 +27,36 @@ export default function Item(props) {
     description,
     onQuantityChange,
     onTotalPriceChange,
+    selectedQuantity = {},
   } = props;
 
   const [quantity, setQuantity] = useState(0);
   const [like, setLike] = useState(false);
-  const textColor = useColorModeValue('navy.700', 'gray.250');
+  const textColor = useColorModeValue('navy.700', 'gray.300');
   const textColorPrice = useColorModeValue('green.500', 'green.400');
+  const backgroundColorInput = useColorModeValue('white', 'navy.800');
+  const borderColor = useColorModeValue('#ccc', '#cccc');
+
+  useEffect(() => {
+    if (Object.keys(selectedQuantity).length === 0) {
+      setQuantity(0);
+    }
+  }, [selectedQuantity]);
+
+  const onChangeValue = (e) => {
+    const value = e.target.value;
+    // Validasi hanya angka atau kosong
+    if (/^\d*$/.test(value)) {
+      setQuantity(value === '' ? null : parseInt(value));
+      const newTotalPrice =
+        value === ''
+          ? 0
+          : value * parseFloat(price.replace(/[^\d,-]/g, '').replace(',', '.'));
+      if (onQuantityChange)
+        onQuantityChange(id, value === '' ? 0 : parseInt(value));
+      if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice);
+    }
+  };
 
   // Fungsi untuk menangani perubahan quantity
   const handleQuantityChange = (newQuantity) => {
@@ -75,7 +100,7 @@ export default function Item(props) {
               w="20px"
               h="20px"
               as={like ? IoHeart : IoHeartOutline}
-              color="brand.500"
+              color="red"
             />
           </Button>
         </Box>
@@ -117,32 +142,26 @@ export default function Item(props) {
             </Button>
 
             {/* Number Input */}
-            <input
-              type="text" // Ubah type menjadi text, karena kita akan menangani inputan dengan onChange dan validasi
+            <Input
+              type="text"
               value={quantity === null ? '' : quantity}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Validasi hanya angka atau kosong
-                if (/^\d*$/.test(value)) {
-                  setQuantity(value === '' ? null : parseInt(value)); // Set null jika kosong
-                }
+              onChange={onChangeValue}
+              onFocus={() => {
+                if (quantity === 0) setQuantity(null);
               }}
-              onFocus={(e) => {
-                if (quantity === 0) setQuantity(null); // Kosongkan jika nilai 0 saat fokus
+              onBlur={() => {
+                if (quantity === null || isNaN(quantity)) setQuantity(0);
               }}
-              onBlur={(e) => {
-                if (quantity === null || isNaN(quantity)) setQuantity(0); // Set ke 0 jika tidak valid
-              }}
-              inputMode="numeric" // Memunculkan keyboard angka pada perangkat mobile
-              style={{
-                width: '60px',
-                textAlign: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                border: '1px solid #ccc',
-                borderRadius: '5px',
-                padding: '5px',
-              }}
+              inputMode="numeric"
+              width="60px"
+              textAlign="center"
+              fontSize="16px"
+              fontWeight="bold"
+              border={`1px solid ${borderColor}`}
+              borderRadius="5px"
+              padding="5px"
+              background={backgroundColorInput}
+              color={textColor}
             />
 
             {/* Add Button */}
