@@ -12,6 +12,14 @@ import {
   SimpleGrid,
   Spinner,
   useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  CloseButton,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -45,19 +53,36 @@ export default function Marketplace() {
   const [loading, setLoading] = useState(true);
   const [selectedQuantity, setSelectedQuantity] = useState({});
   const [selectedTotalPrice, setSelectedTotalPrice] = useState({});
+  const [totQuantity, setTotQuantity] = useState(0);
+  const [totPrice, setTotPrice] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [temporaryQuantity, setTemporaryQuantity] = useState({});
+  const [temporaryPrice, setTemporaryPrice] = useState({});
+  const [deleteInput, setDeleteInput] = useState(true);
+  const [paymentDetails, setPaymentDetails] = useState({
+    quantity: 0,
+    price: 0,
+  });
   const toast = useToast();
   const toastId = useRef(null);
+  const deleteInputRef = useRef(deleteInput);
 
-  const totalQuantity = Object.values(selectedQuantity).reduce(
-    (accumulator, currentValue) => accumulator + currentValue,
-    0,
-  );
+  useEffect(() => {
+    // Cleanup ketika komponen dilepas (unmount) -- fungsi ini ketika user pindah halaman beda file
+    return () => {
+      if (toastId.current) {
+        toast.close(toastId.current);
+        toastId.current = null;
+      }
+      setSelectedQuantity({});
+      setSelectedTotalPrice({});
+    };
+  }, []);
 
-  const totalPrice = Object.values(selectedTotalPrice).reduce(
-    (accumulator, currentValue) => accumulator + currentValue,
-    0,
-  );
-  console.log('quantity : ', totalQuantity, 'totalprice : ', totalPrice);
+  useEffect(() => {
+    deleteInputRef.current = deleteInput;
+  }, [deleteInput]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -88,32 +113,192 @@ export default function Marketplace() {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(selectedQuantity).length > 0 && !toastId.current) {
-      // Show the toast and save its id in the ref
-      toastId.current = toast({
-        title: `Jumlah Dipesan: ${totalQuantity}`,
-        description: `Total Harga: Rp ${totalPrice.toLocaleString('id-ID')}`,
-        status: 'info',
-        duration: null, // Toast will not close automatically
-        isClosable: true,
-        position: 'bottom',
-        variant: 'subtle',
-        onCloseComplete: () => {
-          // Reset selectedQuantity and selectedTotalPrice when toast is closed
-          setSelectedQuantity({});
-          setSelectedTotalPrice({});
-        },
-        containerStyle: {
-          width: '400px', // Set custom width
-          height: 'auto', // Adjust height (auto will let it adjust based on content)
-        },
-      });
-    } else if (Object.keys(selectedQuantity).length === 0 && toastId.current) {
-      // If quantity is 0, close the toast and reset states
-      toast.close(toastId.current);
-      toastId.current = null; // Reset the toast id
+    // Hitung total quantity dan total price
+    const totalQuantity = Object.values(selectedQuantity).reduce(
+      (acc, cur) => acc + cur,
+      0,
+    );
+
+    const totalPrice = Object.values(selectedTotalPrice).reduce(
+      (acc, cur) => acc + cur,
+      0,
+    );
+
+    setTotQuantity(totalQuantity);
+    setTotPrice(totalPrice);
+    if (
+      Object.keys(selectedQuantity).length > 0 &&
+      Object.keys(selectedTotalPrice).length > 0
+    ) {
+      setTemporaryQuantity(selectedQuantity);
+      setTemporaryPrice(selectedTotalPrice);
     }
-  }, [selectedQuantity, selectedTotalPrice, toast]);
+  }, [selectedQuantity, selectedTotalPrice]);
+
+  useEffect(() => {
+    // console.log('quantity : ', totQuantity, 'totalprice : ', totPrice);
+
+    if (totQuantity > 0) {
+      if (toastId.current) {
+        // Update toast jika sudah ada
+        toast.update(toastId.current, {
+          render: () => (
+            <Box
+              style={{
+                position: 'relative',
+                cursor: 'pointer',
+                padding: '10px',
+                backgroundColor: '#6831f5',
+                borderRadius: '8px',
+                border: '1px solid #6831f5',
+              }}
+              onClick={() => {
+                handleToastClick();
+              }}
+            >
+              <CloseButton
+                position="absolute"
+                top="8px"
+                right="8px"
+                onClick={(e) => {
+                  e.stopPropagation(); // Mencegah propagasi event klik ke Box
+                  // setSelectedQuantity({});
+                  // setSelectedTotalPrice({});
+                  toast.close(toastId.current);
+                  toastId.current = null;
+                }}
+              />
+              <div>
+                <strong style={{ color: '#eeebf5' }}>
+                  Jumlah Dipesan: {totQuantity}
+                </strong>
+              </div>
+              <div style={{ color: '#eeebf5' }}>
+                Total Harga: Rp {totPrice.toLocaleString('id-ID')}
+              </div>
+              <div
+                style={{
+                  marginTop: '10px',
+                  color: '#a5a6f2', // Menyesuaikan warna teks dengan background
+                  fontSize: '12px',
+                }}
+              >
+                Klik untuk melanjutkan.
+              </div>
+            </Box>
+          ),
+          status: 'info',
+          duration: null,
+          isClosable: true, // Masih aktifkan close
+          position: 'bottom',
+          variant: 'subtle',
+          containerStyle: {
+            width: '400px',
+            height: 'auto',
+            cursor: 'pointer',
+          },
+        });
+      } else {
+        // Tampilkan toast baru jika belum ada
+        toastId.current = toast({
+          render: () => (
+            <Box
+              style={{
+                position: 'relative',
+                cursor: 'pointer',
+                padding: '10px',
+                backgroundColor: '#6831f5',
+                borderRadius: '8px',
+                border: '1px solid #6831f5',
+              }}
+              onClick={() => {
+                handleToastClick();
+              }}
+            >
+              <CloseButton
+                position="absolute"
+                top="8px"
+                right="8px"
+                onClick={(e) => {
+                  e.stopPropagation(); // Mencegah propagasi event klik ke Box
+                  // setSelectedQuantity({});
+                  // setSelectedTotalPrice({});
+                  toast.close(toastId.current);
+                  toastId.current = null;
+                }}
+              />
+              <div>
+                <strong style={{ color: '#eeebf5' }}>
+                  Jumlah Dipesan: {totQuantity}
+                </strong>
+              </div>
+              <div style={{ color: '#eeebf5' }}>
+                Total Harga: Rp {totPrice.toLocaleString('id-ID')}
+              </div>
+              <div
+                style={{
+                  marginTop: '10px',
+                  color: '#a5a6f2', // Menyesuaikan warna teks dengan background
+                  fontSize: '12px',
+                }}
+              >
+                Klik untuk melanjutkan.
+              </div>
+            </Box>
+          ),
+          status: 'info',
+          duration: null,
+          isClosable: true, // Masih aktifkan close
+          position: 'bottom',
+          variant: 'subtle',
+          onCloseComplete: () => {
+            if (deleteInputRef.current) {
+              setSelectedQuantity({});
+              setSelectedTotalPrice({});
+            }
+          },
+          containerStyle: {
+            width: '400px',
+            height: 'auto',
+            cursor: 'pointer',
+          },
+        });
+      }
+    } else if (totQuantity === 0 && toastId.current) {
+      // Tutup toast jika quantity == 0
+      toast.close(toastId.current);
+      toastId.current = null;
+    }
+  }, [totQuantity, totPrice]);
+
+  // Fungsi untuk menangani klik pada toast
+  const handleToastClick = () => {
+    setPaymentDetails({
+      quantity: totQuantity,
+      price: totPrice,
+    });
+    setTotQuantity(0);
+    setTotPrice(0);
+    setIsModalOpen(true);
+    setDeleteInput(false);
+  };
+
+  // Fungsi untuk menutup modal
+  const closeModal = () => {
+    setDeleteInput(true);
+    setIsModalOpen(false);
+    console.log('temporaryQuantity : ', temporaryQuantity);
+    setSelectedQuantity(temporaryQuantity);
+    setSelectedTotalPrice(temporaryPrice);
+    setTotQuantity(
+      Object.values(temporaryQuantity).reduce((acc, cur) => acc + cur, 0),
+    );
+    setTotPrice(
+      Object.values(temporaryPrice).reduce((acc, cur) => acc + cur, 0),
+    );
+    console.log('totQuantity, totPrice : ', totQuantity, ' ', totPrice);
+    console.log('deleteInputRefclosemodal : ', deleteInputRef.current);
+  };
 
   const formatCurrency = (value) => {
     if (value == null) return 'Rp 0';
@@ -134,12 +319,7 @@ export default function Marketplace() {
       // return;
       return updatedData;
     });
-    console.log('SelectedQuantity : ', selectedQuantity);
   };
-
-  useEffect(() => {
-    console.log('SelectedQuantity updated:', selectedQuantity);
-  }, [selectedQuantity, selectedTotalPrice]);
 
   // Fungsi untuk menangani perubahan totalPrice
   const handleTotalPriceChange = (id, newTotalPrice) => {
@@ -161,6 +341,26 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
+      <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
+        <ModalOverlay />
+        <ModalContent maxWidth="1000px" height="80vh">
+          <ModalHeader>Detail Pembayaran</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Jumlah Pesanan: {paymentDetails.quantity}</Text>
+            <Text>
+              Total Harga: Rp {paymentDetails.price.toLocaleString('id-ID')}
+            </Text>
+            {/* Add other payment details here */}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={closeModal}>
+              Tutup
+            </Button>
+            <Button variant="ghost">Proses Pembayaran</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {/* Main Fields */}
       <Grid
         mb="20px"
@@ -235,6 +435,7 @@ export default function Marketplace() {
                   }
                   onQuantityChange={handleQuantityChange}
                   onTotalPriceChange={handleTotalPriceChange}
+                  selectedQuantity={selectedQuantity}
                 />
               ))}
             </SimpleGrid>
