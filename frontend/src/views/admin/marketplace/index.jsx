@@ -20,6 +20,22 @@ import {
   ModalBody,
   ModalFooter,
   CloseButton,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  Tfoot,
+  FormControl,
+  FormLabel,
+  Input,
+  VStack,
+  Heading,
+  ButtonGroup,
+  useDisclosure,
+  IconButton,
+  useClipboard,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -43,6 +59,7 @@ import Avatar4 from 'assets/img/avatars/avatar4.png';
 import tableDataTopCreators from 'views/admin/marketplace/variables/tableDataTopCreators.json';
 import { tableColumnsTopCreators } from 'views/admin/marketplace/variables/tableColumnsTopCreators';
 import axios from 'axios';
+import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
 
 export default function Marketplace() {
   // Chakra Color Mode
@@ -60,12 +77,73 @@ export default function Marketplace() {
   const [temporaryPrice, setTemporaryPrice] = useState({});
   const [deleteInput, setDeleteInput] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState({
+    itemQuantity: {},
+    itemPrice: {},
     quantity: 0,
     price: 0,
   });
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [customerName, setCustomerName] = useState('');
+  const [isNameInvalid, setIsNameInvalid] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Menggunakan useClipboard untuk setiap item yang ingin disalin
+  const { onCopy: onCopyOrderID, hasCopied: hasCopiedOrderID } = useClipboard(
+    paymentInfo?.orderID,
+  );
+  const { onCopy: onCopyVANumber, hasCopied: hasCopiedVANumber } = useClipboard(
+    paymentInfo?.vaNumber,
+  );
+  const { onCopy: onCopyAmount, hasCopied: hasCopiedAmount } = useClipboard(
+    paymentInfo?.amount.toLocaleString('id-ID'),
+  );
+
+  // State untuk mengatur visibilitas dan status "Disalin!"
+  const [showCopiedOrderID, setShowCopiedOrderID] = useState(false);
+  const [showCopiedVANumber, setShowCopiedVANumber] = useState(false);
+  const [showCopiedAmount, setShowCopiedAmount] = useState(false);
+
+  // State untuk menyembunyikan informasi saat tombol salin ditekan
+  const [hideOrderID, setHideOrderID] = useState(false);
+  const [hideVANumber, setHideVANumber] = useState(false);
+  const [hideAmount, setHideAmount] = useState(false);
+
+  const handleCopyOrderID = () => {
+    onCopyOrderID();
+    setShowCopiedOrderID(true);
+    setHideOrderID(true); // Sembunyikan Order ID
+    setTimeout(() => {
+      setShowCopiedOrderID(false);
+      setHideOrderID(false); // Tampilkan kembali Order ID
+    }, 2000); // 2 detik hilang
+  };
+
+  const handleCopyVANumber = () => {
+    onCopyVANumber();
+    setShowCopiedVANumber(true);
+    setHideVANumber(true); // Sembunyikan VA Number
+    setTimeout(() => {
+      setShowCopiedVANumber(false);
+      setHideVANumber(false); // Tampilkan kembali VA Number
+    }, 2000);
+  };
+
+  const handleCopyAmount = () => {
+    onCopyAmount();
+    setShowCopiedAmount(true);
+    setHideAmount(true); // Sembunyikan Amount
+    setTimeout(() => {
+      setShowCopiedAmount(false);
+      setHideAmount(false); // Tampilkan kembali Amount
+    }, 2000);
+  };
+
   const toast = useToast();
   const toastId = useRef(null);
   const deleteInputRef = useRef(deleteInput);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   useEffect(() => {
     // Cleanup ketika komponen dilepas (unmount) -- fungsi ini ketika user pindah halaman beda file
@@ -274,9 +352,12 @@ export default function Marketplace() {
   // Fungsi untuk menangani klik pada toast
   const handleToastClick = () => {
     setPaymentDetails({
+      itemQuantity: selectedQuantity,
+      itemPrice: selectedTotalPrice,
       quantity: totQuantity,
       price: totPrice,
     });
+    console.log('paymentDetails : ', paymentDetails);
     setTotQuantity(0);
     setTotPrice(0);
     setIsModalOpen(true);
@@ -331,6 +412,63 @@ export default function Marketplace() {
     });
   };
 
+  const processPayment = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    if (disabled) {
+      return onOpen();
+    }
+
+    setIsPaymentModalOpen(false);
+  };
+
+  const handleNavigate = () => {
+    window.location.replace('/orderan');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handlePaymentBCA = async () => {
+    try {
+      if (!customerName.trim()) {
+        setIsNameInvalid(true);
+        toast({
+          title: 'Nama Pemesan Kosong',
+          description: 'Harap isi nama pemesan sebelum melanjutkan pembayaran.',
+          status: 'error', // Warna merah untuk error
+          duration: 5000, // Durasi dalam milidetik (5 detik)
+          isClosable: true, // Dapat ditutup oleh pengguna
+          position: 'top-right', // Posisi toast di layar
+        });
+        return;
+      }
+      setDisabled(true);
+      setIsNameInvalid(false);
+      const response = await axios.post(
+        'http://localhost:5000/api/payments/create',
+        {
+          amount: paymentDetails.price,
+          customerName: 'John Doe',
+        },
+      );
+
+      setPaymentInfo(response.data.data);
+    } catch (error) {
+      console.error(error);
+      alert('Gagal membuat Virtual Account');
+    }
+  };
+
+  const handlePaymentDANA = () => {};
+
+  const payment = () => {
+    console.log('test : ');
+  };
+
   if (loading) {
     return (
       <Box textAlign="center" py={10}>
@@ -343,25 +481,378 @@ export default function Marketplace() {
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
-        <ModalContent maxWidth="1000px" height="80vh">
+        <ModalContent maxWidth="1000px" height="80vh" mx="20px">
           <ModalHeader>Detail Pembayaran</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>Jumlah Pesanan: {paymentDetails.quantity}</Text>
-            <Text>
-              Total Harga: Rp {paymentDetails.price.toLocaleString('id-ID')}
-            </Text>
-            {/* Add other payment details here */}
+            <Box overflowX="auto">
+              <Table variant="simple" size="sm" margin="auto" fontSize="sm">
+                <Thead>
+                  <Tr>
+                    <Th>Nama Produk</Th>
+                    <Th>Jumlah</Th>
+                    <Th>Harga Satuan</Th>
+                    <Th>Total Harga</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {Object.entries(paymentDetails.itemQuantity).map(
+                    ([key, value]) => {
+                      // Konversi key ke number untuk mencocokkan dengan product_id
+                      const matchedProduct = products.find(
+                        (product) => product.product_id === Number(key),
+                      );
+
+                      if (matchedProduct) {
+                        const itemPrice =
+                          paymentDetails.itemPrice[key]?.toLocaleString(
+                            'id-ID',
+                          ) || '0';
+                        const totalPrice =
+                          (
+                            value * paymentDetails.itemPrice[key]
+                          )?.toLocaleString('id-ID') || '0';
+
+                        return (
+                          <Tr key={key}>
+                            <Td fontSize="sm">{matchedProduct.product_name}</Td>
+                            <Td fontSize="sm">{value}</Td>
+                            <Td fontSize="sm">Rp. {itemPrice}</Td>
+                            <Td fontSize="sm">Rp. {totalPrice}</Td>
+                          </Tr>
+                        );
+                      }
+
+                      return (
+                        <Tr key={key}>
+                          <Td fontSize="sm">Produk dengan ID {key}</Td>
+                          <Td fontSize="sm">-</Td>
+                          <Td fontSize="sm">-</Td>
+                          <Td fontSize="sm">-</Td>
+                        </Tr>
+                      );
+                    },
+                  )}
+                </Tbody>
+                <Tfoot>
+                  <Tr borderTop="2px solid" borderColor="gray.200">
+                    <Th fontSize="sm">Total</Th>
+                    <Th fontSize="sm">{paymentDetails.quantity}</Th>
+                    <Th fontSize="sm">-</Th>
+                    <Th fontSize="sm">
+                      Rp. {paymentDetails.price.toLocaleString('id-ID')}
+                    </Th>
+                  </Tr>
+                </Tfoot>
+              </Table>
+            </Box>
           </ModalBody>
+
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={closeModal}>
-              Tutup
+            <Button rounded={20} colorScheme="blue" mr={5} onClick={closeModal}>
+              Kembali
             </Button>
-            <Button variant="ghost">Proses Pembayaran</Button>
+            <Button onClick={processPayment} variant="ghost">
+              Proses Pembayaran
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {/* Main Fields */}
+
+      {/* proses pembayaran */}
+      <Modal
+        isOpen={isPaymentModalOpen}
+        onClose={closePaymentModal}
+        size="xl"
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent
+          maxWidth={{ base: '90%', md: '768px', lg: '1000px' }}
+          height="80vh"
+          mx="20px"
+        >
+          <ModalHeader>Proses Pembayaran</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={6} align="stretch">
+              {/* Judul Section */}
+              {!disabled && (
+                <>
+                  <Box textAlign="center" mb={4}>
+                    <Heading
+                      size="md"
+                      fontSize={{ base: 'lg', sm: 'md', md: 'xl' }}
+                    >
+                      Pilih Metode Pembayaran
+                    </Heading>
+                    <Text fontSize="sm" color="gray.500">
+                      Pilih metode pembayaran yang Anda inginkan untuk
+                      melanjutkan transaksi
+                    </Text>
+                  </Box>
+                </>
+              )}
+
+              {/* Input Nama */}
+              <Box
+                p={4}
+                borderWidth="1px"
+                borderRadius="lg"
+                boxShadow="sm"
+                bg="gray.50"
+              >
+                <Text fontWeight="bold" mb={3}>
+                  {disabled
+                    ? 'Informasi Pemesan'
+                    : 'Masukkan Informasi Pemesan'}
+                </Text>
+                <FormControl
+                  id="customer-name"
+                  isRequired
+                  isInvalid={isNameInvalid}
+                  mb={4}
+                >
+                  <FormLabel>Nama Pemesan</FormLabel>
+                  <Input
+                    placeholder="Masukkan nama pemesan"
+                    focusBorderColor="blue.400"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    onFocus={() => setIsNameInvalid(false)}
+                    disabled={disabled}
+                    background={disabled && '#cccccc'}
+                    textColor={disabled && 'black'}
+                  />
+                  {isNameInvalid && (
+                    <Text color="red.500" fontSize="sm">
+                      Nama pemesan harus diisi.
+                    </Text>
+                  )}
+                </FormControl>
+              </Box>
+
+              {/* Tombol Metode Pembayaran */}
+              {!disabled && (
+                <ButtonGroup
+                  spacing={4}
+                  width="100%"
+                  direction={{ base: 'column', sm: 'row' }}
+                >
+                  <Button
+                    onClick={handlePaymentBCA}
+                    colorScheme="blue"
+                    width="100%"
+                    size={{ base: 'md', sm: 'lg' }} // Menyesuaikan ukuran tombol
+                    fontSize={{ base: 'sm', sm: 'md' }} // Menyesuaikan ukuran font
+                    boxShadow="md"
+                    whiteSpace="normal" // Mengizinkan teks untuk membungkus jika perlu
+                    wordBreak="break-word" // Memastikan kata-kata terpisah jika terlalu panjang
+                  >
+                    Bayar dengan Bank BCA
+                  </Button>
+                  <Button
+                    onClick={handlePaymentDANA}
+                    colorScheme="orange"
+                    width="100%"
+                    size={{ base: 'md', sm: 'lg' }} // Menyesuaikan ukuran tombol
+                    fontSize={{ base: 'sm', sm: 'md' }} // Menyesuaikan ukuran font
+                    boxShadow="md"
+                    whiteSpace="normal" // Mengizinkan teks untuk membungkus jika perlu
+                    wordBreak="break-word" // Memastikan kata-kata terpisah jika terlalu panjang
+                  >
+                    Bayar dengan DANA
+                  </Button>
+                </ButtonGroup>
+              )}
+
+              {/* Tampilan Informasi Pembayaran */}
+              {paymentInfo !== null && (
+                <Box
+                  p={4}
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  boxShadow="sm"
+                  bg="blue.50"
+                  width="100%"
+                  maxWidth="lg"
+                  margin="0 auto"
+                >
+                  <Text fontWeight="bold" mb={2}>
+                    Informasi Virtual Account Anda
+                  </Text>
+
+                  {/* Order ID */}
+                  <Flex justifyContent="space-between" mb={1} align="center">
+                    <Text>Order ID:</Text>
+                    <Flex align="center">
+                      {!hideOrderID && (
+                        <>
+                          <Text fontWeight="medium">{paymentInfo.orderID}</Text>
+                          <IconButton
+                            aria-label="Salin Order ID"
+                            icon={<CopyIcon />}
+                            size="sm"
+                            ml={2}
+                            onClick={handleCopyOrderID}
+                            colorScheme="blue"
+                          />
+                        </>
+                      )}
+                      {showCopiedOrderID && (
+                        <Box
+                          as="span"
+                          fontSize="sm"
+                          color="green.500"
+                          ml={2}
+                          transition="opacity 0.5s ease-out"
+                          opacity={showCopiedOrderID ? 1 : 0}
+                        >
+                          Disalin!
+                        </Box>
+                      )}
+                    </Flex>
+                  </Flex>
+
+                  {/* VA Number */}
+                  <Flex justifyContent="space-between" mb={1} align="center">
+                    <Text>VA Number:</Text>
+                    <Flex align="center">
+                      {!hideVANumber && (
+                        <>
+                          <Text fontWeight="medium">
+                            {paymentInfo.vaNumber}
+                          </Text>
+                          <IconButton
+                            aria-label="Salin VA Number"
+                            icon={<CopyIcon />}
+                            size="sm"
+                            ml={2}
+                            onClick={handleCopyVANumber}
+                            colorScheme="blue"
+                          />
+                        </>
+                      )}
+                      {showCopiedVANumber && (
+                        <Box
+                          as="span"
+                          fontSize="sm"
+                          color="green.500"
+                          ml={2}
+                          transition="opacity 0.5s ease-out"
+                          opacity={showCopiedVANumber ? 1 : 0}
+                        >
+                          Disalin!
+                        </Box>
+                      )}
+                    </Flex>
+                  </Flex>
+
+                  {/* Amount */}
+                  <Flex justifyContent="space-between" mb={1} align="center">
+                    <Text>Jumlah:</Text>
+                    <Flex align="center">
+                      {!hideAmount && (
+                        <>
+                          <Text fontWeight="medium">
+                            Rp{paymentInfo.amount.toLocaleString('id-ID')}
+                          </Text>
+                          <IconButton
+                            aria-label="Salin Jumlah"
+                            icon={<CopyIcon />}
+                            size="sm"
+                            ml={2}
+                            onClick={handleCopyAmount}
+                            colorScheme="blue"
+                          />
+                        </>
+                      )}
+                      {showCopiedAmount && (
+                        <Box
+                          as="span"
+                          fontSize="sm"
+                          color="green.500"
+                          ml={2}
+                          transition="opacity 0.5s ease-out"
+                          opacity={showCopiedAmount ? 1 : 0}
+                        >
+                          Disalin!
+                        </Box>
+                      )}
+                    </Flex>
+                  </Flex>
+
+                  {/* Print Button */}
+                  <Button
+                    onClick={handlePrint}
+                    leftIcon={<DownloadIcon />}
+                    colorScheme="blue"
+                    size="sm"
+                    width="100%"
+                    mt={4}
+                    variant="outline"
+                    boxShadow="sm"
+                  >
+                    Cetak Informasi
+                  </Button>
+                </Box>
+              )}
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              rounded={20}
+              colorScheme="blue"
+              mr={5}
+              onClick={closePaymentModal}
+            >
+              Kembali
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textAlign="center" fontSize="lg" fontWeight="bold">
+            Konfirmasi
+          </ModalHeader>
+          <ModalBody>
+            <VStack spacing={4} align="stretch" textAlign="center">
+              <Text fontSize="md" color="gray.600">
+                Apakah Anda yakin ingin kembali ke menu awal? Harap simpan
+                terlebih dahulu informasi virtual account Anda.
+              </Text>
+            </VStack>
+          </ModalBody>
+          <ModalFooter justifyContent="center">
+            <Button
+              colorScheme="blue"
+              onClick={handleNavigate}
+              size="lg"
+              width="200px"
+              variant="solid"
+              boxShadow="md"
+              mr={4}
+            >
+              Ya
+            </Button>
+            <Button
+              colorScheme="gray"
+              onClick={onClose}
+              size="lg"
+              width="200px"
+              variant="outline"
+              boxShadow="md"
+            >
+              Tidak
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <Grid
         mb="20px"
         gridTemplateColumns={{ xl: 'repeat(3, 1fr)', '2xl': '1fr 0.46fr' }}
