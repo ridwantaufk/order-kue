@@ -36,6 +36,8 @@ import {
   useDisclosure,
   IconButton,
   useClipboard,
+  useBreakpointValue,
+  Divider,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -68,6 +70,13 @@ export default function Marketplace() {
   // Chakra Color Mode
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.500', 'white');
+  const backgroundColor = useColorModeValue('gray.50', 'gray.700');
+  const separatorLine = useColorModeValue('gray.300', '#ccc');
+  const nameTextColor = useColorModeValue('navy.700', '#ccc');
+  const nameTextColorDisabled = useColorModeValue('navy.700', 'gray.200');
+  const nameBackgroundColor = useColorModeValue('white', 'gray.700');
+  const nameBackgroundColorDisabled = useColorModeValue('#cccc', 'gray.600');
+  const qrCodeSize = useBreakpointValue({ base: 150, md: 250, lg: 300 });
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -452,7 +461,7 @@ export default function Marketplace() {
       setDisabled(true);
       setIsNameInvalid(false);
       const response = await axios.post(
-        'http://localhost:5000/api/payments/create',
+        `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
         {
           amount: paymentDetails.price,
           customerName: 'John Doe',
@@ -486,12 +495,16 @@ export default function Marketplace() {
         <ModalOverlay />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
-          height="80vh"
+          height="90vh"
+          overflow="auto"
         >
           <ModalHeader>Detail Pembayaran</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <Box overflowX="auto">
+          <ModalBody
+            overflowY="auto" // Mengaktifkan scroll vertikal jika konten melebihi tinggi
+            height="calc(90vh - 100px)"
+          >
+            <Box overflowX="auto" overflowY="auto">
               <Table variant="simple" size="sm" margin="auto" fontSize="sm">
                 <Thead>
                   <Tr>
@@ -541,7 +554,7 @@ export default function Marketplace() {
                   )}
                 </Tbody>
                 <Tfoot>
-                  <Tr borderTop="2px solid" borderColor="gray.200">
+                  <Tr borderTop="2px solid" borderColor={separatorLine} mt={4}>
                     <Th fontSize="sm">Total</Th>
                     <Th fontSize="sm">{paymentDetails.quantity}</Th>
                     <Th fontSize="sm">-</Th>
@@ -558,7 +571,7 @@ export default function Marketplace() {
             <Button rounded={20} colorScheme="blue" mr={5} onClick={closeModal}>
               Kembali
             </Button>
-            <Button onClick={processPayment} variant="ghost">
+            <Button onClick={processPayment} variant="ghost" c>
               Proses Pembayaran
             </Button>
           </ModalFooter>
@@ -571,13 +584,15 @@ export default function Marketplace() {
         onClose={closePaymentModal}
         size="xl"
         isCentered
+        isLazy
       >
         <ModalOverlay />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
-          height="80vh"
+          height="90vh"
+          overflowY="auto"
         >
-          <ModalHeader>Proses Pembayaran</ModalHeader>
+          <ModalHeader color={nameTextColor}>Proses Pembayaran</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={6} align="stretch">
@@ -588,6 +603,7 @@ export default function Marketplace() {
                     <Heading
                       size="md"
                       fontSize={{ base: 'lg', sm: 'md', md: 'xl' }}
+                      color={nameTextColor}
                     >
                       Pilih Metode Pembayaran
                     </Heading>
@@ -605,9 +621,9 @@ export default function Marketplace() {
                 borderWidth="1px"
                 borderRadius="lg"
                 boxShadow="sm"
-                bg="gray.50"
+                bg={backgroundColor}
               >
-                <Text fontWeight="bold" mb={3}>
+                <Text fontWeight="bold" mb={3} color={nameTextColor}>
                   {disabled
                     ? 'Informasi Pemesan'
                     : 'Masukkan Informasi Pemesan'}
@@ -618,7 +634,7 @@ export default function Marketplace() {
                   isInvalid={isNameInvalid}
                   mb={4}
                 >
-                  <FormLabel>Nama Pemesan</FormLabel>
+                  <FormLabel color={nameTextColor}>Nama Pemesan</FormLabel>
                   <Input
                     placeholder="Masukkan nama pemesan"
                     focusBorderColor="blue.400"
@@ -626,8 +642,12 @@ export default function Marketplace() {
                     onChange={(e) => setCustomerName(e.target.value)}
                     onFocus={() => setIsNameInvalid(false)}
                     disabled={disabled}
-                    background={disabled && '#cccccc'}
-                    textColor={disabled && 'black'}
+                    background={
+                      disabled
+                        ? nameBackgroundColorDisabled
+                        : nameBackgroundColor
+                    }
+                    textColor={disabled ? nameTextColorDisabled : nameTextColor}
                   />
                   {isNameInvalid && (
                     <Text color="red.500" fontSize="sm">
@@ -678,7 +698,7 @@ export default function Marketplace() {
                   borderWidth="1px"
                   borderRadius="lg"
                   boxShadow="sm"
-                  bg="blue.50"
+                  bg={backgroundColor}
                   width="100%"
                   margin="0 auto"
                 >
@@ -717,7 +737,7 @@ export default function Marketplace() {
                       )}
                     </Flex>
                   </Flex>
-
+                  <Divider my={3} borderColor={separatorLine} />
                   {/* VA Number */}
                   <Flex justifyContent="space-between" mb={1} align="center">
                     <Text>VA Number:</Text>
@@ -751,7 +771,7 @@ export default function Marketplace() {
                       )}
                     </Flex>
                   </Flex>
-
+                  <Divider my={3} borderColor={separatorLine} />
                   {/* Amount */}
                   <Flex justifyContent="space-between" mb={1} align="center">
                     <Text>Jumlah:</Text>
@@ -785,7 +805,7 @@ export default function Marketplace() {
                       )}
                     </Flex>
                   </Flex>
-
+                  <Divider my={3} borderColor={separatorLine} />
                   {/* QR Code */}
                   <Box
                     flexShrink={0}
@@ -797,7 +817,7 @@ export default function Marketplace() {
                   >
                     <QRCodeCanvas
                       value={paymentInfo.vaNumber} // Data untuk kode QR
-                      size={150} // Ukuran QR Code
+                      size={qrCodeSize} // Ukuran QR Code responsif
                       bgColor="#ffffff" // Warna background
                       fgColor="#000000" // Warna depan
                       level="H" // Tingkat koreksi kesalahan (L, M, Q, H)
@@ -817,13 +837,28 @@ export default function Marketplace() {
                   <Button
                     onClick={handlePrint}
                     leftIcon={<DownloadIcon />}
-                    colorScheme="blue"
+                    colorScheme="green"
                     size="sm"
                     width="100%"
                     mt={4}
                     variant="outline"
-                    boxShadow="sm"
-                    _hover={{ background: '#48BB78  ' }}
+                    borderColor="green.400" // Outline default
+                    _hover={{
+                      background: 'green.300', // Warna hijau saat hover
+                      borderColor: 'transparent', // Hilangkan outline saat hover
+                      boxShadow: 'md',
+                      color: 'white',
+                    }}
+                    _active={{
+                      background: 'green.400', // Warna lebih gelap saat klik
+                      borderColor: 'transparent', // Hilangkan outline saat klik
+                      boxShadow: 'inner',
+                    }}
+                    _focus={{
+                      outline: 'none', // Hilangkan outline biru saat fokus
+                      boxShadow: 'none',
+                    }}
+                    transition="all 0.2s ease-in-out"
                   >
                     Cetak Informasi
                   </Button>
@@ -853,8 +888,8 @@ export default function Marketplace() {
           </ModalHeader>
           <ModalBody>
             <VStack spacing={4} align="stretch" textAlign="center">
-              <Text fontSize="md" color="gray.600">
-                Apakah Anda yakin ingin kembali ke menu awal? Harap simpan
+              <Text fontSize="md" color={textColor}>
+                Apakah Anda yakin ingin kembali ke menu awal ? Harap simpan
                 terlebih dahulu informasi virtual account Anda.
               </Text>
             </VStack>
