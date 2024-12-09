@@ -13,6 +13,12 @@ import {
   Text,
   useColorModeValue,
   useColorMode,
+  Box,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 // Custom Components
 import { ItemContent } from 'components/menu/ItemContent';
@@ -34,6 +40,27 @@ export default function HeaderLinks(props) {
   const [imageHovered, setImageHovered] = useState(false);
   const [nama, setNama] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const openTime = '08:00 AM';
+  const closeTime = '06:00 PM';
+  const totalVisitors = 125; // Anda bisa mengganti ini dengan data dinamis
+  const textGray = useColorModeValue('gray.600', 'gray.300');
+  const statColor = useColorModeValue('green.500', 'green.300');
+
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const updateTime = () => {
+      const time = new Date();
+      setCurrentTime(time.toLocaleTimeString());
+    };
+
+    const intervalId = setInterval(updateTime, 1000);
+
+    return () => clearInterval(intervalId); // Membersihkan interval saat komponen di-unmount
+  }, []);
 
   const handleMouseEnter = () => {
     setImageHovered(true);
@@ -219,7 +246,6 @@ export default function HeaderLinks(props) {
         </MenuButton>
         <MenuList
           boxShadow={shadow}
-          p="20px"
           me={{ base: '30px', md: 'unset' }}
           borderRadius="20px"
           bg={menuBg}
@@ -227,43 +253,67 @@ export default function HeaderLinks(props) {
           mt="22px"
           minW={{ base: 'unset' }}
           maxW={{ base: '360px', md: 'unset' }}
+          p={4}
         >
-          <Image src={navImage} borderRadius="16px" mb="28px" />
-          <Flex flexDirection="column">
-            <Link w="100%" href="https://horizon-ui.com/pro">
-              <Button w="100%" h="44px" mb="10px" variant="brand">
-                Buy Horizon UI PRO
-              </Button>
-            </Link>
-            <Link
+          <Flex flexDirection="column" align="center" justify="center" w="100%">
+            <Text fontSize="2xl" fontWeight="bold" color="blue.500" mb={4}>
+              Informasi Hari Ini
+            </Text>
+
+            {/* Jam Digital */}
+            <Flex direction="column" align="center" mb={6}>
+              <Text fontSize="2xl" fontWeight="bold" color={textColor} mb={2}>
+                Jam Sekarang :
+              </Text>
+              <Text fontSize="3xl" fontWeight="bold" color={textGray}>
+                {currentTime}
+              </Text>
+            </Flex>
+
+            {/* Informasi Jam Buka dan Tutup */}
+            <Flex
+              direction="row"
+              justify="space-between"
+              align="center"
+              mb={6}
               w="100%"
-              href="https://horizon-ui.com/documentation/docs/introduction"
             >
-              <Button
-                w="100%"
-                h="44px"
-                mb="10px"
-                border="1px solid"
-                bg="transparent"
-                borderColor={borderButton}
-              >
-                See Documentation
-              </Button>
-            </Link>
-            <Link
-              w="100%"
-              href="https://github.com/horizon-ui/horizon-ui-chakra-ts"
-            >
-              <Button
-                w="100%"
-                h="44px"
-                variant="no-hover"
+              <Flex w="48%" direction="column" align="start">
+                <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                  Jam Buka :
+                </Text>
+                <Text fontSize="md" color={textGray}>
+                  {openTime}
+                </Text>
+              </Flex>
+
+              <Flex w="48%" direction="column" align="start">
+                <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                  Jam Tutup :
+                </Text>
+                <Text fontSize="md" color={textGray}>
+                  {closeTime}
+                </Text>
+              </Flex>
+            </Flex>
+
+            {/* Informasi Total Pengunjung */}
+            <Stat>
+              <StatLabel
+                fontSize="lg"
+                fontWeight="bold"
+                mb={2}
                 color={textColor}
-                bg="transparent"
               >
-                Try Horizon Free
-              </Button>
-            </Link>
+                Total Pengunjung Hari Ini
+              </StatLabel>
+              <StatNumber fontSize="3xl" color={statColor}>
+                {totalVisitors}
+              </StatNumber>
+              <StatHelpText fontSize="sm" color="gray.500">
+                Data ini berdasarkan pengunjung yang terdaftar hari ini.
+              </StatHelpText>
+            </Stat>
           </Flex>
         </MenuList>
       </Menu>

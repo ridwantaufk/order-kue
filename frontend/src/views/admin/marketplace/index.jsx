@@ -586,7 +586,7 @@ export default function Marketplace() {
         isCentered
         isLazy
       >
-        <ModalOverlay />
+        <ModalOverlay backdropFilter="blur(1.5px)" />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
           height="90vh"
