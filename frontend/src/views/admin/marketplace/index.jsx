@@ -61,6 +61,9 @@ import { tableColumnsTopCreators } from 'views/admin/marketplace/variables/table
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
 
+import { openPrintWindow } from './print/print';
+import { QRCodeCanvas } from 'qrcode.react';
+
 export default function Marketplace() {
   // Chakra Color Mode
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -112,31 +115,31 @@ export default function Marketplace() {
   const handleCopyOrderID = () => {
     onCopyOrderID();
     setShowCopiedOrderID(true);
-    setHideOrderID(true); // Sembunyikan Order ID
+    setHideOrderID(true);
     setTimeout(() => {
       setShowCopiedOrderID(false);
-      setHideOrderID(false); // Tampilkan kembali Order ID
-    }, 2000); // 2 detik hilang
+      setHideOrderID(false);
+    }, 700);
   };
 
   const handleCopyVANumber = () => {
     onCopyVANumber();
     setShowCopiedVANumber(true);
-    setHideVANumber(true); // Sembunyikan VA Number
+    setHideVANumber(true);
     setTimeout(() => {
       setShowCopiedVANumber(false);
-      setHideVANumber(false); // Tampilkan kembali VA Number
-    }, 2000);
+      setHideVANumber(false);
+    }, 700);
   };
 
   const handleCopyAmount = () => {
     onCopyAmount();
     setShowCopiedAmount(true);
-    setHideAmount(true); // Sembunyikan Amount
+    setHideAmount(true);
     setTimeout(() => {
       setShowCopiedAmount(false);
-      setHideAmount(false); // Tampilkan kembali Amount
-    }, 2000);
+      setHideAmount(false);
+    }, 700);
   };
 
   const toast = useToast();
@@ -429,7 +432,7 @@ export default function Marketplace() {
   };
 
   const handlePrint = () => {
-    window.print();
+    openPrintWindow(paymentInfo);
   };
 
   const handlePaymentBCA = async () => {
@@ -481,7 +484,10 @@ export default function Marketplace() {
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
-        <ModalContent maxWidth="1000px" height="80vh" mx="20px">
+        <ModalContent
+          maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
+          height="80vh"
+        >
           <ModalHeader>Detail Pembayaran</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -568,9 +574,8 @@ export default function Marketplace() {
       >
         <ModalOverlay />
         <ModalContent
-          maxWidth={{ base: '90%', md: '768px', lg: '1000px' }}
+          maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
           height="80vh"
-          mx="20px"
         >
           <ModalHeader>Proses Pembayaran</ModalHeader>
           <ModalCloseButton />
@@ -675,7 +680,6 @@ export default function Marketplace() {
                   boxShadow="sm"
                   bg="blue.50"
                   width="100%"
-                  maxWidth="lg"
                   margin="0 auto"
                 >
                   <Text fontWeight="bold" mb={2}>
@@ -782,6 +786,33 @@ export default function Marketplace() {
                     </Flex>
                   </Flex>
 
+                  {/* QR Code */}
+                  <Box
+                    flexShrink={0}
+                    display="flex"
+                    flexDirection="column" // Teks "Pindai" di bawah QR Code
+                    alignItems="center" // Pusatkan QR Code dan teks di tengah
+                    justifyContent="center"
+                    width={{ base: '100%', md: 'auto' }}
+                  >
+                    <QRCodeCanvas
+                      value={paymentInfo.vaNumber} // Data untuk kode QR
+                      size={150} // Ukuran QR Code
+                      bgColor="#ffffff" // Warna background
+                      fgColor="#000000" // Warna depan
+                      level="H" // Tingkat koreksi kesalahan (L, M, Q, H)
+                      includeMargin={true} // Tambahkan margin
+                    />
+                    <Text
+                      mt={2}
+                      fontSize="sm"
+                      color="gray.500"
+                      textAlign="center"
+                    >
+                      Pindai kode ini untuk membayar melalui Virtual Account
+                    </Text>
+                  </Box>
+
                   {/* Print Button */}
                   <Button
                     onClick={handlePrint}
@@ -792,6 +823,7 @@ export default function Marketplace() {
                     mt={4}
                     variant="outline"
                     boxShadow="sm"
+                    _hover={{ background: '#48BB78  ' }}
                   >
                     Cetak Informasi
                   </Button>
