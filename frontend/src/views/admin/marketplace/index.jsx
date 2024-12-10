@@ -42,7 +42,7 @@ import {
 
 // Custom components
 import Banner from 'views/admin/marketplace/components/Banner';
-import TableTopCreators from 'views/admin/marketplace/components/TableTopCreators';
+import Antrian from 'views/admin/marketplace/components/Antrian';
 import HistoryItem from 'views/admin/marketplace/components/HistoryItem';
 import Item from 'components/card/Item';
 import Card from 'components/card/Card.js';
@@ -464,7 +464,7 @@ export default function Marketplace() {
         `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
         {
           amount: paymentDetails.price,
-          customerName: 'John Doe',
+          customerName: customerName,
         },
       );
 
@@ -1072,10 +1072,7 @@ export default function Marketplace() {
           gridArea={{ xl: '1 / 3 / 2 / 4', '2xl': '1 / 2 / 2 / 3' }}
         >
           <Card px="0px" mb="20px">
-            <TableTopCreators
-              tableData={tableDataTopCreators}
-              columnsData={tableColumnsTopCreators}
-            />
+            <Antrian />
           </Card>
           <Card p="0px">
             <Flex

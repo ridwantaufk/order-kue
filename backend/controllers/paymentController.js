@@ -1,8 +1,9 @@
 const { generateVA, generateOrderID } = require("../utils/generateVA");
+const Order = require("../models/tOrderModel");
 
 let payments = []; // Menyimpan data pembayaran sementara
 
-exports.createPayment = (req, res) => {
+exports.createPayment = async (req, res) => {
   const { amount, customerName } = req.body;
 
   if (!amount || !customerName) {
@@ -23,10 +24,23 @@ exports.createPayment = (req, res) => {
 
   payments.push(newPayment);
 
-  return res.status(201).json({
-    message: "Virtual Account created successfully!",
-    data: newPayment,
-  });
+  try {
+    await Order.create({
+      order_code: orderID,
+      customer_name: customerName,
+    });
+
+    // Kembalikan respons sukses dengan data newOrder dan newPayment
+    return res.status(201).json({
+      message: "Virtual Account and Order created successfully!",
+      data: newPayment,
+    });
+  } catch (error) {
+    console.error("Error in createPayment:", error.message);
+    return res
+      .status(500)
+      .json({ message: "Failed to create order", error: error.message });
+  }
 };
 
 exports.getPayments = (req, res) => {
