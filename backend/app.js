@@ -1,7 +1,14 @@
 const express = require("express");
+const sequelize = require("./config/db");
 const cors = require("cors");
 const app = express();
-const sequelize = require("./config/db");
+const socketIo = require("socket.io");
+
+const http = require("http");
+const server = http.createServer(app);
+const io = socketIo(server);
+const OrderController = require("./controllers/tOrdersController");
+
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
@@ -46,6 +53,25 @@ app.use("/api/ingredients", ingredientRoutes);
 app.use("/api/tools", toolRoutes);
 app.use("/api/payments", paymentRoutes);
 
+// Menangani koneksi socket
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  // Mengirimkan data pesanan baru ke semua klien
+  socket.on("getOrders", async () => {
+    try {
+      const orders = await OrderController.getOrdersForSocket(); // Mengambil data orders untuk dikirim
+      socket.emit("orderUpdate", orders); // Kirimkan data orders ke klien yang terhubung
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
+
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
 console.log("process.env.PORT : ", process.env.PORT);
@@ -60,8 +86,8 @@ sequelize
       // Update .env in frontend with backend production URL
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
-        const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-        // const backendUrl = `https://158d-149-113-206-114.ngrok-free.app`; // ngrok
+        // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
+        const backendUrl = `https://6df5-139-195-217-191.ngrok-free.app`; // ngrok
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
         console.log(
           "URL Backend terupdate di frontend .env (berarti ini pake ngrok backend-nya)"

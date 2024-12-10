@@ -12,7 +12,7 @@ const Order = sequelize.define(
       allowNull: false,
     },
     order_code: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     customer_name: {

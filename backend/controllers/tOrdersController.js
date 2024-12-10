@@ -10,6 +10,17 @@ exports.getOrders = async (req, res) => {
   }
 };
 
+// Fungsi tambahan untuk socket.io agar dapat mengambil data
+exports.getOrdersForSocket = async () => {
+  try {
+    const orders = await Order.findAll();
+    return orders;
+  } catch (error) {
+    console.error("Error fetching orders for socket:", error);
+    return [];
+  }
+};
+
 // Menambahkan pesanan baru
 exports.createOrder = async (req, res) => {
   try {
