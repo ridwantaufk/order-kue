@@ -22,8 +22,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import io from 'socket.io-client';
+import { DateTime } from 'luxon';
 
 const columnHelper = createColumnHelper();
 
@@ -48,12 +48,26 @@ export default function Antrian() {
 
     // Mendapatkan data awal saat koneksi
     socket.on('initialOrders', (initialDataOrders) => {
-      setOrders(initialDataOrders);
+      const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
+      const filteredOrders = initialDataOrders.filter((order) => {
+        const orderDate = DateTime.fromISO(order.created_at, {
+          zone: 'Asia/Jakarta',
+        }).toISODate();
+        return orderDate === today;
+      });
+      setOrders(filteredOrders);
     });
 
     // Mendapatkan pembaruan orders secara real-time
     socket.on('ordersUpdate', (updatedDataOrders) => {
-      setOrders(updatedDataOrders); // Menambahkan data baru
+      const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
+      const filteredOrders = updatedDataOrders.filter((order) => {
+        const orderDate = DateTime.fromISO(order.created_at, {
+          zone: 'Asia/Jakarta',
+        }).toISODate();
+        return orderDate === today;
+      });
+      setOrders(filteredOrders);
     });
 
     // Pastikan untuk menutup koneksi saat komponen tidak aktif
@@ -94,11 +108,13 @@ export default function Antrian() {
         </Text>
       ),
       cell: (info) => {
-        const orderTime = new Date(info.getValue());
-        const currentTime = new Date();
-        const timeDiff = (currentTime - orderTime) / 60000; // Difference in minutes
+        const orderTime = DateTime.fromISO(info.getValue(), {
+          zone: 'Asia/Jakarta',
+        });
+        const currentTime = DateTime.now().setZone('Asia/Jakarta');
+        const timeDiff = currentTime.diff(orderTime, 'minutes').minutes;
 
-        let status = 'Menunggu'; // Default status is "Menunggu"
+        let status = 'Menunggu';
         let statusColor = tagColor; // Default status color is blue
 
         if (timeDiff > 10) {
@@ -148,23 +164,26 @@ export default function Antrian() {
           Antrian
         </Text>
       </Flex>
-      <Box
-        maxH="400px"
-        overflowY="auto"
-        borderRadius="12px"
-        boxShadow="lg"
-        border="1px"
-        borderColor={borderColor}
-      >
-        <Table variant="simple" color="gray.500" mt="12px">
+      <Box maxH="calc(100vh - 250px)" overflowY="auto" w="100%">
+        <Table
+          variant="simple"
+          color={useColorModeValue('gray.600', 'gray.300')}
+          mt="12px"
+          fontSize={{ base: 'xs', md: 'sm' }} // Font lebih kecil di mobile
+          tableLayout="fixed" // Mengatur lebar tabel agar sesuai
+          width="100%"
+        >
           <Thead
             position="sticky"
             top="0"
-            zIndex="docked"
-            backdropFilter="blur(7px)"
-            bg="rgba(255, 255, 255, 0.9)" // Menambahkan transparansi lebih tinggi supaya blur lebih jelas terlihat
+            zIndex="1"
+            backdropFilter="blur(4px)"
+            bg={useColorModeValue(
+              'rgba(255, 255, 255, 0.9)', // Light mode
+              'navy.850', // Dark mode
+            )}
             borderBottom="1px solid"
-            borderColor={borderColor}
+            borderColor={useColorModeValue('gray.200', 'navy.700')}
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
@@ -172,11 +191,14 @@ export default function Antrian() {
                   <Th
                     key={header.id}
                     colSpan={header.colSpan}
-                    borderColor={borderColor}
+                    borderColor={useColorModeValue('gray.200', 'navy.700')}
                     onClick={header.column.getToggleSortingHandler()}
                     cursor="pointer"
-                    color="gray.600"
+                    color={useColorModeValue('gray.600', 'gray.300')}
                     fontWeight="bold"
+                    fontSize={{ base: 'xx-small', md: 'xl' }} // Header lebih kecil di mobile
+                    whiteSpace="normal" // Agar teks terbungkus
+                    overflowWrap="break-word" // Memecah kata panjang
                   >
                     <Flex justify="space-between" align="center">
                       {flexRender(
@@ -197,11 +219,21 @@ export default function Antrian() {
             {table.getRowModel().rows.map((row, index) => (
               <Tr
                 key={row.id}
-                bg={index % 2 === 0 ? 'gray.50' : 'white'}
-                _hover={{ bg: 'blue.100' }} // Hover effect for a single row
+                bg={useColorModeValue(
+                  index % 2 === 0 ? 'gray.50' : 'white', // Light mode
+                  index % 2 === 0 ? 'navy.700' : 'navy.800', // Dark mode
+                )}
+                _hover={{ bg: useColorModeValue('blue.100', 'blue.900') }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <Td key={cell.id} borderColor={borderColor} p="12px">
+                  <Td
+                    key={cell.id}
+                    borderColor={useColorModeValue('gray.200', 'navy.700')}
+                    p="16px" // Padding lebih kecil untuk mobile
+                    fontSize={{ base: 'xx-small', md: 'sm' }} // Isi tabel lebih kecil di mobile
+                    whiteSpace="normal" // Agar teks terbungkus
+                    overflowWrap="break-word" // Memecah kata panjang
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Td>
                 ))}

@@ -43,23 +43,9 @@ import {
 // Custom components
 import Banner from 'views/admin/marketplace/components/Banner';
 import Antrian from 'views/admin/marketplace/components/Antrian';
-import HistoryItem from 'views/admin/marketplace/components/HistoryItem';
 import Item from 'components/card/Item';
 import Card from 'components/card/Card.js';
 
-// Assets
-import Nft1 from 'assets/img/nfts/Nft1.png';
-import Nft2 from 'assets/img/nfts/Nft2.png';
-import Nft3 from 'assets/img/nfts/Nft3.png';
-import Nft4 from 'assets/img/nfts/Nft4.png';
-import Nft5 from 'assets/img/nfts/Nft5.png';
-import Nft6 from 'assets/img/nfts/Nft6.png';
-import Avatar1 from 'assets/img/avatars/avatar1.png';
-import Avatar2 from 'assets/img/avatars/avatar2.png';
-import Avatar3 from 'assets/img/avatars/avatar3.png';
-import Avatar4 from 'assets/img/avatars/avatar4.png';
-import tableDataTopCreators from 'views/admin/marketplace/variables/tableDataTopCreators.json';
-import { tableColumnsTopCreators } from 'views/admin/marketplace/variables/tableColumnsTopCreators';
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
 
@@ -69,7 +55,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 export default function Marketplace() {
   // Chakra Color Mode
   const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const textColorBrand = useColorModeValue('brand.500', 'white');
+  const textColorBrand = useColorModeValue('brand.400', 'white');
   const backgroundColor = useColorModeValue('gray.50', 'gray.700');
   const separatorLine = useColorModeValue('gray.300', '#ccc');
   const nameTextColor = useColorModeValue('navy.700', '#ccc');
@@ -156,6 +142,22 @@ export default function Marketplace() {
   const deleteInputRef = useRef(deleteInput);
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [activeCategory, setActiveCategory] = useState('semua');
+  const activeColor = useColorModeValue('blue.600', 'blue.300');
+
+  // Fungsi untuk menangani klik pada kategori "Makanan"
+  const handleCategoryClick = (category) => {
+    setActiveCategory(category);
+    if (category === 'makanan') {
+      setSearchKeyword('brownies'); // Set kata kunci pencarian menjadi 'brownies' ketika klik kategori Makanan
+    } else if (category === 'minuman') {
+      setSearchKeyword('minuman'); // Kosongkan kata kunci pencarian untuk "Minuman"
+    } else if (category === 'semua') {
+      setSearchKeyword(''); // Kosongkan kata kunci untuk "Semua Menu" agar semua produk tampil
+    }
+  };
 
   useEffect(() => {
     // Cleanup ketika komponen dilepas (unmount) -- fungsi ini ketika user pindah halaman beda file
@@ -495,14 +497,14 @@ export default function Marketplace() {
         <ModalOverlay />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
-          height="90vh"
+          height="85vh"
           overflow="auto"
         >
           <ModalHeader>Detail Pembayaran</ModalHeader>
           <ModalCloseButton />
           <ModalBody
             overflowY="auto" // Mengaktifkan scroll vertikal jika konten melebihi tinggi
-            height="calc(90vh - 100px)"
+            height="calc(85vh - 100px)"
           >
             <Box overflowX="auto" overflowY="auto">
               <Table variant="simple" size="sm" margin="auto" fontSize="sm">
@@ -589,7 +591,7 @@ export default function Marketplace() {
         <ModalOverlay backdropFilter="blur(1.5px)" />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
-          height="90vh"
+          height="85vh"
           overflowY="auto"
         >
           <ModalHeader color={nameTextColor}>Proses Pembayaran</ModalHeader>
@@ -949,26 +951,50 @@ export default function Marketplace() {
                 mt={{ base: '20px', md: '0px' }}
               >
                 <Link
-                  color={textColorBrand}
+                  color={
+                    activeCategory === 'semua' ? activeColor : textColorBrand
+                  }
                   fontWeight="500"
                   me={{ base: '34px', md: '44px' }}
                   to="#art"
+                  onClick={() => handleCategoryClick('semua')}
+                  textShadow={
+                    activeCategory === 'semua'
+                      ? '1px 1px 3px rgba(52, 164, 235, 0.9)'
+                      : 'none'
+                  } // Efek shadow pada teks
                 >
                   Semua Menu
                 </Link>
                 <Link
-                  color={textColorBrand}
+                  color={
+                    activeCategory === 'makanan' ? activeColor : textColorBrand
+                  }
                   fontWeight="500"
                   me={{ base: '34px', md: '44px' }}
                   to="#art"
+                  onClick={() => handleCategoryClick('makanan')}
+                  textShadow={
+                    activeCategory === 'makanan'
+                      ? '1px 1px 3px rgba(52, 164, 235, 0.9)'
+                      : 'none'
+                  }
                 >
                   Makanan
                 </Link>
                 <Link
-                  color={textColorBrand}
+                  color={
+                    activeCategory === 'minuman' ? activeColor : textColorBrand
+                  }
                   fontWeight="500"
                   me={{ base: '34px', md: '44px' }}
                   to="#music"
+                  onClick={() => handleCategoryClick('minuman')}
+                  textShadow={
+                    activeCategory === 'minuman'
+                      ? '1px 1px 3px rgba(52, 164, 235, 0.9)'
+                      : 'none'
+                  }
                 >
                   Minuman
                 </Link>
@@ -979,91 +1005,40 @@ export default function Marketplace() {
               columns={{ base: 2, md: 3 }} // 2 columns on mobile (base), 3 on medium screens and above
               gap="20px" // Space between items
             >
-              {products.map((product) => (
-                <Item
-                  key={product.product_id}
-                  id={product.product_id}
-                  name={product.product_name}
-                  price={`${formatCurrency(product.price)}`}
-                  description={product.description}
-                  image={
-                    product.icon
-                      ? `/assets/img/products/${product.icon}`
-                      : '/assets/img/products/no-image.png'
+              {products
+                .filter((product) => {
+                  // Filter produk berdasarkan searchKeyword
+                  if (searchKeyword === 'brownies') {
+                    return product.product_name
+                      .toLowerCase()
+                      .includes(searchKeyword.toLowerCase());
+                  } else if (searchKeyword === 'minuman') {
+                    // Untuk kategori "Minuman", tampilkan produk yang tidak mengandung kata "brownies"
+                    return !product.product_name
+                      .toLowerCase()
+                      .includes('brownies');
+                  } else {
+                    // Menampilkan semua produk jika searchKeyword kosong (Semua Menu)
+                    return true;
                   }
-                  onQuantityChange={handleQuantityChange}
-                  onTotalPriceChange={handleTotalPriceChange}
-                  selectedQuantity={selectedQuantity}
-                />
-              ))}
-            </SimpleGrid>
-
-            <Text
-              mt="45px"
-              mb="36px"
-              color={textColor}
-              fontSize="2xl"
-              ms="24px"
-              fontWeight="700"
-            >
-              Recently Added
-            </Text>
-            <SimpleGrid
-              columns={{ base: 1, md: 3 }}
-              gap="20px"
-              mb={{ base: '20px', xl: '0px' }}
-            >
-              <Item
-                name="Swipe Circles"
-                author="By Peter Will"
-                bidders={[
-                  Avatar1,
-                  Avatar2,
-                  Avatar3,
-                  Avatar4,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                ]}
-                image={Nft4}
-                currentbid="0.91 ETH"
-                download="#"
-              />
-              <Item
-                name="Colorful Heaven"
-                author="By Mark Benjamin"
-                bidders={[
-                  Avatar1,
-                  Avatar2,
-                  Avatar3,
-                  Avatar4,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                ]}
-                image={Nft5}
-                currentbid="0.91 ETH"
-                download="#"
-              />
-              <Item
-                name="3D Cubes Art"
-                author="By Manny Gates"
-                bidders={[
-                  Avatar1,
-                  Avatar2,
-                  Avatar3,
-                  Avatar4,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                  Avatar1,
-                ]}
-                image={Nft6}
-                currentbid="0.91 ETH"
-                download="#"
-              />
+                })
+                .map((product) => (
+                  <Item
+                    key={product.product_id}
+                    id={product.product_id}
+                    name={product.product_name}
+                    price={`${formatCurrency(product.price)}`}
+                    description={product.description}
+                    image={
+                      product.icon
+                        ? `/assets/img/products/${product.icon}`
+                        : '/assets/img/products/no-image.png'
+                    }
+                    onQuantityChange={handleQuantityChange}
+                    onTotalPriceChange={handleTotalPriceChange}
+                    selectedQuantity={selectedQuantity}
+                  />
+                ))}
             </SimpleGrid>
           </Flex>
         </Flex>
@@ -1071,69 +1046,11 @@ export default function Marketplace() {
           flexDirection="column"
           gridArea={{ xl: '1 / 3 / 2 / 4', '2xl': '1 / 2 / 2 / 3' }}
         >
-          <Card px="0px" mb="20px">
+          <Card px="0px" mt="20px" mb="20px">
             <Antrian />
-          </Card>
-          <Card p="0px">
-            <Flex
-              align={{ sm: 'flex-start', lg: 'center' }}
-              justify="space-between"
-              w="100%"
-              px="22px"
-              py="18px"
-            >
-              <Text color={textColor} fontSize="xl" fontWeight="600">
-                History
-              </Text>
-              <Button variant="action">See all</Button>
-            </Flex>
-
-            <HistoryItem
-              name="Colorful Heaven"
-              author="By Mark Benjamin"
-              date="30s ago"
-              image={Nft5}
-              price="0.91 ETH"
-            />
-            <HistoryItem
-              name="Abstract Colors"
-              author="By Esthera Jackson"
-              date="58s ago"
-              image={Nft1}
-              price="0.91 ETH"
-            />
-            <HistoryItem
-              name="ETH AI Brain"
-              author="By Nick Wilson"
-              date="1m ago"
-              image={Nft2}
-              price="0.91 ETH"
-            />
-            <HistoryItem
-              name="Swipe Circles"
-              author="By Peter Will"
-              date="1m ago"
-              image={Nft4}
-              price="0.91 ETH"
-            />
-            <HistoryItem
-              name="Mesh Gradients "
-              author="By Will Smith"
-              date="2m ago"
-              image={Nft3}
-              price="0.91 ETH"
-            />
-            <HistoryItem
-              name="3D Cubes Art"
-              author="By Manny Gates"
-              date="3m ago"
-              image={Nft6}
-              price="0.91 ETH"
-            />
           </Card>
         </Flex>
       </Grid>
-      {/* Delete Product */}
     </Box>
   );
 }

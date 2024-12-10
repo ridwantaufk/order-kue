@@ -1,5 +1,5 @@
 /*eslint-disable*/
-import React from "react";
+import React from 'react';
 import {
   Flex,
   Link,
@@ -7,89 +7,112 @@ import {
   ListItem,
   Text,
   useColorModeValue,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 export default function Footer() {
-  let textColor = useColorModeValue("gray.400", "white");
-  let linkColor = useColorModeValue({ base: "gray.400", lg: "white" }, "white");
+  let textColor = useColorModeValue('gray.300', 'gray.400');
+  let hoverColor = useColorModeValue('blue.400', 'green.400');
   return (
     <Flex
-      zIndex='3'
+      zIndex="3"
       flexDirection={{
-        base: "column",
-        lg: "row",
+        base: 'column',
+        lg: 'row',
       }}
       alignItems={{
-        base: "center",
-        xl: "start",
+        base: 'center',
+        xl: 'start',
       }}
-      justifyContent='space-between'
-      px={{ base: "30px", md: "0px" }}
-      pb='30px'>
+      justifyContent="space-between"
+      px={{ base: '30px', md: '0px' }}
+      pb="0px"
+    >
       <Text
         color={textColor}
         textAlign={{
-          base: "center",
-          xl: "start",
+          base: 'center',
+          xl: 'start',
         }}
-        mb={{ base: "20px", lg: "0px" }}>
-        {" "}
+        mb={{ base: '20px', lg: '0px' }}
+      >
+        {' '}
         &copy; {1900 + new Date().getYear()}
-        <Text as='span' fontWeight='500' ms='4px'>
-          Horizon UI. All Rights Reserved. Made with love by
-          <Link
-            mx='3px'
-            color={textColor}
-            href='https://www.simmmple.com?ref=horizon-chakra-free'
-            target='_blank'
-            fontWeight='700'>
-            Simmmple!
-          </Link>
+        <Text as="span" fontWeight="500" ms="4px">
+          Dibuat Oleh Ridwan Taufik - Spesialis Javascript - Fullstack Developer
+          - ReactJs, NodeJs, ExpressJs, NextJs, VueJs, PostgreSQL, RESTful API
         </Text>
       </Text>
-      <List display='flex'>
+      <List display="flex" ml={{ md: '40' }}>
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
-            color={linkColor}
-            href='mailto:hello@simmmple.com?ref=horizon-chakra-free'>
-            Support
+            fontWeight="500"
+            color={textColor}
+            href="https://wa.me/6281312025217"
+            isExternal
+            _hover={{
+              color: hoverColor,
+            }}
+          >
+            WhatsApp
           </Link>
         </ListItem>
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
-            color={linkColor}
-            href='https://www.simmmple.com/licenses?ref=horizon-chakra-free'>
-            License
+            fontWeight="500"
+            color={textColor}
+            href="https://linkedin.com/in/ridwan-taufik-b3624325a"
+            isExternal
+            _hover={{
+              color: hoverColor,
+            }}
+          >
+            Linkedin
           </Link>
         </ListItem>
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
-            color={linkColor}
-            href='https://simmmple.com/terms-of-service?ref=horizon-chakra-free'>
-            Terms of Use
+            fontWeight="500"
+            color={textColor}
+            href="mailto:ridwan1998taufik@gmail.com"
+            isExternal
+            _hover={{
+              color: hoverColor,
+            }}
+          >
+            Email
           </Link>
         </ListItem>
-        <ListItem>
+        <ListItem
+          me={{
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
-            color={linkColor}
-            href='https://www.blog.simmmple.com/?ref=horizon-chakra-free'>
-            Blog
+            fontWeight="500"
+            color={textColor}
+            href="https://www.instagram.com/ridwantaufk/"
+            isExternal
+            _hover={{
+              color: hoverColor,
+            }}
+          >
+            Instagram
           </Link>
         </ListItem>
       </List>

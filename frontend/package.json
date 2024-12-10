@@ -20,6 +20,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^11.11.9",
     "jwt-decode": "^4.0.0",
+    "luxon": "^3.5.0",
     "npm-force-resolutions": "^0.0.10",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.1.0",
