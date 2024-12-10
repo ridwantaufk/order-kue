@@ -1,5 +1,6 @@
 const { generateVA, generateOrderID } = require("../utils/generateVA");
 const Order = require("../models/tOrderModel");
+const tOrdersController = require("../controllers/tOrdersController");
 
 let payments = []; // Menyimpan data pembayaran sementara
 
@@ -29,6 +30,8 @@ exports.createPayment = async (req, res) => {
       order_code: orderID,
       customer_name: customerName,
     });
+
+    tOrdersController.notifyOrderUpdate();
 
     // Kembalikan respons sukses dengan data newOrder dan newPayment
     return res.status(201).json({

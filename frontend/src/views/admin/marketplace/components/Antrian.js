@@ -35,16 +35,31 @@ export default function Antrian() {
   const tagColor = useColorModeValue('blue.100', 'blue.700');
   const tagColorGreen = useColorModeValue('green.100', 'green.700');
 
-  const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
-
   useEffect(() => {
-    const socket = io(SOCKET_URL);
-
-    socket.on('orderUpdate', (newOrderData) => {
-      setOrders(newOrderData);
+    // Koneksi ke server Socket.IO
+    const socket = io(process.env.REACT_APP_BACKEND_URL, {
+      transports: ['websocket', 'polling'],
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
-    return () => socket.disconnect();
+    socket.on('connect', () => {
+      console.log('Connected to Socket.IO server');
+    });
+
+    // Mendapatkan data awal saat koneksi
+    socket.on('initialOrders', (initialDataOrders) => {
+      setOrders(initialDataOrders);
+    });
+
+    // Mendapatkan pembaruan orders secara real-time
+    socket.on('ordersUpdate', (updatedDataOrders) => {
+      setOrders(updatedDataOrders); // Menambahkan data baru
+    });
+
+    // Pastikan untuk menutup koneksi saat komponen tidak aktif
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const columns = [
@@ -104,26 +119,6 @@ export default function Antrian() {
       },
     }),
   ];
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_URL}/api/orders`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'ngrok-skip-browser-warning': 'true',
-            },
-          },
-        );
-        setOrders(response.data);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      }
-    };
-    fetchOrders();
-  }, []);
 
   const table = useReactTable({
     data: orders,
