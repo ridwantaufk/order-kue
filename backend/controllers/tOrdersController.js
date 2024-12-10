@@ -1,4 +1,6 @@
 const Order = require("../models/tOrderModel");
+const EventEmitter = require("events");
+const emitter = new EventEmitter();
 
 // Mendapatkan semua pesanan
 exports.getOrders = async (req, res) => {
@@ -19,6 +21,21 @@ exports.getOrdersForSocket = async () => {
     console.error("Error fetching orders for socket:", error);
     return [];
   }
+};
+
+exports.notifyOrderUpdate = () => {
+  emitter.emit("orderUpdated"); // Emit event untuk pembaruan
+};
+
+exports.listenForOrderUpdates = (io) => {
+  emitter.on("orderUpdated", async () => {
+    try {
+      const orders = await exports.getOrdersForSocket(); // Ambil data terbaru
+      io.emit("ordersUpdate", orders); // Emit ke semua klien dengan data terbaru
+    } catch (error) {
+      console.error("Error fetching updated orders:", error);
+    }
+  });
 };
 
 // Menambahkan pesanan baru
