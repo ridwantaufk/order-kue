@@ -45,6 +45,7 @@ import Banner from 'views/admin/marketplace/components/Banner';
 import Antrian from 'views/admin/marketplace/components/Antrian';
 import Item from 'components/card/Item';
 import Card from 'components/card/Card.js';
+import Tracker from '../../../components/Tracker';
 
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
@@ -493,6 +494,7 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
+      <Tracker page="/orderan" />
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent
@@ -641,7 +643,11 @@ export default function Marketplace() {
                     placeholder="Masukkan nama pemesan"
                     focusBorderColor="blue.400"
                     value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 30) {
+                        setCustomerName(e.target.value);
+                      }
+                    }}
                     onFocus={() => setIsNameInvalid(false)}
                     disabled={disabled}
                     background={
@@ -1005,7 +1011,7 @@ export default function Marketplace() {
               columns={{ base: 2, md: 3 }} // 2 columns on mobile (base), 3 on medium screens and above
               gap="20px" // Space between items
             >
-              {products
+              {/* {products
                 .filter((product) => {
                   // Filter produk berdasarkan searchKeyword
                   if (searchKeyword === 'brownies') {
@@ -1038,7 +1044,36 @@ export default function Marketplace() {
                     onTotalPriceChange={handleTotalPriceChange}
                     selectedQuantity={selectedQuantity}
                   />
-                ))}
+                ))} */}
+              {products.map((product) => {
+                const productName = product.product_name.toLowerCase();
+
+                // Logika untuk menyembunyikan produk
+                const isHidden =
+                  (searchKeyword === 'brownies' &&
+                    !productName.includes('brownies')) ||
+                  (searchKeyword === 'minuman' &&
+                    productName.includes('brownies'));
+
+                return (
+                  <Item
+                    key={product.product_id}
+                    id={product.product_id}
+                    name={product.product_name}
+                    price={`${formatCurrency(product.price)}`}
+                    description={product.description}
+                    image={
+                      product.icon
+                        ? `/assets/img/products/${product.icon}`
+                        : '/assets/img/products/no-image.png'
+                    }
+                    onQuantityChange={handleQuantityChange}
+                    onTotalPriceChange={handleTotalPriceChange}
+                    selectedQuantity={selectedQuantity}
+                    hidden={isHidden} // Mengirim properti hidden ke Item
+                  />
+                );
+              })}
             </SimpleGrid>
           </Flex>
         </Flex>
