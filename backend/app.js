@@ -16,7 +16,7 @@ const fs = require("fs");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Ganti dengan URL frontend jika di produksi
+    origin: "*", // Ganti dengan URL frontend jika di produksi demi keamanan
     methods: ["GET", "POST"],
   },
   transports: ["websocket", "polling"], // Gunakan fallback polling
@@ -47,6 +47,8 @@ const costRoutes = require("./routes/mCostsRoutes");
 const ingredientRoutes = require("./routes/mIngredientsRoutes");
 const toolRoutes = require("./routes/mToolsRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const tUtilsProductRoutes = require("./routes/tUtilsProductRoutes");
+const visitorRoutes = require("./routes/visitorRoutes");
 
 app.use("/api/configurations", configurationsRoutes);
 app.use("/api/users", usersRoutes);
@@ -58,6 +60,8 @@ app.use("/api/costs", costRoutes);
 app.use("/api/ingredients", ingredientRoutes);
 app.use("/api/tools", toolRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/favorite", tUtilsProductRoutes);
+app.use("/api", visitorRoutes);
 
 tOrdersController.listenForOrderUpdates(io);
 
@@ -69,8 +73,7 @@ io.on("connection", (socket) => {
   tOrdersController
     .getOrdersForSocket()
     .then((orders) => {
-      socket.emit("initialOrders", orders); // Kirim data awal
-      console.log("initialOrders : ", orders);
+      socket.emit("initialOrders", orders);
     })
     .catch((error) => {
       console.error("Error fetching initial orders:", error);
@@ -79,7 +82,6 @@ io.on("connection", (socket) => {
   // Emit pembaruan orders langsung (perbaiki event listenernya)
   socket.on("newOrder", (order) => {
     if (order) {
-      console.log("ordersUpdate : ", order); // Pastikan data order diterima
       io.emit("ordersUpdate", order); // Emit update ke semua klien
     } else {
       console.log("No order data received");
@@ -98,9 +100,9 @@ const PORT = process.env.PORT || 5000;
 sequelize
   .sync()
   .then(() => {
-    console.log("Database synced");
+    console.log("Database disinkronkan");
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Server berjalan pada port ${PORT}`);
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
         const backendUrl = `https://order-kue-production.up.railway.app`; // railway

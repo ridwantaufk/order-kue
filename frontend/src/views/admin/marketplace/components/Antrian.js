@@ -29,14 +29,29 @@ const columnHelper = createColumnHelper();
 
 export default function Antrian() {
   const [orders, setOrders] = useState([]);
+  const [currentTime, setCurrentTime] = useState(
+    DateTime.now().setZone('Asia/Jakarta'),
+  );
   const [sorting, setSorting] = useState([{ id: 'created_at', desc: true }]);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
-  const tagColor = useColorModeValue('blue.100', 'blue.700');
-  const tagColorGreen = useColorModeValue('green.100', 'green.700');
+  const evenRowBackground = useColorModeValue('white', 'gray.700');
+  const oddRowBackground = useColorModeValue('gray.200', 'navy.700');
+  const hoverBackground = useColorModeValue('blue.100', 'blue.900');
+  const borderColor = useColorModeValue('gray.200', 'navy.700');
 
+  // Gunakan requestAnimationFrame untuk pembaruan waktu
   useEffect(() => {
-    // Koneksi ke server Socket.IO
+    const updateTime = () => {
+      setCurrentTime(DateTime.now().setZone('Asia/Jakarta'));
+      requestAnimationFrame(updateTime);
+    };
+
+    const frameId = requestAnimationFrame(updateTime);
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  // Socket.io untuk mendapatkan data pesanan
+  useEffect(() => {
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
       extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
@@ -46,7 +61,6 @@ export default function Antrian() {
       console.log('Connected to Socket.IO server');
     });
 
-    // Mendapatkan data awal saat koneksi
     socket.on('initialOrders', (initialDataOrders) => {
       const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
       const filteredOrders = initialDataOrders.filter((order) => {
@@ -58,7 +72,6 @@ export default function Antrian() {
       setOrders(filteredOrders);
     });
 
-    // Mendapatkan pembaruan orders secara real-time
     socket.on('ordersUpdate', (updatedDataOrders) => {
       const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
       const filteredOrders = updatedDataOrders.filter((order) => {
@@ -70,7 +83,6 @@ export default function Antrian() {
       setOrders(filteredOrders);
     });
 
-    // Pastikan untuk menutup koneksi saat komponen tidak aktif
     return () => {
       socket.disconnect();
     };
@@ -79,31 +91,43 @@ export default function Antrian() {
   const columns = [
     columnHelper.accessor('order_code', {
       header: () => (
-        <Text fontSize="sm" color="gray.400" textAlign="center">
+        <Text
+          fontSize={{ base: 'xs', md: 'sm' }}
+          color="gray.400"
+          textAlign="center"
+        >
           Order Code
         </Text>
       ),
       cell: (info) => (
-        <Text fontSize="sm" color={textColor}>
+        <Text fontSize={{ base: 'xs', md: 'sm' }} color={textColor}>
           {info.getValue()}
         </Text>
       ),
     }),
     columnHelper.accessor('customer_name', {
       header: () => (
-        <Text fontSize="sm" color="gray.400" textAlign="center">
+        <Text
+          fontSize={{ base: 'xs', md: 'sm' }}
+          color="gray.400"
+          textAlign="center"
+        >
           Customer Name
         </Text>
       ),
       cell: (info) => (
-        <Text fontSize="sm" color={textColor}>
+        <Text fontSize={{ base: 'xs', md: 'sm' }} color={textColor}>
           {info.getValue()}
         </Text>
       ),
     }),
     columnHelper.accessor('created_at', {
       header: () => (
-        <Text fontSize="sm" color="gray.400" textAlign="center">
+        <Text
+          fontSize={{ base: 'xs', md: 'sm' }}
+          color="gray.400"
+          textAlign="center"
+        >
           Status
         </Text>
       ),
@@ -111,22 +135,16 @@ export default function Antrian() {
         const orderTime = DateTime.fromISO(info.getValue(), {
           zone: 'Asia/Jakarta',
         });
-        const currentTime = DateTime.now().setZone('Asia/Jakarta');
         const timeDiff = currentTime.diff(orderTime, 'minutes').minutes;
 
-        let status = 'Menunggu';
-        let statusColor = tagColor; // Default status color is blue
-
-        if (timeDiff > 10) {
-          status = 'Selesai'; // Change status if more than 10 minutes
-          statusColor = tagColorGreen; // Change color to green
-        }
+        const status = timeDiff > 1 ? 'Selesai' : 'Menunggu';
+        const colorScheme = timeDiff > 1 ? 'green' : 'blue';
 
         return (
           <Tag
             size="sm"
             variant="subtle"
-            colorScheme={status === 'Menunggu' ? 'blue' : 'green'}
+            colorScheme={colorScheme}
             borderRadius="full"
           >
             <TagLabel>{status}</TagLabel>
@@ -170,7 +188,7 @@ export default function Antrian() {
           color={useColorModeValue('gray.600', 'gray.300')}
           mt="12px"
           fontSize={{ base: 'xs', md: 'sm' }} // Font lebih kecil di mobile
-          tableLayout="fixed" // Mengatur lebar tabel agar sesuai
+          sx={{ tableLayout: 'fixed' }}
           width="100%"
         >
           <Thead
@@ -219,16 +237,13 @@ export default function Antrian() {
             {table.getRowModel().rows.map((row, index) => (
               <Tr
                 key={row.id}
-                bg={useColorModeValue(
-                  index % 2 === 0 ? 'gray.50' : 'white', // Light mode
-                  index % 2 === 0 ? 'navy.700' : 'navy.800', // Dark mode
-                )}
-                _hover={{ bg: useColorModeValue('blue.100', 'blue.900') }}
+                bg={index % 2 === 0 ? evenRowBackground : oddRowBackground}
+                _hover={{ bg: hoverBackground }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <Td
                     key={cell.id}
-                    borderColor={useColorModeValue('gray.200', 'navy.700')}
+                    borderColor={borderColor}
                     p="16px" // Padding lebih kecil untuk mobile
                     fontSize={{ base: 'xx-small', md: 'sm' }} // Isi tabel lebih kecil di mobile
                     whiteSpace="normal" // Agar teks terbungkus

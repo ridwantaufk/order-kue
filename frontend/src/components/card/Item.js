@@ -12,6 +12,7 @@ import {
   useColorModeValue,
   Input,
 } from '@chakra-ui/react';
+import axios from 'axios';
 // Custom components
 import Card from 'components/card/Card.js';
 // Assets
@@ -28,14 +29,87 @@ export default function Item(props) {
     onQuantityChange,
     onTotalPriceChange,
     selectedQuantity = {},
+    hidden = false,
   } = props;
 
   const [quantity, setQuantity] = useState(0);
   const [like, setLike] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
   const textColor = useColorModeValue('navy.700', 'gray.300');
   const textColorPrice = useColorModeValue('green.500', 'green.400');
   const backgroundColorInput = useColorModeValue('white', 'navy.800');
   const borderColor = useColorModeValue('#ccc', '#cccc');
+
+  const [scale, setScale] = useState(1); // Untuk kontrol scale gambar
+  const lastTap = useRef(0); // Referensi untuk waktu tap terakhir
+
+  useEffect(() => {
+    // Mengambil jumlah favorit dari backend saat komponen pertama kali dirender
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/favorite/${id}`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      })
+      .then((response) => {
+        console.log('response util : ', response.data.favorite);
+        setFavoriteCount(response.data.favorite);
+      })
+      .catch((error) => {
+        console.error('Error fetching favorite count:', error);
+      });
+  }, [id]);
+
+  // Fungsi untuk menangani tap
+  const handleDoubleTap = (button = '') => {
+    // Logika untuk menangani double tap
+    if (button === '') {
+      const currentTime = new Date().getTime();
+      const tapDelay = 300; // Ambang waktu untuk deteksi double-tap
+
+      if (currentTime - lastTap.current < tapDelay) {
+        // Jika double tap terdeteksi
+        updateFavoriteCount();
+        setScale(1.1); // Efek zoom saat double tap
+
+        // Reset zoom setelah animasi selesai
+        setTimeout(() => {
+          setScale(1); // Kembalikan ke ukuran semula
+        }, 300);
+      }
+
+      lastTap.current = currentTime;
+    } else if (button === 'button') {
+      // Jika parameter adalah 'button', langsung perbarui tanpa efek zoom
+      updateFavoriteCount();
+    }
+  };
+
+  const updateFavoriteCount = () => {
+    let newFavoriteCount;
+
+    if (like) {
+      // Jika sedang di-like, maka unlike: kurangi 1 jika favoriteCount > 0
+      newFavoriteCount = Math.max(favoriteCount - 1, 0);
+    } else {
+      // Jika belum di-like, maka like: tambahkan 1
+      newFavoriteCount = favoriteCount + 1;
+    }
+
+    // Kirim request ke backend untuk memperbarui favorit
+    axios
+      .put(`${process.env.REACT_APP_BACKEND_URL}/api/favorite/${id}`, {
+        favorite: newFavoriteCount,
+      })
+      .then((response) => {
+        console.log('Favorite updated:', response.data);
+        setFavoriteCount(newFavoriteCount); // Perbarui nilai favorit di state
+        setLike(!like); // Toggle status like
+      })
+      .catch((error) => {
+        console.error('Error updating favorite:', error);
+      });
+  };
 
   useEffect(() => {
     if (Object.keys(selectedQuantity).length === 0) {
@@ -69,15 +143,22 @@ export default function Item(props) {
   };
 
   return (
-    <Card p="20px">
+    <Card hidden={hidden} p="20px">
       <Flex direction={{ base: 'column' }} justify="center">
         {/* Image Section */}
-        <Box mb={{ base: '20px', '2xl': '20px' }} position="relative">
+        <Box
+          mb={{ base: '20px', '2xl': '20px' }}
+          position="relative"
+          onClick={() => handleDoubleTap()}
+        >
           <Image
             src={image}
             w={{ base: '100%', '3xl': '100%' }}
             h={{ base: '100%', '3xl': '100%' }}
             borderRadius="20px"
+            maxH={{ base: '200px', '3xl': '100%' }}
+            transition="transform 0.3s ease-in-out"
+            transform={`scale(${scale})`} // Menggunakan nilai scale
           />
           <Button
             position="absolute"
@@ -91,16 +172,15 @@ export default function Item(props) {
             borderRadius="50%"
             minW="36px"
             h="36px"
-            onClick={() => {
-              setLike(!like);
-            }}
+            onClick={() => handleDoubleTap('button')} // Mengubah status like
+            zIndex={2}
           >
             <Icon
-              transition="0.2s linear"
+              transition="0.3s ease-in-out"
               w="20px"
               h="20px"
               as={like ? IoHeart : IoHeartOutline}
-              color="red"
+              color={like ? 'red' : 'gray.500'}
             />
           </Button>
         </Box>
@@ -119,6 +199,7 @@ export default function Item(props) {
               fontSize="sm"
               fontWeight="400"
               mt="10px"
+              h="50px"
             >
               {description}
             </Text>
