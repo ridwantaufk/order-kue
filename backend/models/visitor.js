@@ -10,22 +10,36 @@ const Visitor = sequelize.define(
     },
     country: {
       type: DataTypes.STRING(50),
+      allowNull: true,
     },
     region: {
       type: DataTypes.STRING(50),
+      allowNull: true,
     },
     city: {
       type: DataTypes.STRING(50),
+      allowNull: true,
     },
     page_visited: {
       type: DataTypes.STRING(255),
+      allowNull: true,
     },
     visit_time: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
     user_agent: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    latitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: true,
+    },
+    longitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: true,
     },
   },
   {
