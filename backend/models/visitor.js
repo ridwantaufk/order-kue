@@ -41,6 +41,18 @@ const Visitor = sequelize.define(
       type: DataTypes.DECIMAL(9, 6),
       allowNull: true,
     },
+    latitude_gps: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    longitude_gps: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    location_details_gps: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
   },
   {
     tableName: "visitors",
