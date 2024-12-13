@@ -75,7 +75,6 @@ export default function Item(props) {
         response.data.forEach((item) => {
           if (item.product_id === id) {
             totalQuantity += item.quantity;
-            console.log('product_id : ', item.quantity);
           }
         });
         setBestSellerCount(totalQuantity);
