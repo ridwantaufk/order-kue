@@ -524,7 +524,7 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
-      {/* <Tracker page="/orderan" /> */}
+      <Tracker page="/orderan" />
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent
