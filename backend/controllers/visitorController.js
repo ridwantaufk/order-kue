@@ -3,6 +3,8 @@ const geoip = require("geoip-lite");
 
 const recordVisitor = async (req, res) => {
   try {
+    // console.log("req : ", req);
+
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
     const location = geoip.lookup(ip) || {

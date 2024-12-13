@@ -146,10 +146,39 @@ export default function Marketplace() {
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeCategory, setActiveCategory] = useState('semua');
+  const [terlaris, setTerlaris] = useState(false);
   const activeColor = useColorModeValue('blue.600', 'blue.300');
 
   // Fungsi untuk menangani klik pada kategori "Makanan"
   const handleCategoryClick = (category) => {
+    if (terlaris) {
+      const fetchProducts = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL}/api/products`,
+            {
+              headers: {
+                'ngrok-skip-browser-warning': 'true',
+              },
+            },
+          );
+          console.log('response.data : ', response.data);
+
+          // Sort data
+          const sortedData = response.data.sort((a, b) =>
+            a.product_name.localeCompare(b.product_name),
+          );
+
+          setProducts(sortedData);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching products:', error);
+          setLoading(false);
+        }
+      };
+
+      fetchProducts();
+    }
     setActiveCategory(category);
     if (category === 'makanan') {
       setSearchKeyword('brownies'); // Set kata kunci pencarian menjadi 'brownies' ketika klik kategori Makanan
@@ -463,11 +492,12 @@ export default function Marketplace() {
       }
       setDisabled(true);
       setIsNameInvalid(false);
+
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
         {
-          amount: paymentDetails.price,
           customerName: customerName,
+          paymentDetails: paymentDetails,
         },
       );
 
@@ -494,7 +524,7 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
-      <Tracker page="/orderan" />
+      {/* <Tracker page="/orderan" /> */}
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent
@@ -938,7 +968,14 @@ export default function Marketplace() {
           flexDirection="column"
           gridArea={{ xl: '1 / 1 / 2 / 3', '2xl': '1 / 1 / 2 / 2' }}
         >
-          <Banner />
+          <Banner
+            setProducts={setProducts}
+            setSelectedQuantity={setSelectedQuantity}
+            setSelectedTotalPrice={setSelectedTotalPrice}
+            setActiveCategory={setActiveCategory}
+            setSearchKeyword={setSearchKeyword}
+            setTerlaris={setTerlaris}
+          />
           <Flex direction="column">
             <Flex
               mt="45px"

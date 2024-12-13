@@ -43,6 +43,8 @@ export default function Item(props) {
   const [scale, setScale] = useState(1); // Untuk kontrol scale gambar
   const lastTap = useRef(0); // Referensi untuk waktu tap terakhir
 
+  const [bestSellerCount, setBestSellerCount] = useState(0);
+
   useEffect(() => {
     // Mengambil jumlah favorit dari backend saat komponen pertama kali dirender
     axios
@@ -52,13 +54,36 @@ export default function Item(props) {
         },
       })
       .then((response) => {
-        console.log('response util : ', response.data.favorite);
+        // console.log('response util : ', response.data.favorite);
         setFavoriteCount(response.data.favorite);
       })
       .catch((error) => {
         console.error('Error fetching favorite count:', error);
       });
   }, [id]);
+
+  useEffect(() => {
+    // Mengambil jumlah terlaris dari backend
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      })
+      .then((response) => {
+        let totalQuantity = 0;
+        response.data.forEach((item) => {
+          if (item.product_id === id) {
+            totalQuantity += item.quantity;
+            console.log('product_id : ', item.quantity);
+          }
+        });
+        setBestSellerCount(totalQuantity);
+      })
+      .catch((error) => {
+        console.error('Error fetching order items:', error);
+      });
+  }, []);
 
   // Fungsi untuk menangani tap
   const handleDoubleTap = (button = '') => {
@@ -75,7 +100,7 @@ export default function Item(props) {
         // Reset zoom setelah animasi selesai
         setTimeout(() => {
           setScale(1); // Kembalikan ke ukuran semula
-        }, 300);
+        }, 120);
       }
 
       lastTap.current = currentTime;
@@ -102,7 +127,7 @@ export default function Item(props) {
         favorite: newFavoriteCount,
       })
       .then((response) => {
-        console.log('Favorite updated:', response.data);
+        // console.log('Favorite updated:', response.data);
         setFavoriteCount(newFavoriteCount); // Perbarui nilai favorit di state
         setLike(!like); // Toggle status like
       })
@@ -203,7 +228,18 @@ export default function Item(props) {
             >
               {description}
             </Text>
+
+            {/* Tambahan Informasi Rating dan Terlaris */}
+            <Flex align="center" mt="10px">
+              <Text color="red.400" fontSize="sm" fontWeight="500" mr="5px">
+                ❤️ {favoriteCount} like
+              </Text>
+              <Text color="secondaryGray.600" fontSize="sm" fontWeight="400">
+                Terjual: {bestSellerCount}
+              </Text>
+            </Flex>
           </Flex>
+
           {/* Action Section */}
           <Flex align="start" justify="space-between" mt="25px" gap="10px">
             {/* Minus Button */}
