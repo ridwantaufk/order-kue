@@ -1,11 +1,14 @@
-const { generateVA, generateOrderID } = require("../utils/generateVA");
 const Order = require("../models/tOrderModel");
+const OrderItem = require("../models/tOrderItemModel");
 const tOrdersController = require("../controllers/tOrdersController");
+const { generateVA, generateOrderID } = require("../utils/generateVA");
+const sequelize = require("../config/db");
 
 let payments = []; // Menyimpan data pembayaran sementara
 
 exports.createPayment = async (req, res) => {
-  const { amount, customerName } = req.body;
+  const { customerName, paymentDetails } = req.body;
+  const amount = paymentDetails.price;
 
   if (!amount || !customerName) {
     return res
@@ -25,11 +28,42 @@ exports.createPayment = async (req, res) => {
 
   payments.push(newPayment);
 
+  // Mulai transaksi
+  const transaction = await sequelize.transaction();
+
   try {
-    await Order.create({
-      order_code: orderID,
-      customer_name: customerName,
-    });
+    const newOrder = await Order.create(
+      {
+        order_code: orderID,
+        customer_name: customerName,
+      },
+      { transaction }
+    );
+
+    const orderId = newOrder.order_id;
+
+    const { itemQuantity, itemPrice } = paymentDetails;
+
+    const quantityKeys = Object.keys(itemQuantity);
+    const priceKeys = Object.keys(itemPrice);
+
+    if (
+      quantityKeys.length !== priceKeys.length ||
+      !quantityKeys.every((key) => priceKeys.includes(key))
+    ) {
+      throw new Error("Key mismatch between itemQuantity and itemPrice.");
+    }
+
+    const orderItems = quantityKeys.map((key) => ({
+      order_id: orderId,
+      product_id: parseInt(key), // Key dari itemQuantity dan itemPrice
+      quantity: itemQuantity[key],
+      price: itemPrice[key],
+    }));
+
+    await OrderItem.bulkCreate(orderItems, { transaction });
+
+    await transaction.commit();
 
     tOrdersController.notifyOrderUpdate();
 
@@ -39,6 +73,7 @@ exports.createPayment = async (req, res) => {
       data: newPayment,
     });
   } catch (error) {
+    await transaction.rollback();
     console.error("Error in createPayment:", error.message);
     return res
       .status(500)

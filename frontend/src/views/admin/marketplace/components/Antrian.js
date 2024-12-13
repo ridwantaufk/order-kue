@@ -143,7 +143,7 @@ export default function Antrian() {
         return (
           <Tag
             size="sm"
-            variant="subtle"
+            variant="solid"
             colorScheme={colorScheme}
             borderRadius="full"
           >
