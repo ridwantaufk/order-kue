@@ -33,59 +33,63 @@ export default function Antrian() {
     DateTime.now().setZone('Asia/Jakarta'),
   );
   const [sorting, setSorting] = useState([{ id: 'created_at', desc: true }]);
+
+  // Color schemes for different table states
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const evenRowBackground = useColorModeValue('white', 'gray.700');
   const oddRowBackground = useColorModeValue('gray.200', 'navy.700');
   const hoverBackground = useColorModeValue('blue.100', 'blue.900');
   const borderColor = useColorModeValue('gray.200', 'navy.700');
 
-  // Gunakan requestAnimationFrame untuk pembaruan waktu
+  // Update current time every 60 seconds
   useEffect(() => {
-    const updateTime = () => {
+    const intervalId = setInterval(() => {
       setCurrentTime(DateTime.now().setZone('Asia/Jakarta'));
-      requestAnimationFrame(updateTime);
-    };
+    }, 1000); // Update every second
 
-    const frameId = requestAnimationFrame(updateTime);
-    return () => cancelAnimationFrame(frameId);
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
-  // Socket.io untuk mendapatkan data pesanan
+  // Fetch orders using socket.io
   useEffect(() => {
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
       extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
-    socket.on('connect', () => {
-      console.log('Connected to Socket.IO server');
-    });
+    socket.on('connect', () => console.log('Connected to Socket.IO server'));
+
+    // Filter orders by today's date
+    const filterOrdersByDate = (ordersData) => {
+      if (process.env.REACT_APP_BACKEND_URL.includes('railway')) {
+        const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
+        return ordersData.filter((order) => {
+          const orderDate = DateTime.fromISO(order.created_at)
+            .toUTC()
+            .toISODate();
+          return orderDate === today;
+        });
+      } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
+        const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
+        return ordersData.filter((order) => {
+          const orderDate = DateTime.fromISO(order.created_at, {
+            zone: 'Asia/Jakarta',
+          }).toISODate();
+          return orderDate === today;
+        });
+      }
+    };
 
     socket.on('initialOrders', (initialDataOrders) => {
-      const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
-      const filteredOrders = initialDataOrders.filter((order) => {
-        const orderDate = DateTime.fromISO(order.created_at, {
-          zone: 'Asia/Jakarta',
-        }).toISODate();
-        return orderDate === today;
-      });
-      setOrders(filteredOrders);
+      setOrders(filterOrdersByDate(initialDataOrders));
     });
 
     socket.on('ordersUpdate', (updatedDataOrders) => {
-      const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
-      const filteredOrders = updatedDataOrders.filter((order) => {
-        const orderDate = DateTime.fromISO(order.created_at, {
-          zone: 'Asia/Jakarta',
-        }).toISODate();
-        return orderDate === today;
-      });
-      setOrders(filteredOrders);
+      setOrders(filterOrdersByDate(updatedDataOrders));
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, []);
 
   const columns = [
@@ -132,13 +136,25 @@ export default function Antrian() {
         </Text>
       ),
       cell: (info) => {
-        const orderTime = DateTime.fromISO(info.getValue(), {
-          zone: 'Asia/Jakarta',
-        });
-        const timeDiff = currentTime.diff(orderTime, 'minutes').minutes;
+        let orderTime;
+        let status;
+        let colorScheme;
 
-        const status = timeDiff > 1 ? 'Selesai' : 'Menunggu';
-        const colorScheme = timeDiff > 1 ? 'green' : 'blue';
+        if (process.env.REACT_APP_BACKEND_URL.includes('railway')) {
+          orderTime = new Date(info.getValue());
+          orderTime.setHours(orderTime.getHours() - 7); // Adjust for WIB time zone
+          const timeDiffInMinutes = (currentTime - orderTime) / (1000 * 60);
+          status = timeDiffInMinutes > 0.5 ? 'Selesai' : 'Menunggu';
+          colorScheme = timeDiffInMinutes > 0.5 ? 'green' : 'blue';
+        } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
+          orderTime = DateTime.fromISO(info.getValue(), {
+            zone: 'Asia/Jakarta',
+          });
+          const timeDiff = currentTime.diff(orderTime, 'minutes').minutes;
+
+          status = timeDiff > 0.5 ? 'Selesai' : 'Menunggu';
+          colorScheme = timeDiff > 0.5 ? 'green' : 'blue';
+        }
 
         return (
           <Tag
