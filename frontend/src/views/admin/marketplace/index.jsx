@@ -46,6 +46,8 @@ import Antrian from 'views/admin/marketplace/components/Antrian';
 import Item from 'components/card/Item';
 import Card from 'components/card/Card.js';
 import Tracker from '../../../components/Tracker';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
@@ -55,6 +57,12 @@ import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Marketplace() {
   // Chakra Color Mode
+  const skeletonBgColor = useColorModeValue('#c2c2c2', '#240d4f');
+  const skeletonColor = useColorModeValue('#f0f0f0', '#555');
+
+  const skeletonWidth = useBreakpointValue({ base: '100%', md: '100%' });
+  const skeletonHeight = useBreakpointValue({ base: 150, md: 200 });
+
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.400', 'white');
   const backgroundColor = useColorModeValue('gray.50', 'gray.700');
@@ -516,8 +524,91 @@ export default function Marketplace() {
 
   if (loading) {
     return (
-      <Box textAlign="center" py={10}>
-        <Spinner size="xl" />
+      <Box
+        padding="20px"
+        display="flex"
+        flexDirection="column"
+        gap="20px"
+        marginTop="80px"
+      >
+        {/* Layout dengan dua kolom */}
+        <Flex direction={['column', 'row']} gap="20px">
+          {/* Kolom kiri */}
+          <Box flex="2">
+            {/* Skeleton untuk header */}
+            <Skeleton
+              height="300px"
+              width="100%"
+              baseColor={skeletonBgColor}
+              highlightColor={skeletonColor}
+            />
+
+            {/* Skeleton untuk menu */}
+            <Flex direction={['column', 'row']} gap="15px" marginTop="20px">
+              <Skeleton
+                height="calc(40vh - 100px)"
+                width="15vw"
+                baseColor={skeletonBgColor}
+                highlightColor={skeletonColor}
+              />
+              <Skeleton
+                height="calc(40vh - 100px"
+                width="15vw"
+                baseColor={skeletonBgColor}
+                highlightColor={skeletonColor}
+              />
+              <Skeleton
+                height="calc(40vh - 100px"
+                width="15vw"
+                baseColor={skeletonBgColor}
+                highlightColor={skeletonColor}
+              />
+            </Flex>
+          </Box>
+
+          {/* Kolom kanan */}
+          <Box flex="1">
+            {/* Skeleton untuk konten kanan */}
+            <Skeleton
+              height="calc(85vh - 100px)"
+              width="100%"
+              baseColor={skeletonBgColor}
+              highlightColor={skeletonColor}
+            />
+          </Box>
+        </Flex>
+
+        {/* Skeleton untuk tabel */}
+        <Box marginTop="20px">
+          <Skeleton
+            height="40px"
+            width="100%"
+            baseColor={skeletonBgColor}
+            highlightColor={skeletonColor}
+          />
+          <Skeleton
+            height="40px"
+            width="100%"
+            baseColor={skeletonBgColor}
+            highlightColor={skeletonColor}
+          />
+          <Skeleton
+            height="40px"
+            width="100%"
+            baseColor={skeletonBgColor}
+            highlightColor={skeletonColor}
+          />
+        </Box>
+
+        {/* Skeleton untuk tombol */}
+        <Box marginTop="20px">
+          <Skeleton
+            height="50px"
+            width="30%"
+            baseColor={skeletonBgColor}
+            highlightColor={skeletonColor}
+          />
+        </Box>
       </Box>
     );
   }
