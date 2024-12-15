@@ -135,8 +135,10 @@ export default function Antrian() {
 
         if (status === 'Selesai') {
           colorScheme = 'green';
-        } else if (status === 'Menunggu') {
+        } else if (status === 'Sedang Diproses') {
           colorScheme = 'blue';
+        } else if (status === 'Menunggu') {
+          colorScheme = 'gray';
         }
 
         return (
