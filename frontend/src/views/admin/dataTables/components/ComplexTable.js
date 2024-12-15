@@ -25,7 +25,12 @@ import Card from 'components/card/Card';
 import Menu from 'components/menu/MainMenu';
 import * as React from 'react';
 import axios from 'axios';
-import { MdCancel, MdCheckCircle, MdAccessTime } from 'react-icons/md';
+import {
+  MdCancel,
+  MdCheckCircle,
+  MdAccessTime,
+  MdHourglassEmpty,
+} from 'react-icons/md';
 import { io } from 'socket.io-client';
 import { DateTime } from 'luxon';
 
@@ -37,6 +42,8 @@ export default function ComplexTable() {
     { id: 'status', asc: true },
     { id: 'updated_at', desc: true },
   ]);
+  const [showPrompt, setShowPrompt] = React.useState(false);
+  const [extraTime, setExtraTime] = React.useState(false);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
@@ -119,9 +126,6 @@ export default function ComplexTable() {
       ),
       cell: (info) => {
         const row = info.row.original;
-        const [isCompleted, setIsCompleted] = React.useState(
-          row.status === 'Selesai',
-        );
 
         const handleStatusClick = () => {
           if (row.status === 'Menunggu') {
@@ -129,10 +133,20 @@ export default function ComplexTable() {
               .put(
                 `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
                 {
+                  status: 'Sedang Diproses',
+                },
+              )
+              .then(() => {})
+              .catch((error) => console.error('Error updating status:', error));
+          } else if (row.status === 'Sedang Diproses') {
+            axios
+              .put(
+                `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
+                {
                   status: 'Selesai',
                 },
               )
-              .then(() => setIsCompleted(true))
+              .then(() => {})
               .catch((error) => console.error('Error updating status:', error));
           }
         };
@@ -144,18 +158,26 @@ export default function ComplexTable() {
               h="24px"
               me="5px"
               color={
-                isCompleted
+                row.status === 'Selesai'
                   ? 'green.500'
-                  : row.status === 'Menunggu'
+                  : row.status === 'Sedang Diproses'
                   ? 'blue.500'
-                  : row.status === 'Batal'
-                  ? 'red.500'
+                  : row.status === 'Menunggu'
+                  ? 'gray.500'
                   : null
               }
-              as={isCompleted ? MdCheckCircle : MdAccessTime}
+              as={
+                row.status === 'Selesai'
+                  ? MdCheckCircle
+                  : row.status === 'Sedang Diproses'
+                  ? MdHourglassEmpty
+                  : row.status === 'Menunggu'
+                  ? MdAccessTime
+                  : null
+              }
             />
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              {isCompleted ? 'Selesai' : row.status}
+              {row.status}
             </Text>
           </Flex>
         );
@@ -185,25 +207,36 @@ export default function ComplexTable() {
       cell: (info) => {
         const row = info.row.original;
         const [elapsedTime, setElapsedTime] = React.useState(0);
-        const totalTime = 60 * 1000; // Total time (30 minutes)
+        const [showPrompt, setShowPrompt] = React.useState(false); // State lokal untuk setiap baris
+        const totalTime = 60 * 1000; // Total time (60 seconds)
+
+        // Ambil waktu dari kolom updated_at
+        const updatedAt = new Date(row.updated_at);
 
         React.useEffect(() => {
-          if (row.status === 'Menunggu') {
+          if (row.status === 'Sedang Diproses') {
             const interval = setInterval(() => {
-              setElapsedTime((prevTime) =>
-                Math.min(prevTime + 1000, totalTime),
-              );
-            }, 1000);
-            return () => clearInterval(interval);
-          } else if (row.status === 'Selesai') {
-            setElapsedTime(totalTime);
-          }
-        }, [row.status]);
+              const currentTime = new Date();
+              const timeDifference = currentTime - updatedAt; // Selisih waktu antara updated_at dan waktu sekarang
 
-        const progressPercent =
-          row.status === 'Selesai'
-            ? 100
-            : Math.round((elapsedTime / totalTime) * 100);
+              // Hitung waktu yang telah berlalu (elapsedTime)
+              const newElapsedTime = Math.min(timeDifference, totalTime); // Jangan lebih dari totalTime
+              setElapsedTime(newElapsedTime);
+
+              // Jika waktu sudah habis, berhenti menghitung mundur dan tampilkan prompt
+              if (newElapsedTime >= totalTime) {
+                clearInterval(interval);
+                setShowPrompt(true); // Tampilkan prompt hanya untuk baris yang sesuai
+              }
+            }, 1000);
+            return () => clearInterval(interval); // Bersihkan interval ketika komponen dibersihkan
+          } else if (row.status === 'Selesai') {
+            setElapsedTime(totalTime); // Jika selesai, set waktu ke totalTime untuk progres 100%
+          }
+        }, [row.status, updatedAt]);
+
+        // Hitung persentase progres berdasarkan waktu yang telah berlalu
+        const progressPercent = Math.round((elapsedTime / totalTime) * 100);
         const remainingTime = totalTime - elapsedTime;
         const minutesLeft = String(
           Math.floor(remainingTime / (60 * 1000)),
@@ -212,6 +245,24 @@ export default function ComplexTable() {
           Math.floor((remainingTime % (60 * 1000)) / 1000),
         ).padStart(2, '0');
 
+        const handleAddExtraTime = () => {
+          setShowPrompt(false); // Menyembunyikan prompt setelah menambah waktu
+        };
+
+        const handleFinishOrder = () => {
+          setShowPrompt(false);
+
+          axios
+            .put(
+              `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
+              {
+                status: 'Selesai',
+              },
+            )
+            .then(() => {})
+            .catch((error) => console.error('Error finishing order:', error));
+        };
+
         return (
           <Flex direction="column" align="center" w="120px">
             <Progress
@@ -219,19 +270,40 @@ export default function ComplexTable() {
               colorScheme="brandScheme"
               h="8px"
               w="100%"
-              value={progressPercent}
+              value={progressPercent} // Persentase progres berdasarkan waktu yang telah berlalu
             />
-            {row.status === 'Menunggu' && (
-              <Text
-                color={textColor}
-                fontSize="sm"
-                fontWeight="700"
-                mt="5px"
-                minW="100px"
-                textAlign="center"
-              >
-                {progressPercent}% - {minutesLeft}m {secondsLeft}s
-              </Text>
+            {row.status === 'Sedang Diproses' && (
+              <>
+                {showPrompt ? (
+                  <Flex direction="column" align="center" justify="center">
+                    <Text fontSize="sm" fontWeight="bold" color="red.500">
+                      Estimasi habis! Pesanan sudah selesai ?
+                    </Text>
+                    <Box mt="2">
+                      <Icon
+                        as={MdCheckCircle}
+                        w="24px"
+                        h="24px"
+                        color="green.500"
+                        cursor="pointer"
+                        onClick={handleFinishOrder}
+                      />
+                      <Icon
+                        as={MdCancel}
+                        w="24px"
+                        h="24px"
+                        color="red.500"
+                        cursor="pointer"
+                        onClick={handleAddExtraTime}
+                      />
+                    </Box>
+                  </Flex>
+                ) : (
+                  <Text fontSize="sm" fontWeight="700" color={textColor}>
+                    {minutesLeft}:{secondsLeft}
+                  </Text>
+                )}
+              </>
             )}
           </Flex>
         );
