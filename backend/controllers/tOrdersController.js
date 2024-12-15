@@ -1,6 +1,7 @@
-const Order = require("../models/tOrderModel");
 const EventEmitter = require("events");
 const emitter = new EventEmitter();
+const Order = require("../models/tOrderModel");
+const tOrdersController = require("../controllers/tOrdersController");
 
 // Mendapatkan semua pesanan
 exports.getOrders = async (req, res) => {
@@ -59,6 +60,7 @@ exports.updateOrder = async (req, res) => {
 
     const { status } = req.body;
     await order.update({ status });
+    tOrdersController.notifyOrderUpdate();
     res.json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });

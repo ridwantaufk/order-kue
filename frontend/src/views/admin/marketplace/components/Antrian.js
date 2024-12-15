@@ -29,7 +29,10 @@ const columnHelper = createColumnHelper();
 
 export default function Antrian() {
   const [orders, setOrders] = useState([]);
-  const [sorting, setSorting] = useState([{ id: 'created_at', desc: true }]);
+  const [sorting, setSorting] = useState([
+    { id: 'status', asc: true },
+    { id: 'updated_at', desc: true },
+  ]);
 
   // Color schemes for different table states
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -49,22 +52,26 @@ export default function Antrian() {
 
     // Filter orders by today's date
     const filterOrdersByDate = (ordersData) => {
+      const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
+
       if (process.env.REACT_APP_BACKEND_URL.includes('railway')) {
-        const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
-        return ordersData.filter((order) => {
-          const orderDate = DateTime.fromISO(order.created_at)
-            .toUTC()
-            .toISODate();
-          return orderDate === today;
-        });
+        return ordersData
+          .filter((order) => {
+            const orderDate = DateTime.fromISO(order.updated_at)
+              .toUTC()
+              .toISODate();
+            return orderDate === today;
+          })
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
       } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
-        const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
-        return ordersData.filter((order) => {
-          const orderDate = DateTime.fromISO(order.created_at, {
-            zone: 'Asia/Jakarta',
-          }).toISODate();
-          return orderDate === today;
-        });
+        return ordersData
+          .filter((order) => {
+            const orderDate = DateTime.fromISO(order.updated_at, {
+              zone: 'Asia/Jakarta',
+            }).toISODate();
+            return orderDate === today;
+          })
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
       }
     };
 
@@ -123,10 +130,9 @@ export default function Antrian() {
         </Text>
       ),
       cell: (info) => {
-        const status = info.getValue(); // directly get the status from the data
+        const status = info.getValue();
         let colorScheme;
 
-        // Set color based on the status
         if (status === 'Selesai') {
           colorScheme = 'green';
         } else if (status === 'Menunggu') {
