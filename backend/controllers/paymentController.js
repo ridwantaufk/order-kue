@@ -36,6 +36,7 @@ exports.createPayment = async (req, res) => {
       {
         order_code: orderID,
         customer_name: customerName,
+        status: "Menunggu",
       },
       { transaction }
     );

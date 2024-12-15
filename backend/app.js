@@ -105,8 +105,8 @@ sequelize
       console.log(`Server berjalan pada port ${PORT}`);
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
-        const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-        // const backendUrl = `https://b4c0-139-195-217-191.ngrok-free.app`; // ngrok
+        // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
+        const backendUrl = `https://b4c0-139-195-217-191.ngrok-free.app`; // ngrok
         console.log("ada backend url : ", backendUrl);
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
         console.log(

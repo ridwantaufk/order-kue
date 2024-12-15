@@ -29,9 +29,6 @@ const columnHelper = createColumnHelper();
 
 export default function Antrian() {
   const [orders, setOrders] = useState([]);
-  const [currentTime, setCurrentTime] = useState(
-    DateTime.now().setZone('Asia/Jakarta'),
-  );
   const [sorting, setSorting] = useState([{ id: 'created_at', desc: true }]);
 
   // Color schemes for different table states
@@ -40,16 +37,6 @@ export default function Antrian() {
   const oddRowBackground = useColorModeValue('gray.200', 'navy.700');
   const hoverBackground = useColorModeValue('blue.100', 'blue.900');
   const borderColor = useColorModeValue('gray.200', 'navy.700');
-
-  // Update current time every 60 seconds
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(DateTime.now().setZone('Asia/Jakarta'));
-    }, 1000); // Update every second
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []);
 
   // Fetch orders using socket.io
   useEffect(() => {
@@ -125,7 +112,7 @@ export default function Antrian() {
         </Text>
       ),
     }),
-    columnHelper.accessor('created_at', {
+    columnHelper.accessor('status', {
       header: () => (
         <Text
           fontSize={{ base: 'xs', md: 'sm' }}
@@ -136,24 +123,14 @@ export default function Antrian() {
         </Text>
       ),
       cell: (info) => {
-        let orderTime;
-        let status;
+        const status = info.getValue(); // directly get the status from the data
         let colorScheme;
 
-        if (process.env.REACT_APP_BACKEND_URL.includes('railway')) {
-          orderTime = new Date(info.getValue());
-          orderTime.setHours(orderTime.getHours() - 7); // Adjust for WIB time zone
-          const timeDiffInMinutes = (currentTime - orderTime) / (1000 * 60);
-          status = timeDiffInMinutes > 0.5 ? 'Selesai' : 'Menunggu';
-          colorScheme = timeDiffInMinutes > 0.5 ? 'green' : 'blue';
-        } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
-          orderTime = DateTime.fromISO(info.getValue(), {
-            zone: 'Asia/Jakarta',
-          });
-          const timeDiff = currentTime.diff(orderTime, 'minutes').minutes;
-
-          status = timeDiff > 0.5 ? 'Selesai' : 'Menunggu';
-          colorScheme = timeDiff > 0.5 ? 'green' : 'blue';
+        // Set color based on the status
+        if (status === 'Selesai') {
+          colorScheme = 'green';
+        } else if (status === 'Menunggu') {
+          colorScheme = 'blue';
         }
 
         return (
@@ -203,7 +180,7 @@ export default function Antrian() {
           variant="simple"
           color={useColorModeValue('gray.600', 'gray.300')}
           mt="12px"
-          fontSize={{ base: 'xs', md: 'sm' }} // Font lebih kecil di mobile
+          fontSize={{ base: 'xs', md: 'sm' }}
           sx={{ tableLayout: 'fixed' }}
           width="100%"
         >
@@ -230,9 +207,9 @@ export default function Antrian() {
                     cursor="pointer"
                     color={useColorModeValue('gray.600', 'gray.300')}
                     fontWeight="bold"
-                    fontSize={{ base: 'xx-small', md: 'xl' }} // Header lebih kecil di mobile
-                    whiteSpace="normal" // Agar teks terbungkus
-                    overflowWrap="break-word" // Memecah kata panjang
+                    fontSize={{ base: 'xx-small', md: 'xl' }}
+                    whiteSpace="normal"
+                    overflowWrap="break-word"
                   >
                     <Flex justify="space-between" align="center">
                       {flexRender(
@@ -260,10 +237,10 @@ export default function Antrian() {
                   <Td
                     key={cell.id}
                     borderColor={borderColor}
-                    p="16px" // Padding lebih kecil untuk mobile
-                    fontSize={{ base: 'xx-small', md: 'sm' }} // Isi tabel lebih kecil di mobile
-                    whiteSpace="normal" // Agar teks terbungkus
-                    overflowWrap="break-word" // Memecah kata panjang
+                    p="16px"
+                    fontSize={{ base: 'xx-small', md: 'sm' }}
+                    whiteSpace="normal"
+                    overflowWrap="break-word"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Td>

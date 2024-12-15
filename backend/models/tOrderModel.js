@@ -19,6 +19,10 @@ const Order = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    status: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
     created_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
