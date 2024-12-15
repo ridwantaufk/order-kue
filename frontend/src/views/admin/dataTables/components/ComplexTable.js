@@ -25,85 +25,69 @@ import Card from 'components/card/Card';
 import Menu from 'components/menu/MainMenu';
 import * as React from 'react';
 import axios from 'axios';
-import {
-  MdCancel,
-  MdCheckCircle,
-  MdOutlineError,
-  MdAccessTime,
-} from 'react-icons/md';
+import { MdCancel, MdCheckCircle, MdAccessTime } from 'react-icons/md';
 import { io } from 'socket.io-client';
+import { DateTime } from 'luxon';
 
 const columnHelper = createColumnHelper();
 
 export default function ComplexTable() {
-  const [sorting, setSorting] = React.useState([]);
-  const [tableData, setTableData] = React.useState([]);
+  const [orders, setOrders] = React.useState([]);
+  const [sorting, setSorting] = React.useState([
+    { id: 'status', asc: true },
+    { id: 'updated_at', desc: true },
+  ]);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   // Get today's date
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set time to midnight to compare only the date
-
-  const socket = io(process.env.REACT_APP_BACKEND_URL);
 
   React.useEffect(() => {
-    // Listen for initial data when the component mounts
-    socket.on('orders-data', (orders) => {
-      // Filter orders created today
-      const filteredData = orders.filter((order) => {
-        const createdAt = new Date(order.created_at);
-        createdAt.setHours(0, 0, 0, 0); // Set time to midnight for comparison
-        return createdAt.getTime() === today.getTime(); // Compare only the date part
-      });
-
-      // Sort the filtered data first by 'status' (desc), then by 'created_at' (desc)
-      const sortedData = filteredData.sort((a, b) => {
-        // Compare by 'status' first
-        if (a.status !== b.status) {
-          return b.status.localeCompare(a.status); // Sort 'Selesai' (or other statuses) last
-        }
-        // If 'status' is the same, then compare by 'created_at' (desc)
-        return new Date(b.created_at) - new Date(a.created_at);
-      });
-
-      setTableData(sortedData); // Set the sorted data
+    const socket = io(process.env.REACT_APP_BACKEND_URL, {
+      transports: ['websocket', 'polling'],
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
-    // Listen for order updates
-    socket.on('order-update', (updatedOrder) => {
-      setTableData((prevData) => {
-        const updatedData = prevData.map((order) =>
-          order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order,
-        );
+    const today = DateTime.now().setZone('Asia/Jakarta').toISODate();
 
-        // Re-sort the data after the update
-        return updatedData.sort((a, b) => {
-          if (a.status !== b.status) {
-            return b.status.localeCompare(a.status);
-          }
-          return new Date(b.created_at) - new Date(a.created_at);
-        });
-      });
-    });
-
-    // Cleanup socket connection when component unmounts
-    return () => {
-      socket.off('orders-data');
-      socket.off('order-update');
+    const filterOrdersByDate = (ordersData) => {
+      if (process.env.REACT_APP_BACKEND_URL.includes('railway')) {
+        return ordersData
+          .filter((order) => {
+            const orderDate = DateTime.fromISO(order.updated_at)
+              .toUTC()
+              .toISODate();
+            return orderDate === today;
+          })
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
+        return ordersData
+          .filter((order) => {
+            const orderDate = DateTime.fromISO(order.updated_at, {
+              zone: 'Asia/Jakarta',
+            }).toISODate();
+            return orderDate === today;
+          })
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      }
     };
+
+    socket.on('initialOrders', (initialDataOrders) => {
+      setOrders(filterOrdersByDate(initialDataOrders));
+    });
+
+    socket.on('ordersUpdate', (updatedDataOrders) => {
+      setOrders(filterOrdersByDate(updatedDataOrders));
+    });
+
+    return () => socket.disconnect();
   }, []);
 
   const columns = [
     columnHelper.accessor('order_code', {
       id: 'order_code',
       header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
+        <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
           ORDER CODE
         </Text>
       ),
@@ -116,12 +100,7 @@ export default function ComplexTable() {
     columnHelper.accessor('customer_name', {
       id: 'customer_name',
       header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
+        <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
           CUSTOMER NAME
         </Text>
       ),
@@ -134,25 +113,18 @@ export default function ComplexTable() {
     columnHelper.accessor('status', {
       id: 'status',
       header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
+        <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
           STATUS
         </Text>
       ),
       cell: (info) => {
-        const row = info.row.original; // Mengambil data asli dari baris
+        const row = info.row.original;
         const [isCompleted, setIsCompleted] = React.useState(
           row.status === 'Selesai',
         );
 
         const handleStatusClick = () => {
-          console.log('status : ', row.status);
           if (row.status === 'Menunggu') {
-            // Update status and progress when clicked
             axios
               .put(
                 `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
@@ -160,12 +132,8 @@ export default function ComplexTable() {
                   status: 'Selesai',
                 },
               )
-              .then((response) => {
-                setIsCompleted(true); // Update the state to reflect the new status
-              })
-              .catch((error) => {
-                console.error('Error updating status:', error);
-              });
+              .then(() => setIsCompleted(true))
+              .catch((error) => console.error('Error updating status:', error));
           }
         };
 
@@ -197,12 +165,7 @@ export default function ComplexTable() {
     columnHelper.accessor('created_at', {
       id: 'created_at',
       header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
+        <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
           CREATED AT
         </Text>
       ),
@@ -215,21 +178,15 @@ export default function ComplexTable() {
     columnHelper.accessor('progress', {
       id: 'progress',
       header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
+        <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
           PROGRESS
         </Text>
       ),
       cell: (info) => {
-        const row = info.row.original; // Mengambil data asli dari baris
+        const row = info.row.original;
         const [elapsedTime, setElapsedTime] = React.useState(0);
-        const totalTime = 30 * 60 * 1000; // Total waktu dalam milidetik (30 menit)
+        const totalTime = 60 * 1000; // Total time (30 minutes)
 
-        // Update progress for 'Menunggu' status only
         React.useEffect(() => {
           if (row.status === 'Menunggu') {
             const interval = setInterval(() => {
@@ -239,27 +196,21 @@ export default function ComplexTable() {
             }, 1000);
             return () => clearInterval(interval);
           } else if (row.status === 'Selesai') {
-            setElapsedTime(totalTime); // Set progress to 100% when status is 'Selesai'
+            setElapsedTime(totalTime);
           }
         }, [row.status]);
 
-        const remainingTime = totalTime - elapsedTime;
         const progressPercent =
           row.status === 'Selesai'
             ? 100
             : Math.round((elapsedTime / totalTime) * 100);
-
-        const minutesLeft =
-          row.status === 'Menunggu'
-            ? String(Math.floor(remainingTime / (60 * 1000))).padStart(2, '0')
-            : '00';
-        const secondsLeft =
-          row.status === 'Menunggu'
-            ? String(Math.floor((remainingTime % (60 * 1000)) / 1000)).padStart(
-                2,
-                '0',
-              )
-            : '00';
+        const remainingTime = totalTime - elapsedTime;
+        const minutesLeft = String(
+          Math.floor(remainingTime / (60 * 1000)),
+        ).padStart(2, '0');
+        const secondsLeft = String(
+          Math.floor((remainingTime % (60 * 1000)) / 1000),
+        ).padStart(2, '0');
 
         return (
           <Flex direction="column" align="center" w="120px">
@@ -276,7 +227,7 @@ export default function ComplexTable() {
                 fontSize="sm"
                 fontWeight="700"
                 mt="5px"
-                minW="100px" // Menjaga panjang tetap
+                minW="100px"
                 textAlign="center"
               >
                 {progressPercent}% - {minutesLeft}m {secondsLeft}s
@@ -289,11 +240,9 @@ export default function ComplexTable() {
   ];
 
   const table = useReactTable({
-    data: tableData,
+    data: orders, // Use orders data from state
     columns,
-    state: {
-      sorting,
-    },
+    state: { sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -301,12 +250,7 @@ export default function ComplexTable() {
   });
 
   return (
-    <Card
-      flexDirection="column"
-      w="100%"
-      px="0px"
-      overflowX={{ sm: 'scroll', lg: 'hidden' }}
-    >
+    <Card flexDirection="column" w="100%" px="0px" overflowX="scroll">
       <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
         <Text
           color={textColor}
@@ -314,7 +258,7 @@ export default function ComplexTable() {
           fontWeight="700"
           lineHeight="100%"
         >
-          Orders Table
+          Tabel Order
         </Text>
         <Menu />
       </Flex>
@@ -323,34 +267,33 @@ export default function ComplexTable() {
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      pe="10px"
-                      borderColor={borderColor}
-                      cursor="pointer"
-                      onClick={header.column.getToggleSortingHandler()}
+                {headerGroup.headers.map((header) => (
+                  <Th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    pe="10px"
+                    borderColor={borderColor}
+                    cursor="pointer"
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    <Flex
+                      justifyContent="space-between"
+                      align="center"
+                      fontSize={{ sm: '10px', lg: '12px' }}
+                      color="gray.400"
                     >
-                      <Flex
-                        justifyContent="space-between"
-                        align="center"
-                        fontSize={{ sm: '10px', lg: '12px' }}
-                        color="gray.400"
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {{
-                          asc: '',
-                          desc: '',
-                        }[header.column.getIsSorted()] ?? null}
-                      </Flex>
-                    </Th>
-                  );
-                })}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getIsSorted() && (
+                        <span>
+                          {header.column.getIsSorted() === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </Flex>
+                  </Th>
+                ))}
               </Tr>
             ))}
           </Thead>
@@ -358,27 +301,23 @@ export default function ComplexTable() {
             {table
               .getRowModel()
               .rows.slice(0, 11)
-              .map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              .map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                      borderColor="transparent"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
           </Tbody>
         </Table>
       </Box>
