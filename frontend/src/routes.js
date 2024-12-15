@@ -73,7 +73,7 @@ const routes = [
     secondary: true,
   },
   {
-    name: 'Ringkasan Data',
+    name: 'Orderan Pembeli',
     layout: '/admin',
     roles: ['admin', 'ridwan', 'asri'],
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,

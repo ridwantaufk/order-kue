@@ -81,7 +81,6 @@ function SignIn() {
       localStorage.setItem('user_id', id);
       localStorage.setItem('token', token);
       localStorage.setItem('role', username);
-      // return;
       toast.success('Login berhasil!', {
         position: 'top-right',
       });

@@ -51,12 +51,14 @@ exports.createOrder = async (req, res) => {
 
 // Mengupdate pesanan
 exports.updateOrder = async (req, res) => {
+  console.log("req.params.id : ", req.params.id);
+  console.log("req.body : ", req.body);
   try {
     const order = await Order.findByPk(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    const { userId, productId } = req.body;
-    await order.update({ userId, productId });
+    const { status } = req.body;
+    await order.update({ status });
     res.json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });
