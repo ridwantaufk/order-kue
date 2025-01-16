@@ -421,19 +421,7 @@ export default function HeaderLinks(props) {
               px="14px"
               bg={menuBg}
             >
-              <Text fontSize="sm">Profile Settings</Text>
-            </MenuItem>
-            <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
-              borderRadius="8px"
-              px="14px"
-              bg={menuBg}
-            >
-              <Text fontSize="sm">Newsletter Settings</Text>
+              <Text fontSize="sm">Pengaturan Profil</Text>
             </MenuItem>
             <MenuItem
               _hover={{

@@ -278,15 +278,7 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm">Profile Settings</Text>
-            </MenuItem>
-            <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              borderRadius="8px"
-              px="14px"
-            >
-              <Text fontSize="sm">Newsletter Settings</Text>
+              <Text fontSize="sm">Pengaturan Profil</Text>
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
