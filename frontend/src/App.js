@@ -2,7 +2,7 @@ import './assets/css/App.css';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AuthLayout from './layouts/auth';
 import AdminLayout from './layouts/admin';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, useToast } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
@@ -10,8 +10,8 @@ import { jwtDecode } from 'jwt-decode';
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
   const [data, setData] = useState([]); // State untuk menyimpan data
-
   const navigate = useNavigate();
+  const toast = useToast();
 
   // useEffect(() => {
   //   console.log('token : ', localStorage.getItem('token'));
@@ -49,18 +49,31 @@ export default function Main() {
 
       if (expiresIn > 0) {
         const timeout = setTimeout(() => {
-          alert('Sesi habis. Silahkan masuk kembali.');
+          toast({
+            title: 'Sesi Berakhir',
+            description: 'Sesi habis. Silahkan masuk kembali.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
           localStorage.clear();
           navigate('/auth/sign-in', { replace: true });
         }, expiresIn * 1000);
 
         return () => clearTimeout(timeout); // Clear timer saat komponen dilepas
       } else {
+        toast({
+          title: 'Sesi Berakhir',
+          description: 'Sesi habis. Silahkan masuk kembali.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
         localStorage.clear();
         navigate('/auth/sign-in', { replace: true });
       }
     }
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <ChakraProvider theme={currentTheme}>

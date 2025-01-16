@@ -63,7 +63,7 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
-    const updatedData = { name, username, age };
+    const updatedData = { name, username, password, age };
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10); // Hash jika password diubah
     }
