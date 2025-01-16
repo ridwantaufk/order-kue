@@ -67,7 +67,6 @@ const updateUser = async (req, res) => {
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10); // Hash jika password diubah
     }
-    console.log("updatedData : ", updatedData);
 
     await user.update(updatedData);
     res.status(200).json({ message: "User berhasil diperbarui", user });
