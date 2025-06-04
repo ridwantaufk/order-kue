@@ -1,11 +1,20 @@
 const OrderItem = require("../models/tOrderItemModel");
+const Order = require("../models/tOrderModel");
 
 // Mendapatkan semua item pesanan
 exports.getOrderItems = async (req, res) => {
   try {
-    const orderItems = await OrderItem.findAll();
+    const orderItems = await OrderItem.findAll({
+      include: [
+        {
+          model: Order,
+        },
+      ],
+    });
+    // console.log("orderItems : ", orderItems);
     res.json(orderItems);
   } catch (error) {
+    console.log("error otder : ", error);
     res.status(500).json({ message: error.message });
   }
 };

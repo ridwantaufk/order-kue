@@ -25,6 +25,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
   const [previewIconFile, setPreviewIconFile] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const toast = useToast();
+  const fileInputRef = React.useRef(null);
 
   const readOnlyBg = useColorModeValue('gray.200', 'gray.600');
   const editableBg = useColorModeValue('white', 'gray.900');
@@ -74,13 +75,19 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
   };
 
   const handleIconUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
     setIconFile(null);
-    setPreviewIconFile(e.target.files[0]);
+    setPreviewIconFile(file);
   };
 
   const handleIconRemove = () => {
     setIconFile(null);
     setPreviewIconFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -265,6 +272,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             Unggah Icon
           </FormLabel>
           <Input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleIconUpload}

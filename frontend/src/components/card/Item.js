@@ -63,7 +63,6 @@ export default function Item(props) {
   }, [id]);
 
   useEffect(() => {
-    // Mengambil jumlah terlaris dari backend
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`, {
         headers: {
@@ -72,11 +71,17 @@ export default function Item(props) {
       })
       .then((response) => {
         let totalQuantity = 0;
+
         response.data.forEach((item) => {
-          if (item.product_id === id) {
+          const orderStatus = item.Order?.status?.toLowerCase() || '';
+          // console.log('orderStatus : ', orderStatus);
+
+          // Cek product_id dan status bukan "menunggu"
+          if (item.product_id === id && orderStatus !== 'menunggu') {
             totalQuantity += item.quantity;
           }
         });
+
         setBestSellerCount(totalQuantity);
       })
       .catch((error) => {

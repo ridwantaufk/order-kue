@@ -22,14 +22,16 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
 import { DateTime } from 'luxon';
+import { useSearchStore } from 'components/search/searchStore';
 
 const columnHelper = createColumnHelper();
 
 export default function Antrian() {
   const [orders, setOrders] = useState([]);
+  const searchTerm = useSearchStore((state) => state.searchTerm);
   const [sorting, setSorting] = useState([
     { id: 'status', desc: true },
     { id: 'updated_at', desc: true },
@@ -177,8 +179,17 @@ export default function Antrian() {
     }),
   ];
 
+  const filteredOrders = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return orders.filter((order) => {
+      const code = order.order_code?.toLowerCase() || '';
+      const name = order.customer_name?.toLowerCase() || '';
+      return code.includes(term) || name.includes(term);
+    });
+  }, [orders, searchTerm]);
+
   const table = useReactTable({
-    data: orders,
+    data: filteredOrders,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
