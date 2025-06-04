@@ -13,6 +13,7 @@ import {
   useColorModeValue,
   Tag,
   TagLabel,
+  Img,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -30,7 +31,7 @@ const columnHelper = createColumnHelper();
 export default function Antrian() {
   const [orders, setOrders] = useState([]);
   const [sorting, setSorting] = useState([
-    { id: 'status', asc: true },
+    { id: 'status', desc: true },
     { id: 'updated_at', desc: true },
   ]);
 
@@ -132,22 +133,43 @@ export default function Antrian() {
       cell: (info) => {
         const status = info.getValue();
         let colorScheme;
+        let iconStatus;
 
-        if (status === 'Selesai') {
-          colorScheme = 'green';
-        } else if (status === 'Sedang Diproses') {
-          colorScheme = 'blue';
-        } else if (status === 'Menunggu') {
-          colorScheme = 'gray';
+        switch (status) {
+          case 'Menunggu':
+            colorScheme = 'gray';
+            iconStatus = '/assets/img/animations/payment.gif';
+            break;
+          case 'Sedang diproses':
+            colorScheme = 'blue';
+            iconStatus = '/assets/img/animations/cooking.gif';
+            break;
+          case 'Sedang dikirim':
+            colorScheme = 'orange';
+            iconStatus = '/assets/img/animations/delivery-scooter.gif';
+            break;
+          case 'Diterima':
+            colorScheme = 'green';
+            iconStatus = '/assets/img/animations/received-delivery.gif';
+            break;
+          default:
+            colorScheme = 'red'; // fallback kalau ada status aneh
+            iconStatus = '';
         }
 
         return (
           <Tag
-            size="sm"
+            size="md"
             variant="solid"
             colorScheme={colorScheme}
             borderRadius="full"
+            fontSize={{
+              base: 'x-small',
+              md: 'x-small',
+              lg: 'x-small',
+            }}
           >
+            <Img src={iconStatus} className="w-5 h-5" alt="payment" />
             <TagLabel>{status}</TagLabel>
           </Tag>
         );
@@ -245,7 +267,7 @@ export default function Antrian() {
                   <Td
                     key={cell.id}
                     borderColor={borderColor}
-                    p="16px"
+                    p="10px"
                     fontSize={{ base: 'xx-small', md: 'sm' }}
                     whiteSpace="normal"
                     overflowWrap="break-word"
