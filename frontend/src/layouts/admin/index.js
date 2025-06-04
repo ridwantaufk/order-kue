@@ -20,9 +20,7 @@ export default function Dashboard(props) {
     return !!token;
   };
 
-  const shouldShowSidebar = () => {
-    return isAuthenticated() && window.location.pathname.startsWith('/admin');
-  };
+  // console.log('isAuthenticated : ', isAuthenticated());
 
   // functions for changing the states from components
   const getRoute = () => {
@@ -130,7 +128,7 @@ export default function Dashboard(props) {
             setToggleSidebar,
           }}
         >
-          {shouldShowSidebar() && <Sidebar routes={routes} {...rest} />}
+          {isAuthenticated() && <Sidebar routes={routes} {...rest} />}
 
           <Box
             float="right"
@@ -141,11 +139,11 @@ export default function Dashboard(props) {
             maxHeight="100%"
             w={{
               base: '100%',
-              xl: shouldShowSidebar() ? `calc(100% - 290px)` : '100%',
+              xl: isAuthenticated() ? `calc(100% - 290px)` : '100%',
             }}
             maxWidth={{
               base: '100%',
-              xl: shouldShowSidebar() ? `calc(100% - 290px)` : '100%',
+              xl: isAuthenticated() ? `calc(100% - 290px)` : '100%',
             }}
             transition="all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1)"
             transitionDuration=".2s, .2s, .35s"
