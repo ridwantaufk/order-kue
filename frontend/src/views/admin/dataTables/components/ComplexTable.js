@@ -30,6 +30,7 @@ import {
   MdCheckCircle,
   MdAccessTime,
   MdHourglassEmpty,
+  MdLocalShipping,
 } from 'react-icons/md';
 import { io } from 'socket.io-client';
 import { DateTime } from 'luxon';
@@ -133,17 +134,27 @@ export default function ComplexTable() {
               .put(
                 `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
                 {
-                  status: 'Sedang Diproses',
+                  status: 'Sedang diproses',
                 },
               )
               .then(() => {})
               .catch((error) => console.error('Error updating status:', error));
-          } else if (row.status === 'Sedang Diproses') {
+          } else if (row.status === 'Sedang diproses') {
             axios
               .put(
                 `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
                 {
-                  status: 'Selesai',
+                  status: 'Sedang dikirim',
+                },
+              )
+              .then(() => {})
+              .catch((error) => console.error('Error updating status:', error));
+          } else if (row.status === 'Sedang dikirim') {
+            axios
+              .put(
+                `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
+                {
+                  status: 'Diterima',
                 },
               )
               .then(() => {})
@@ -158,22 +169,26 @@ export default function ComplexTable() {
               h="24px"
               me="5px"
               color={
-                row.status === 'Selesai'
-                  ? 'green.500'
-                  : row.status === 'Sedang Diproses'
-                  ? 'blue.500'
-                  : row.status === 'Menunggu'
+                row.status === 'Menunggu'
                   ? 'gray.500'
-                  : null
+                  : row.status === 'Sedang diproses'
+                  ? 'blue.500'
+                  : row.status === 'Sedang dikirim'
+                  ? 'orange.500'
+                  : row.status === 'Diterima'
+                  ? 'green.500'
+                  : 'red.500'
               }
               as={
-                row.status === 'Selesai'
-                  ? MdCheckCircle
-                  : row.status === 'Sedang Diproses'
-                  ? MdHourglassEmpty
-                  : row.status === 'Menunggu'
+                row.status === 'Menunggu'
                   ? MdAccessTime
-                  : null
+                  : row.status === 'Sedang diproses'
+                  ? MdHourglassEmpty
+                  : row.status === 'Sedang dikirim'
+                  ? MdLocalShipping
+                  : row.status === 'Diterima'
+                  ? MdCheckCircle
+                  : MdHourglassEmpty
               }
             />
             <Text color={textColor} fontSize="sm" fontWeight="700">
@@ -214,7 +229,7 @@ export default function ComplexTable() {
         const updatedAt = new Date(row.updated_at);
 
         React.useEffect(() => {
-          if (row.status === 'Sedang Diproses') {
+          if (row.status === 'Sedang diproses') {
             const interval = setInterval(() => {
               const currentTime = new Date();
               const timeDifference = currentTime - updatedAt; // Selisih waktu antara updated_at dan waktu sekarang
@@ -256,7 +271,7 @@ export default function ComplexTable() {
             .put(
               `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
               {
-                status: 'Selesai',
+                status: 'Sedang dikirim',
               },
             )
             .then(() => {})
@@ -272,7 +287,7 @@ export default function ComplexTable() {
               w="100%"
               value={progressPercent} // Persentase progres berdasarkan waktu yang telah berlalu
             />
-            {row.status === 'Sedang Diproses' && (
+            {row.status === 'Sedang diproses' && (
               <>
                 {showPrompt ? (
                   <Flex direction="column" align="center" justify="center">

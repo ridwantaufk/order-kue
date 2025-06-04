@@ -215,6 +215,10 @@ export default function Marketplace() {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      // console.log(
+      //   'URL : ',
+      //   `${process.env.REACT_APP_BACKEND_URL}/api/products`,
+      // );
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/products`,
@@ -615,7 +619,7 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
-      <Tracker page="/orderan" />
+      {/* <Tracker page="/orderan" /> */}
       <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent
@@ -1209,7 +1213,14 @@ export default function Marketplace() {
           flexDirection="column"
           gridArea={{ xl: '1 / 3 / 2 / 4', '2xl': '1 / 2 / 2 / 3' }}
         >
-          <Card px="0px" mt="20px" mb="20px">
+          <Card
+            px="0"
+            position="fixed"
+            top="110px"
+            width="32%"
+            bg="white"
+            boxShadow="md"
+          >
             <Antrian />
           </Card>
         </Flex>
