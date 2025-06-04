@@ -35,6 +35,10 @@ import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
 import axios from 'axios';
 export default function HeaderLinks(props) {
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  };
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
   const [imageHovered, setImageHovered] = useState(false);
@@ -336,118 +340,120 @@ export default function HeaderLinks(props) {
           as={colorMode === 'light' ? IoMdMoon : IoMdSunny}
         />
       </Button>
-      <Menu>
-        <MenuButton
-          p="0px"
-          onMouseEnter={() => {
-            handleMouseEnter();
-          }}
-          onMouseLeave={() => {
-            handleMouseLeave();
-          }}
-          _hover={{
-            boxShadow: '0px 0px 20px #0c34c7',
-            transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
-            borderRadius: '50%',
-          }}
-          borderRadius={'50%'}
-          transition={'background-color 0.3s ease, box-shadow 0s'}
-        >
-          {nama !== '' ? (
-            <Avatar
-              _hover={{
-                cursor: 'pointer',
-              }}
-              color="white"
-              name={nama}
-              bg="linear-gradient(45deg, #02124a, #0c34c7)"
-              size="sm"
-              w="40px"
-              h="40px"
-            />
-          ) : (
-            <Avatar
-              _hover={{ cursor: 'pointer' }}
-              color="white"
-              src={imageHovered ? '' : noImage}
-              name={''}
-              alt="no profile"
-              bg={
-                imageHovered
-                  ? 'linear-gradient(45deg, #02124a, #0c34c7)'
-                  : colorMode === 'light'
-                  ? 'white'
-                  : 'navy.800'
-              }
-              objectFit="cover"
-              w="30px"
-              h="30px"
-              borderRadius={imageHovered ? '50%' : '0%'}
-            />
-          )}
-          {/* {console.log('imageHovered : ', imageHovered)} */}
-        </MenuButton>
-        <MenuList
-          boxShadow={shadow}
-          p="0px"
-          mt="10px"
-          borderRadius="20px"
-          bg={menuBg}
-          border="none"
-        >
-          <Flex w="100%" mb="0px">
-            <Text
-              ps="20px"
-              pt="16px"
-              pb="10px"
-              w="100%"
-              borderBottom="1px solid"
-              borderColor={borderColor}
-              fontSize="sm"
-              fontWeight="700"
-              color={textColor}
-            >
-              👋&nbsp; {nama ? `Hey, ${nama}` : `Hey !`}
-            </Text>
-          </Flex>
-          <Flex flexDirection="column" p="10px">
-            <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
-              borderRadius="8px"
-              px="14px"
-              bg={menuBg}
-            >
-              <Text fontSize="sm">Pengaturan Profil</Text>
-            </MenuItem>
-            <MenuItem
-              _hover={{
-                bg: menuBgHovered,
-                transition: 'background-color 0.5s, border-color 0.3s',
-              }}
-              // _focus={{ bg: 'none' }}
-              color="red.400"
-              borderRadius="8px"
-              px="14px"
-              bg={menuBg}
-              onClick={() => {
-                if (isLoggedIn) {
-                  localStorage.clear();
-                  setIsLoggedIn(false); // Set login state to false
-                  window.location.reload(); // Force page reload to reflect changes
-                } else {
-                  window.location.href = '/auth/sign-in';
+      {isAuthenticated() && (
+        <Menu>
+          <MenuButton
+            p="0px"
+            onMouseEnter={() => {
+              handleMouseEnter();
+            }}
+            onMouseLeave={() => {
+              handleMouseLeave();
+            }}
+            _hover={{
+              boxShadow: '0px 0px 20px #0c34c7',
+              transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+              borderRadius: '50%',
+            }}
+            borderRadius={'50%'}
+            transition={'background-color 0.3s ease, box-shadow 0s'}
+          >
+            {nama !== '' ? (
+              <Avatar
+                _hover={{
+                  cursor: 'pointer',
+                }}
+                color="white"
+                name={nama}
+                bg="linear-gradient(45deg, #02124a, #0c34c7)"
+                size="sm"
+                w="40px"
+                h="40px"
+              />
+            ) : (
+              <Avatar
+                _hover={{ cursor: 'pointer' }}
+                color="white"
+                src={imageHovered ? '' : noImage}
+                name={''}
+                alt="no profile"
+                bg={
+                  imageHovered
+                    ? 'linear-gradient(45deg, #02124a, #0c34c7)'
+                    : colorMode === 'light'
+                    ? 'white'
+                    : 'navy.800'
                 }
-              }}
-            >
-              <Text fontSize="sm">{isLoggedIn ? 'Keluar' : 'Masuk'}</Text>
-            </MenuItem>
-          </Flex>
-        </MenuList>
-      </Menu>
+                objectFit="cover"
+                w="30px"
+                h="30px"
+                borderRadius={imageHovered ? '50%' : '0%'}
+              />
+            )}
+            {/* {console.log('imageHovered : ', imageHovered)} */}
+          </MenuButton>
+          <MenuList
+            boxShadow={shadow}
+            p="0px"
+            mt="10px"
+            borderRadius="20px"
+            bg={menuBg}
+            border="none"
+          >
+            <Flex w="100%" mb="0px">
+              <Text
+                ps="20px"
+                pt="16px"
+                pb="10px"
+                w="100%"
+                borderBottom="1px solid"
+                borderColor={borderColor}
+                fontSize="sm"
+                fontWeight="700"
+                color={textColor}
+              >
+                👋&nbsp; {nama ? `Hey, ${nama}` : `Hey !`}
+              </Text>
+            </Flex>
+            <Flex flexDirection="column" p="10px">
+              <MenuItem
+                _hover={{
+                  bg: menuBgHovered,
+                  transition: 'background-color 0.5s, border-color 0.3s',
+                }}
+                // _focus={{ bg: 'none' }}
+                borderRadius="8px"
+                px="14px"
+                bg={menuBg}
+              >
+                <Text fontSize="sm">Pengaturan Profil</Text>
+              </MenuItem>
+              <MenuItem
+                _hover={{
+                  bg: menuBgHovered,
+                  transition: 'background-color 0.5s, border-color 0.3s',
+                }}
+                // _focus={{ bg: 'none' }}
+                color="red.400"
+                borderRadius="8px"
+                px="14px"
+                bg={menuBg}
+                onClick={() => {
+                  if (isLoggedIn) {
+                    localStorage.clear();
+                    setIsLoggedIn(false); // Set login state to false
+                    window.location.reload(); // Force page reload to reflect changes
+                  } else {
+                    window.location.href = '/auth/sign-in';
+                  }
+                }}
+              >
+                <Text fontSize="sm">{isLoggedIn ? 'Keluar' : 'Masuk'}</Text>
+              </MenuItem>
+            </Flex>
+          </MenuList>
+        </Menu>
+      )}
     </Flex>
   );
 }

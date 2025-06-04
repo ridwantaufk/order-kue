@@ -180,7 +180,7 @@ export default function Item(props) {
             w={{ base: '100%', '3xl': '100%' }}
             h={{ base: '100%', '3xl': '100%' }}
             borderRadius="20px"
-            maxH={{ base: '200px', '3xl': '100%' }}
+            maxH={{ base: '30vh', '3xl': '100%' }}
             transition="transform 0.3s ease-in-out"
             transform={`scale(${scale})`} // Menggunakan nilai scale
           />

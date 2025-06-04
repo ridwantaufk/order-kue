@@ -56,7 +56,11 @@ import { openPrintWindow } from './print/print';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Marketplace() {
-  // Chakra Color Mode
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  };
+
   const skeletonBgColor = useColorModeValue('#c2c2c2', '#240d4f');
   const skeletonColor = useColorModeValue('#f0f0f0', '#555');
 
@@ -1055,13 +1059,41 @@ export default function Marketplace() {
 
       <Grid
         mb="20px"
-        gridTemplateColumns={{ xl: 'repeat(3, 1fr)', '2xl': '1fr 0.46fr' }}
-        gap={{ base: '20px', xl: '20px' }}
-        display={{ base: 'block', xl: 'grid' }}
+        gridTemplateColumns={
+          isAuthenticated()
+            ? {
+                lg: 'repeat(3, 1fr)',
+                xl: 'repeat(3, 1fr)',
+                '2xl': '1fr 0.46fr',
+              }
+            : {
+                lg: 'repeat(3, 1fr)',
+                xl: 'repeat(3, 1fr)',
+                '2xl': '1fr 0.46fr',
+              }
+        }
+        gap={{ base: '20px', xl: '20px', '2xl': '50px' }}
+        display={
+          isAuthenticated()
+            ? { base: 'block', lg: 'grid' }
+            : { base: 'block', lg: 'grid' }
+        }
       >
         <Flex
           flexDirection="column"
-          gridArea={{ xl: '1 / 1 / 2 / 3', '2xl': '1 / 1 / 2 / 2' }}
+          gridArea={
+            isAuthenticated()
+              ? {
+                  lg: '1 / 1 / 2 / 3',
+                  xl: '1 / 1 / 2 / 3',
+                  '2xl': '1 / 1 / 2 / 2',
+                }
+              : {
+                  lg: '1 / 1 / 2 / 3',
+                  xl: '1 / 1 / 2 / 3',
+                  '2xl': '1 / 1 / 2 / 2',
+                }
+          }
         >
           <Banner
             setProducts={setProducts}
@@ -1202,7 +1234,7 @@ export default function Marketplace() {
                     onQuantityChange={handleQuantityChange}
                     onTotalPriceChange={handleTotalPriceChange}
                     selectedQuantity={selectedQuantity}
-                    hidden={isHidden} // Mengirim properti hidden ke Item
+                    hidden={isHidden}
                   />
                 );
               })}
@@ -1215,10 +1247,19 @@ export default function Marketplace() {
         >
           <Card
             px="0"
-            position="fixed"
+            mt={
+              isAuthenticated()
+                ? { base: '20px', lg: '0px' }
+                : { base: '20px', lg: '0' }
+            }
+            position={
+              isAuthenticated()
+                ? { base: 'static', sm: 'static', md: 'static', lg: 'fixed' }
+                : { base: 'static', sm: 'static', md: 'static', lg: 'fixed' }
+            }
             top="110px"
-            width="32%"
-            bg="white"
+            right={isAuthenticated() ? { lg: '20px' } : { lg: '20px' }}
+            width={isAuthenticated() ? { lg: '32%', xl: '25%' } : { lg: '32%' }}
             boxShadow="md"
           >
             <Antrian />
