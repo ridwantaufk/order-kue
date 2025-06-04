@@ -177,7 +177,7 @@ export default function HeaderLinks(props) {
           </Text>
         </Text>
       </Flex>
-      <SidebarResponsive routes={routes} />
+      {isAuthenticated() && <SidebarResponsive routes={routes} />}
       <Menu>
         <MenuButton p="0px">
           <Icon

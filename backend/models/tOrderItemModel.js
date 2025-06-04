@@ -1,6 +1,7 @@
 // models/orderItemModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
+const Order = require("./tOrderModel");
 
 const OrderItem = sequelize.define(
   "OrderItem",
@@ -43,5 +44,9 @@ const OrderItem = sequelize.define(
     timestamps: false,
   }
 );
+
+OrderItem.belongsTo(Order, {
+  foreignKey: "order_id",
+});
 
 module.exports = OrderItem;

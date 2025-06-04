@@ -52,23 +52,23 @@ exports.updateProduct = async (req, res) => {
     let iconFile = product.icon;
 
     // // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama (berlaku di project local, bukan github. Perhatikan penyimpanan untuk kebutuhan github atau project lokal)
-    // if (icon === "delete" && product.icon) {
-    //   const iconPath = path.join(
-    //     __dirname,
-    //     "..",
-    //     "..",
-    //     "frontend",
-    //     "public",
-    //     "assets",
-    //     "img",
-    //     "products",
-    //     product.icon
-    //   );
-    //   if (fs.existsSync(iconPath)) {
-    //     fs.unlinkSync(iconPath);
-    //   }
-    //   iconFile = null; // Set icon ke null di database
-    // }
+    if (icon === "delete" && product.icon) {
+      const iconPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "frontend",
+        "public",
+        "assets",
+        "img",
+        "products",
+        product.icon
+      );
+      if (fs.existsSync(iconPath)) {
+        fs.unlinkSync(iconPath);
+      }
+      iconFile = null; // Set icon ke null di database
+    }
 
     console.log("reqfile : ", req.file);
     console.log("icon : ", icon);
@@ -77,33 +77,30 @@ exports.updateProduct = async (req, res) => {
 
     // 1. Jika `icon` dihapus
     // // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama (berlaku di project github, bukan local. Perhatikan penyimpanan untuk kebutuhan github atau project lokal)
-    if (icon === "delete" && product.icon) {
-      const filePath = `frontend/public/assets/img/products/${product.icon}`;
-      console.log("Menghapus icon dari GitHub:", filePath);
+    // if (icon === "delete" && product.icon) {
+    //   const filePath = `frontend/public/assets/img/products/${product.icon}`;
+    //   console.log("Menghapus icon dari GitHub:", filePath);
 
-      try {
-        // Hapus file ikon dari GitHub
-        await deleteFileFromGitHub(filePath);
-        console.log("Icon di GitHub berhasil dihapus");
-      } catch (error) {
-        console.error("Gagal menghapus icon di GitHub:", error.message);
-        return res
-          .status(500)
-          .json({ message: "Gagal menghapus icon di GitHub" });
-      }
+    //   try {
+    //     // Hapus file ikon dari GitHub
+    //     await deleteFileFromGitHub(filePath);
+    //     console.log("Icon di GitHub berhasil dihapus");
+    //   } catch (error) {
+    //     console.error("Gagal menghapus icon di GitHub:", error.message);
+    //     return res
+    //       .status(500)
+    //       .json({ message: "Gagal menghapus icon di GitHub" });
+    //   }
 
-      // Set `icon` di database menjadi null setelah dihapus
-      iconFile = null;
-    }
+    // Set `icon` di database menjadi null setelah dihapus
+    //   iconFile = null;
+    // }
 
     // 2. Jika ada file baru yang diupload
     // Hapus icon lama jika ada (berlaku di project github, bukan local. Perhatikan repo/projectnya sesuai kebutuhan)
     if (req.file) {
-      const timestamp = Date.now();
-      const uniqueFilename = `${timestamp}-${req.file.originalname}`;
-      req.file.filename = uniqueFilename;
-      const githubUrl = await uploadToGitHub(req.file, req.file.filename);
-      console.log("URL icon di GitHub:", githubUrl);
+      // const githubUrl = await uploadToGitHub(req.file, req.file.filename);
+      // console.log("URL icon di GitHub:", githubUrl);
 
       // aktifkan kalo mau simpan nama file saja
       iconFile = req.file.filename;
