@@ -76,11 +76,12 @@ function SignIn() {
 
       console.log('response : ', response.data);
 
-      const { id, token, username } = response.data;
+      const { id, token, username, role } = response.data;
 
+      localStorage.setItem('username', username);
       localStorage.setItem('user_id', id);
       localStorage.setItem('token', token);
-      localStorage.setItem('role', username);
+      localStorage.setItem('role', role);
       toast.success('Login berhasil!', {
         position: 'top-right',
       });
@@ -277,6 +278,20 @@ function SignIn() {
             >
               Masuk
             </Button>
+            <Flex direction="column" align="center" mt="4">
+              <Text fontSize="sm" color={textColorSecondary}>
+                Belum punya akun?{' '}
+                <Text
+                  as="span"
+                  color="blue.500"
+                  cursor="pointer"
+                  fontWeight="medium"
+                  onClick={() => navigate('/auth/sign-up')}
+                >
+                  Daftar di sini
+                </Text>
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
       )}

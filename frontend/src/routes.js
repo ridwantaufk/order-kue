@@ -17,6 +17,8 @@ import MasterTransaksi from 'views/admin/masterTransaksi';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
+import SignUpCentered from 'views/auth/signUp';
+import { GoDatabase } from 'react-icons/go';
 
 // Function to check if the user is logged in
 const isAuthenticated = () => {
@@ -24,36 +26,15 @@ const isAuthenticated = () => {
   return !!token; // Return true if token exists (user is logged in)
 };
 
-const highAccessRighted = () => {
-  return localStorage.getItem('role') === 'admin';
-};
-
-const accessRighted = () => {
-  if (localStorage.getItem('role') === 'ridwan') {
-    return localStorage.getItem('role');
-  } else if (localStorage.getItem('role') === 'andri') {
-    return localStorage.getItem('role');
-  } else if (localStorage.getItem('role') === 'asri') {
-    return localStorage.getItem('role');
-  } else if (localStorage.getItem('role') === 'admin') {
-    return localStorage.getItem('role');
-  }
-  return null;
-};
-
 const routes = [
   {
     name: 'Beranda Utama',
     layout: '/admin',
     path: '/default',
-    roles: ['admin'],
+    // roles: ['admin'],
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: isAuthenticated() ? (
-      highAccessRighted() ? (
-        <MainDashboard />
-      ) : (
-        <Navigate to={window.location.pathname} />
-      )
+      <MainDashboard />
     ) : (
       <Navigate to="/auth/sign-in" />
     ),
@@ -75,31 +56,23 @@ const routes = [
   {
     name: 'Orderan Pembeli',
     layout: '/admin',
-    roles: ['admin', 'ridwan', 'asri'],
+    // roles: ['admin', 'ridwan', 'asri'],
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     path: '/data-tables',
     component: isAuthenticated() ? (
-      ['admin', 'ridwan', 'asri'].includes(accessRighted()) ? (
-        <DataTables />
-      ) : (
-        <Navigate to={window.location.pathname} />
-      )
+      <DataTables />
     ) : (
       <Navigate to="/auth/sign-in" />
-    ), // Redirect to login if not authenticated
+    ),
   },
   {
     name: 'Mastering',
     layout: '/admin',
-    roles: ['admin', 'ridwan', 'andri'],
+    // roles: ['admin', 'ridwan', 'andri'],
     path: '/master-transaksi',
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={GoDatabase} width="20px" height="20px" color="inherit" />,
     component: isAuthenticated() ? (
-      ['admin', 'ridwan', 'andri'].includes(accessRighted()) ? (
-        <MasterTransaksi />
-      ) : (
-        <Navigate to={window.location.pathname} />
-      )
+      <MasterTransaksi />
     ) : (
       <Navigate to="/auth/sign-in" />
     ), // Redirect to login if not authenticated
@@ -107,15 +80,11 @@ const routes = [
   {
     name: 'Profil',
     layout: '/admin',
-    roles: ['admin', 'ridwan', 'andri', 'asri'],
+    // roles: ['admin', 'ridwan', 'andri', 'asri'],
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: isAuthenticated() ? (
-      ['admin', 'ridwan', 'andri', 'asri'].includes(accessRighted()) ? (
-        <Profile />
-      ) : (
-        <Navigate to={window.location.pathname} />
-      )
+      <Profile />
     ) : (
       <Navigate to="/auth/sign-in" />
     ), // Redirect to login if not authenticated
@@ -126,6 +95,13 @@ const routes = [
     path: '/sign-in',
     icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
     component: <SignInCentered />,
+  },
+  {
+    name: 'Daftar',
+    layout: '/auth',
+    path: '/sign-up',
+    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
+    component: <SignUpCentered />,
   },
 ];
 

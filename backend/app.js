@@ -38,6 +38,7 @@ app.get("/api", (req, res) => {
 
 // Routes
 const configurationsRoutes = require("./routes/configurationsRoutes");
+const dashboardRoutes = require("./routes/vDashboardRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const productsRoutes = require("./routes/mProductsRoutes");
 const ordersRoutes = require("./routes/tOrdersRoutes");
@@ -51,6 +52,7 @@ const tUtilsProductRoutes = require("./routes/tUtilsProductRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 
 app.use("/api/configurations", configurationsRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/orders", ordersRoutes);
