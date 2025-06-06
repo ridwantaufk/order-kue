@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import axios from 'axios';
+import { useRef } from 'react';
 
 // Mock toast for demonstration - replace with actual toast import
 const toast = (options) => {
@@ -57,7 +58,8 @@ export default function ModernUserProfile() {
   const [showPassword, setShowPassword] = useState(false);
   const [originalData, setOriginalData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [validationErrors, setValidationErrors] = useState({}); // Di dalam komponen ProfileField, tambahkan:
+  const textareaRef = useRef(null);
 
   // Required fields based on database schema
   const requiredFields = ['name', 'username', 'password', 'role'];
@@ -416,13 +418,25 @@ export default function ModernUserProfile() {
       if (type === 'textarea') {
         return (
           <textarea
+            ref={textareaRef}
             value={value || ''}
-            onChange={(e) => handleChange(field, e.target.value)}
+            onChange={(e) => {
+              const cursorPosition = e.target.selectionStart;
+              handleChange(field, e.target.value);
+
+              // Restore cursor position after state update
+              setTimeout(() => {
+                if (textareaRef.current) {
+                  textareaRef.current.setSelectionRange(
+                    cursorPosition,
+                    cursorPosition,
+                  );
+                }
+              }, 0);
+            }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === 'Escape') {
                 e.preventDefault();
-                handleSave(field);
-              } else if (e.key === 'Escape') {
                 handleCancel(field);
               }
             }}
