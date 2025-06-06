@@ -38,6 +38,7 @@ import {
   useClipboard,
   useBreakpointValue,
   Divider,
+  Textarea,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -48,12 +49,14 @@ import Card from 'components/card/Card.js';
 import Tracker from '../../../components/Tracker';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import LocationPicker from 'components/location/maps';
 
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
 
 import { openPrintWindow } from './print/print';
 import { QRCodeCanvas } from 'qrcode.react';
+import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 
 export default function Marketplace() {
   const isAuthenticated = () => {
@@ -63,10 +66,6 @@ export default function Marketplace() {
 
   const skeletonBgColor = useColorModeValue('#c2c2c2', '#240d4f');
   const skeletonColor = useColorModeValue('#f0f0f0', '#555');
-
-  const skeletonWidth = useBreakpointValue({ base: '100%', md: '100%' });
-  const skeletonHeight = useBreakpointValue({ base: 150, md: 200 });
-
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.400', 'white');
   const backgroundColor = useColorModeValue('gray.50', 'gray.700');
@@ -97,6 +96,38 @@ export default function Marketplace() {
   const [customerName, setCustomerName] = useState('');
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [disabled, setDisabled] = useState(false);
+
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationCoords, setLocationCoords] = useState({ lat: '', lng: '' });
+  const [locationError, setLocationError] = useState('');
+  const [manualAddress, setManualAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  // Ambil lokasi dari device
+  const getLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation tidak didukung di perangkat ini.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationCoords({
+          lat: position.coords.latitude.toString(),
+          lng: position.coords.longitude.toString(),
+        });
+        setLocationError('');
+      },
+      (error) => {
+        setLocationError(
+          'Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.',
+        );
+        console.error(error);
+      },
+    );
+  };
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // Menggunakan useClipboard untuk setiap item yang ingin disalin
@@ -761,6 +792,8 @@ export default function Marketplace() {
                     ? 'Informasi Pemesan'
                     : 'Masukkan Informasi Pemesan'}
                 </Text>
+
+                {/* Nama Pemesan */}
                 <FormControl
                   id="customer-name"
                   isRequired
@@ -792,7 +825,105 @@ export default function Marketplace() {
                     </Text>
                   )}
                 </FormControl>
+
+                {/* Lokasi Otomatis */}
+                <FormControl mb={4}>
+                  <FormLabel color={nameTextColor}>Lokasi (otomatis)</FormLabel>
+                  <Button onClick={() => setIsMapOpen(true)}>
+                    Ambil Lokasi dari Maps
+                  </Button>
+
+                  {selectedLocation && (
+                    <Box
+                      mt={3}
+                      h="200px"
+                      w="100%"
+                      borderRadius="md"
+                      overflow="hidden"
+                      borderWidth="1px"
+                    >
+                      <MapContainer
+                        center={[selectedLocation.lat, selectedLocation.lng]}
+                        zoom={15}
+                        style={{ height: '100%', width: '100%' }}
+                        dragging={false}
+                        scrollWheelZoom={false}
+                        doubleClickZoom={false}
+                        zoomControl={false}
+                        attributionControl={false}
+                      >
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <Marker
+                          position={[
+                            selectedLocation.lat,
+                            selectedLocation.lng,
+                          ]}
+                        />
+                      </MapContainer>
+                    </Box>
+                  )}
+
+                  <LocationPicker
+                    isOpen={isMapOpen}
+                    onClose={() => setIsMapOpen(false)}
+                    onSave={(pos) => setSelectedLocation(pos)}
+                  />
+                </FormControl>
+
+                {/* Alamat Manual */}
+                <FormControl isRequired mb={4}>
+                  <FormLabel color={nameTextColor}>Alamat Lengkap</FormLabel>
+                  <Textarea
+                    placeholder="Masukkan alamat lengkap pengiriman"
+                    focusBorderColor="blue.400"
+                    value={manualAddress}
+                    onChange={(e) => setManualAddress(e.target.value)}
+                    disabled={disabled}
+                    background={
+                      disabled
+                        ? nameBackgroundColorDisabled
+                        : nameBackgroundColor
+                    }
+                    textColor={disabled ? nameTextColorDisabled : nameTextColor}
+                  />
+                </FormControl>
+
+                {/* Nomor WA / HP */}
+                <FormControl isRequired mb={4}>
+                  <FormLabel color={nameTextColor}>
+                    Nomor HP / WhatsApp
+                  </FormLabel>
+                  <Input
+                    placeholder="08xxxxxxxxxx"
+                    focusBorderColor="blue.400"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={disabled}
+                    background={
+                      disabled
+                        ? nameBackgroundColorDisabled
+                        : nameBackgroundColor
+                    }
+                    textColor={disabled ? nameTextColorDisabled : nameTextColor}
+                  />
+                </FormControl>
               </Box>
+
+              <a
+                href={`https://www.google.com/maps?q=${locationCoords.lat},${locationCoords.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Text
+                  fontSize="sm"
+                  color="blue.500"
+                  mt={1}
+                  textDecor="underline"
+                >
+                  Lihat di Google Maps
+                </Text>
+              </a>
 
               {/* Tombol Metode Pembayaran */}
               {!disabled && (
@@ -1175,40 +1306,6 @@ export default function Marketplace() {
               columns={{ base: 2, md: 3 }} // 2 columns on mobile (base), 3 on medium screens and above
               gap="20px" // Space between items
             >
-              {/* {products
-                .filter((product) => {
-                  // Filter produk berdasarkan searchKeyword
-                  if (searchKeyword === 'brownies') {
-                    return product.product_name
-                      .toLowerCase()
-                      .includes(searchKeyword.toLowerCase());
-                  } else if (searchKeyword === 'minuman') {
-                    // Untuk kategori "Minuman", tampilkan produk yang tidak mengandung kata "brownies"
-                    return !product.product_name
-                      .toLowerCase()
-                      .includes('brownies');
-                  } else {
-                    // Menampilkan semua produk jika searchKeyword kosong (Semua Menu)
-                    return true;
-                  }
-                })
-                .map((product) => (
-                  <Item
-                    key={product.product_id}
-                    id={product.product_id}
-                    name={product.product_name}
-                    price={`${formatCurrency(product.price)}`}
-                    description={product.description}
-                    image={
-                      product.icon
-                        ? `/assets/img/products/${product.icon}`
-                        : '/assets/img/products/no-image.png'
-                    }
-                    onQuantityChange={handleQuantityChange}
-                    onTotalPriceChange={handleTotalPriceChange}
-                    selectedQuantity={selectedQuantity}
-                  />
-                ))} */}
               {products.map((product) => {
                 const productName = product.product_name.toLowerCase();
 
