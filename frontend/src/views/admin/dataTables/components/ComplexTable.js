@@ -212,114 +212,54 @@ export default function ComplexTable() {
         </Text>
       ),
     }),
-    columnHelper.accessor('progress', {
-      id: 'progress',
+    columnHelper.accessor('time_elapsed', {
+      id: 'time_elapsed',
       header: () => (
         <Text color="gray.400" fontSize={{ sm: '10px', lg: '12px' }}>
-          PROGRESS
+          TIME ELAPSED
         </Text>
       ),
       cell: (info) => {
         const row = info.row.original;
         const [elapsedTime, setElapsedTime] = React.useState(0);
-        const [showPrompt, setShowPrompt] = React.useState(false); // State lokal untuk setiap baris
-        const totalTime = 60 * 1000; // Total time (60 seconds)
+        const [rowStats, setRowStats] = React.useState(null);
 
-        // Ambil waktu dari kolom updated_at
-        const updatedAt = new Date(row.updated_at);
+        // Ambil waktu mulai dari updated_at (saat status jadi "Sedang diproses")
+        const startedAt = new Date(row.updated_at).getTime();
 
         React.useEffect(() => {
-          if (row.status === 'Sedang diproses') {
-            const interval = setInterval(() => {
-              const currentTime = new Date();
-              const timeDifference = currentTime - updatedAt; // Selisih waktu antara updated_at dan waktu sekarang
+          const isRunning =
+            row.status === 'Sedang diproses' || row.status === 'Sedang dikirim';
 
-              // Hitung waktu yang telah berlalu (elapsedTime)
-              const newElapsedTime = Math.min(timeDifference, totalTime); // Jangan lebih dari totalTime
-              setElapsedTime(newElapsedTime);
+          if (!isRunning) return;
+          setRowStats(isRunning);
 
-              // Jika waktu sudah habis, berhenti menghitung mundur dan tampilkan prompt
-              if (newElapsedTime >= totalTime) {
-                clearInterval(interval);
-                setShowPrompt(true); // Tampilkan prompt hanya untuk baris yang sesuai
-              }
-            }, 1000);
-            return () => clearInterval(interval); // Bersihkan interval ketika komponen dibersihkan
-          } else if (row.status === 'Selesai') {
-            setElapsedTime(totalTime); // Jika selesai, set waktu ke totalTime untuk progres 100%
-          }
-        }, [row.status, updatedAt]);
+          const interval = setInterval(() => {
+            const now = Date.now();
+            const diff = now - startedAt;
+            setElapsedTime(diff);
+          }, 1000);
 
-        // Hitung persentase progres berdasarkan waktu yang telah berlalu
-        const progressPercent = Math.round((elapsedTime / totalTime) * 100);
-        const remainingTime = totalTime - elapsedTime;
-        const minutesLeft = String(
-          Math.floor(remainingTime / (60 * 1000)),
+          return () => clearInterval(interval);
+        }, [row.status, startedAt]);
+
+        // Konversi elapsedTime ke HH:MM:SS
+        const hours = String(Math.floor(elapsedTime / 3600000)).padStart(
+          2,
+          '0',
+        );
+        const minutes = String(
+          Math.floor((elapsedTime % 3600000) / 60000),
         ).padStart(2, '0');
-        const secondsLeft = String(
-          Math.floor((remainingTime % (60 * 1000)) / 1000),
+        const seconds = String(
+          Math.floor((elapsedTime % 60000) / 1000),
         ).padStart(2, '0');
-
-        const handleAddExtraTime = () => {
-          setShowPrompt(false); // Menyembunyikan prompt setelah menambah waktu
-        };
-
-        const handleFinishOrder = () => {
-          setShowPrompt(false);
-
-          axios
-            .put(
-              `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
-              {
-                status: 'Sedang dikirim',
-              },
-            )
-            .then(() => {})
-            .catch((error) => console.error('Error finishing order:', error));
-        };
 
         return (
           <Flex direction="column" align="center" w="120px">
-            <Progress
-              variant="table"
-              colorScheme="brandScheme"
-              h="8px"
-              w="100%"
-              value={progressPercent} // Persentase progres berdasarkan waktu yang telah berlalu
-            />
-            {row.status === 'Sedang diproses' && (
-              <>
-                {showPrompt ? (
-                  <Flex direction="column" align="center" justify="center">
-                    <Text fontSize="sm" fontWeight="bold" color="red.500">
-                      Estimasi habis! Pesanan sudah selesai ?
-                    </Text>
-                    <Box mt="2">
-                      <Icon
-                        as={MdCheckCircle}
-                        w="24px"
-                        h="24px"
-                        color="green.500"
-                        cursor="pointer"
-                        onClick={handleFinishOrder}
-                      />
-                      <Icon
-                        as={MdCancel}
-                        w="24px"
-                        h="24px"
-                        color="red.500"
-                        cursor="pointer"
-                        onClick={handleAddExtraTime}
-                      />
-                    </Box>
-                  </Flex>
-                ) : (
-                  <Text fontSize="sm" fontWeight="700" color={textColor}>
-                    {minutesLeft}:{secondsLeft}
-                  </Text>
-                )}
-              </>
-            )}
+            <Text fontSize="sm" fontWeight="700" color="teal.500">
+              {rowStats ? `${hours}:${minutes}:${seconds}` : '-'}
+            </Text>
           </Flex>
         );
       },

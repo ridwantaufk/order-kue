@@ -1,4 +1,3 @@
-// models/userModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -28,6 +27,22 @@ const User = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    birth_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    phone_number: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    role: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -40,8 +55,8 @@ const User = sequelize.define(
     },
   },
   {
-    tableName: "users", // Nama tabel di database
-    timestamps: false, // Nonaktifkan automatic timestamps
+    tableName: "users",
+    timestamps: false,
   }
 );
 

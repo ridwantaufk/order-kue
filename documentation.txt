@@ -8,6 +8,10 @@ psql -h junction.proxy.rlwy.net -U postgres -p 50686 -d railway -f "db_orderkue.
 4. Masukkan password yang diminta
 5. Selesai !
 
+import database postgreSQL local :
+psql -U postgres -d db_orderkue -f "D:\New folder\Data Ridwan\DEVELOPER IT\JS\Project\reactJs-NodeJs\order-kue\sql_terbaru_setelah_improvement.sql"
+
+
 Aktifkan ngrok (jika backend menggunakan ip/url ngrok) :
 1. Buka terminal sembarang/bebas
 2. Sesuaikan port di backend (misal app.js)

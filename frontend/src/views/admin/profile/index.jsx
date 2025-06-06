@@ -6,7 +6,6 @@ import Banner from 'views/admin/profile/components/Banner';
 
 // Assets
 import banner from 'assets/img/auth/admin.jpg';
-import avatar from 'assets/img/avatars/1735780582235.jpg';
 import React from 'react';
 
 export default function Overview() {
@@ -22,15 +21,7 @@ export default function Overview() {
         }}
         gap="20px" // Uniform gap between elements
       >
-        <Banner
-          banner={banner}
-          avatar={avatar}
-          name="Adela Parkson"
-          job="Product Designer"
-          posts="17"
-          followers="9.7k"
-          following="274"
-        />
+        <Banner banner={banner} />
       </Grid>
     </Box>
   );

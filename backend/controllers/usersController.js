@@ -3,21 +3,45 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const createUser = async (req, res) => {
-  const { name, username, password, age } = req.body;
+  const {
+    name,
+    username,
+    password,
+    age,
+    birth_date,
+    phone_number,
+    address,
+    role,
+  } = req.body;
+
+  console.log("ISI REGISTER : ", req.body);
+
+  // Validasi sederhana
+  if (!name || !username || !password || !role) {
+    return res.status(400).json({ message: "Field bertanda (* wajib diisi !" });
+  }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       name,
       username,
       password: hashedPassword,
-      age,
+      age: age || null,
+      birth_date: birth_date || null,
+      phone_number: phone_number || null,
+      address: address || null,
+      role,
     });
+
     res.status(201).json({ message: "User berhasil dibuat", user });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Terjadi kesalahan", error: error.message });
+    console.error("Error saat membuat user:", error);
+    res.status(500).json({
+      message: "Terjadi kesalahan saat membuat user",
+      error: error.message,
+    });
   }
 };
 
@@ -55,7 +79,17 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, username, password, age } = req.body;
+  const {
+    name,
+    username,
+    password,
+    age,
+    birth_date,
+    phone_number,
+    address,
+    role,
+  } = req.body;
+  console.log("req.body update : ", req.body);
 
   try {
     const user = await User.findByPk(id);
@@ -63,9 +97,18 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
-    const updatedData = { name, username, password, age };
+    const updatedData = {
+      name,
+      username,
+      age,
+      birth_date,
+      phone_number,
+      address,
+      role,
+    };
+
     if (password) {
-      updatedData.password = await bcrypt.hash(password, 10); // Hash jika password diubah
+      updatedData.password = await bcrypt.hash(password, 10);
     }
 
     await user.update(updatedData);

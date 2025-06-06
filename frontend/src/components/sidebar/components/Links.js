@@ -87,7 +87,7 @@ export function SidebarLinks(props) {
         return null;
       }
 
-      if (route.name === 'Masuk') {
+      if (route.name === 'Masuk' || route.name === 'Daftar') {
         return null;
       }
 
