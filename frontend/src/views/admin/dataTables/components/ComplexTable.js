@@ -2,8 +2,16 @@
 
 import {
   Box,
+  Button,
   Flex,
   Icon,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Progress,
   Table,
   Tbody,
@@ -31,6 +39,7 @@ import {
   MdAccessTime,
   MdHourglassEmpty,
   MdLocalShipping,
+  MdCheck,
 } from 'react-icons/md';
 import { io } from 'socket.io-client';
 import { DateTime } from 'luxon';
@@ -43,12 +52,17 @@ export default function ComplexTable() {
     { id: 'status', asc: true },
     { id: 'updated_at', desc: true },
   ]);
-  const [showPrompt, setShowPrompt] = React.useState(false);
-  const [extraTime, setExtraTime] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
+  const [selectedOrderId, setSelectedOrderId] = React.useState(null);
+
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
-  // Get today's date
+  const statusMap = {
+    Menunggu: 'Sedang diproses',
+    'Sedang diproses': 'Sedang dikirim',
+    'Sedang dikirim': 'Diterima',
+  };
 
   React.useEffect(() => {
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
@@ -130,65 +144,61 @@ export default function ComplexTable() {
 
         const handleStatusClick = () => {
           if (row.status === 'Menunggu') {
-            axios
-              .put(
-                `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
-                {
-                  status: 'Sedang diproses',
-                },
-              )
-              .then(() => {})
-              .catch((error) => console.error('Error updating status:', error));
-          } else if (row.status === 'Sedang diproses') {
-            axios
-              .put(
-                `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
-                {
-                  status: 'Sedang dikirim',
-                },
-              )
-              .then(() => {})
-              .catch((error) => console.error('Error updating status:', error));
-          } else if (row.status === 'Sedang dikirim') {
-            axios
-              .put(
-                `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
-                {
-                  status: 'Diterima',
-                },
-              )
-              .then(() => {})
-              .catch((error) => console.error('Error updating status:', error));
+            setSelectedOrderId(row.order_id);
+            setShowConfirm(true);
+            return;
           }
+
+          updateStatus(statusMap[row.status]);
+        };
+
+        const updateStatus = (nextStatus) => {
+          axios
+            .put(
+              `${process.env.REACT_APP_BACKEND_URL}/api/orders/${row.order_id}`,
+              {
+                status: nextStatus,
+              },
+            )
+            .catch((error) => console.error('Error updating status:', error));
         };
 
         return (
-          <Flex align="center" onClick={handleStatusClick} cursor="pointer">
+          <Flex
+            align="center"
+            onClick={
+              row.status !== 'Batal' && row.status !== 'Diterima'
+                ? handleStatusClick
+                : () => {}
+            }
+            cursor={
+              row.status !== 'Batal' && row.status !== 'Diterima'
+                ? 'pointer'
+                : 'default'
+            }
+            gap={1}
+          >
             <Icon
               w="24px"
               h="24px"
               me="5px"
               color={
-                row.status === 'Menunggu'
-                  ? 'gray.500'
-                  : row.status === 'Sedang diproses'
-                  ? 'blue.500'
-                  : row.status === 'Sedang dikirim'
-                  ? 'orange.500'
-                  : row.status === 'Diterima'
-                  ? 'green.500'
-                  : 'red.500'
+                {
+                  Menunggu: 'gray.500',
+                  'Sedang diproses': 'blue.500',
+                  'Sedang dikirim': 'orange.500',
+                  Diterima: 'green.500',
+                  Batal: 'red.500',
+                }[row.status] ?? 'red.500'
               }
               as={
-                row.status === 'Menunggu'
-                  ? MdAccessTime
-                  : row.status === 'Sedang diproses'
-                  ? MdHourglassEmpty
-                  : row.status === 'Sedang dikirim'
-                  ? MdLocalShipping
-                  : row.status === 'Diterima'
-                  ? MdCheckCircle
-                  : MdHourglassEmpty
+                {
+                  Menunggu: MdAccessTime,
+                  'Sedang diproses': MdHourglassEmpty,
+                  'Sedang dikirim': MdLocalShipping,
+                  Diterima: MdCheckCircle,
+                  Batal: MdCancel,
+                }[row.status] ?? MdHourglassEmpty
               }
             />
             <Text color={textColor} fontSize="sm" fontWeight="700">
@@ -278,6 +288,64 @@ export default function ComplexTable() {
 
   return (
     <Card flexDirection="column" w="100%" px="0px" overflowX="scroll">
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent zIndex="modal" borderRadius="xl" shadow="lg">
+          <ModalHeader fontSize="lg" fontWeight="bold">
+            Konfirmasi
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Apakah Anda yakin ingin memproses pesanan ini?</Text>
+          </ModalBody>
+
+          <ModalFooter display="flex" justifyContent="center" gap={8}>
+            <Button
+              leftIcon={<MdCheck />}
+              colorScheme="blue"
+              onClick={() => {
+                axios
+                  .put(
+                    `${process.env.REACT_APP_BACKEND_URL}/api/orders/${selectedOrderId}`,
+                    {
+                      status: statusMap['Menunggu'],
+                    },
+                  )
+                  .catch((error) =>
+                    console.error('Error updating status:', error),
+                  );
+                setShowConfirm(false);
+              }}
+            >
+              Lanjutkan
+            </Button>
+            <Button
+              leftIcon={<MdCancel />}
+              colorScheme="red"
+              onClick={() => {
+                axios
+                  .put(
+                    `${process.env.REACT_APP_BACKEND_URL}/api/orders/${selectedOrderId}`,
+                    {
+                      status: 'Batal',
+                    },
+                  )
+                  .catch((error) =>
+                    console.error('Error cancelling order:', error),
+                  );
+                setShowConfirm(false);
+              }}
+            >
+              Batalkan
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
         <Text
           color={textColor}

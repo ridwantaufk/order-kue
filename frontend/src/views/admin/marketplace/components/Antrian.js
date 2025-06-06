@@ -154,8 +154,12 @@ export default function Antrian() {
             colorScheme = 'green';
             iconStatus = '/assets/img/animations/received-delivery.gif';
             break;
+          case 'Batal':
+            colorScheme = 'red';
+            iconStatus = '/assets/img/animations/cancelled.gif';
+            break;
           default:
-            colorScheme = 'red'; // fallback kalau ada status aneh
+            colorScheme = 'red';
             iconStatus = '';
         }
 

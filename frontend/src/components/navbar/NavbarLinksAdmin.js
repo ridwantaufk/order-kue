@@ -28,12 +28,12 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import noImage from '../../assets/img/avatars/no-profil.png';
 // Assets
-import navImage from 'assets/img/layout/Navbar.png';
 import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 export default function HeaderLinks(props) {
   const isAuthenticated = () => {
     const token = localStorage.getItem('token');
@@ -44,6 +44,8 @@ export default function HeaderLinks(props) {
   const [imageHovered, setImageHovered] = useState(false);
   const [nama, setNama] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const navigate = useNavigate();
 
   const openTime = '08:00 AM';
   const closeTime = '06:00 PM';
@@ -417,6 +419,7 @@ export default function HeaderLinks(props) {
             </Flex>
             <Flex flexDirection="column" p="10px">
               <MenuItem
+                onClick={() => navigate('/admin/profile')}
                 _hover={{
                   bg: menuBgHovered,
                   transition: 'background-color 0.5s, border-color 0.3s',
