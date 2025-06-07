@@ -19,6 +19,32 @@ const Order = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    // Kolom baru yang ditambahkan
+    customer_phone: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    customer_address: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    location_latitude: {
+      type: DataTypes.DECIMAL(10, 8),
+      allowNull: true,
+    },
+    location_longitude: {
+      type: DataTypes.DECIMAL(11, 8),
+      allowNull: true,
+    },
+    order_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    device_info: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     status: {
       type: DataTypes.STRING(20),
       allowNull: false,

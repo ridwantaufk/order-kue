@@ -35,7 +35,7 @@ export function SidebarLinks(props) {
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
-                'ngrok-skip-browser-warning': 'true',
+                // 'ngrok-skip-browser-warning': 'true',
               },
             },
           );
@@ -45,7 +45,7 @@ export function SidebarLinks(props) {
           setUserRole(localStorage.getItem('role'));
         } catch (error) {
           console.error('Error message login : ', error.message);
-          if (error.response.data.message) {
+          if (error?.response?.data.message) {
             localStorage.clear();
             setIsLoggedIn(false);
             setUserRole(null);

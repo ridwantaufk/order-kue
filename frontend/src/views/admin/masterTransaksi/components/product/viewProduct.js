@@ -115,11 +115,11 @@ export default function ViewProduct({ onEdit }) {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-          {
-            headers: {
-              'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
-            },
-          },
+          // {
+          //   headers: {
+          //     'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
+          //   },
+          // },
         );
         const sortedProducts = response.data.sort((a, b) =>
           a.product_name.localeCompare(b.product_name),
@@ -268,7 +268,7 @@ export default function ViewProduct({ onEdit }) {
             <Tr
               key={product.product_id}
               bg={
-                product.stock === 0 && product.available === false
+                product.stock <= 0 && product.available === false
                   ? rowBgColorTr
                   : undefined
               }
@@ -280,17 +280,17 @@ export default function ViewProduct({ onEdit }) {
                   )}
                   onChange={() => handleSelectProduct(product)}
                   colorScheme="red"
-                  isDisabled={product.stock === 0 && !product.available}
+                  isDisabled={product.stock <= 0 && !product.available}
                 />
               </Td>
               <Td
                 textDecoration={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? 'line-through'
                     : 'none'
                 }
                 color={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? rowBgColorTd
                     : undefined
                 }
@@ -299,12 +299,12 @@ export default function ViewProduct({ onEdit }) {
               </Td>
               <Td
                 textDecoration={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? 'line-through'
                     : 'none'
                 }
                 color={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? rowBgColorTd
                     : undefined
                 }
@@ -313,13 +313,13 @@ export default function ViewProduct({ onEdit }) {
               </Td>
               <Td
                 textDecoration={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? 'line-through'
                     : 'none'
                 }
                 isNumeric
                 color={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? rowBgColorTd
                     : undefined
                 }
@@ -328,13 +328,13 @@ export default function ViewProduct({ onEdit }) {
               </Td>
               <Td
                 textDecoration={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? 'line-through'
                     : 'none'
                 }
                 isNumeric
                 color={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? rowBgColorTd
                     : undefined
                 }
@@ -343,13 +343,13 @@ export default function ViewProduct({ onEdit }) {
               </Td>
               <Td
                 textDecoration={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? 'line-through'
                     : 'none'
                 }
                 isNumeric
                 color={
-                  product.stock === 0 && product.available === false
+                  product.stock <= 0 && product.available === false
                     ? rowBgColorTd
                     : undefined
                 }
@@ -371,7 +371,7 @@ export default function ViewProduct({ onEdit }) {
                   boxSize="50px"
                   objectFit="cover"
                   filter={
-                    product.stock === 0 && product.available === false
+                    product.stock <= 0 && product.available === false
                       ? 'grayscale(100%)'
                       : 'none'
                   }
@@ -389,7 +389,7 @@ export default function ViewProduct({ onEdit }) {
                     colorScheme="red"
                     onClick={() => handleDeleteClick(product)}
                     isDisabled={
-                      product.stock === 0 && product.available === false
+                      product.stock <= 0 && product.available === false
                     }
                   >
                     Hapus

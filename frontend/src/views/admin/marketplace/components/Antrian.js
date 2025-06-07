@@ -66,7 +66,10 @@ export default function Antrian() {
             return orderDate === today;
           })
           .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-      } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
+      } else if (
+        process.env.REACT_APP_BACKEND_URL.includes('ngrok') ||
+        process.env.REACT_APP_BACKEND_URL
+      ) {
         return ordersData
           .filter((order) => {
             const orderDate = DateTime.fromISO(order.updated_at, {
@@ -87,6 +90,10 @@ export default function Antrian() {
     });
 
     return () => socket.disconnect();
+  }, []);
+
+  useEffect(() => {
+    console.log('Orders updated:', orders);
   }, []);
 
   const columns = [

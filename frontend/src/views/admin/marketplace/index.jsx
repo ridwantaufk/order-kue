@@ -64,6 +64,17 @@ export default function Marketplace() {
     return !!token;
   };
 
+  const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setIsMobileDevice(isMobile());
+  }, []);
+
+  const modalBodyRef = useRef(null);
+  const paymentModalBodyRef = useRef(null);
+
   const skeletonBgColor = useColorModeValue('#c2c2c2', '#240d4f');
   const skeletonColor = useColorModeValue('#f0f0f0', '#555');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -103,6 +114,13 @@ export default function Marketplace() {
   const [locationError, setLocationError] = useState('');
   const [manualAddress, setManualAddress] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isPhoneInvalid, setIsPhoneInvalid] = useState(false);
+  const [isAddressInvalid, setIsAddressInvalid] = useState(false);
+
+  const validatePhoneNumber = (phone) => {
+    const phoneRegex = /^(\+62|62|0)[8][1-9][0-9]{6,9}$/;
+    return phoneRegex.test(phone);
+  };
 
   // Ambil lokasi dari device
   const getLocation = () => {
@@ -199,11 +217,11 @@ export default function Marketplace() {
         try {
           const response = await axios.get(
             `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-            {
-              headers: {
-                'ngrok-skip-browser-warning': 'true',
-              },
-            },
+            // {
+            //   headers: {
+            //     'ngrok-skip-browser-warning': 'true',
+            //   },
+            // },
           );
           console.log('response.data : ', response.data);
 
@@ -250,18 +268,18 @@ export default function Marketplace() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      // console.log(
-      //   'URL : ',
-      //   `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-      // );
+      console.log(
+        'URL : ',
+        `${process.env.REACT_APP_BACKEND_URL}/api/products`,
+      );
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-          {
-            headers: {
-              'ngrok-skip-browser-warning': 'true',
-            },
-          },
+          // {
+          //   headers: {
+          //     'ngrok-skip-browser-warning': 'true',
+          //   },
+          // },
         );
         console.log('response.data : ', response.data);
 
@@ -525,33 +543,112 @@ export default function Marketplace() {
 
   const handlePaymentBCA = async () => {
     try {
+      // Reset semua error state
+      setIsNameInvalid(false);
+      setIsPhoneInvalid(false);
+      setIsAddressInvalid(false);
+
+      let hasError = false;
+
+      // Validasi nama
       if (!customerName.trim()) {
         setIsNameInvalid(true);
+        hasError = true;
+      }
+
+      // Validasi nomor telepon
+      if (!phoneNumber.trim()) {
+        setIsPhoneInvalid(true);
+        hasError = true;
+      } else if (!validatePhoneNumber(phoneNumber.trim())) {
+        setIsPhoneInvalid(true);
+        hasError = true;
         toast({
-          title: 'Nama Pemesan Kosong',
-          description: 'Harap isi nama pemesan sebelum melanjutkan pembayaran.',
-          status: 'error', // Warna merah untuk error
-          duration: 5000, // Durasi dalam milidetik (5 detik)
-          isClosable: true, // Dapat ditutup oleh pengguna
-          position: 'top-right', // Posisi toast di layar
+          title: 'Format Nomor HP Salah',
+          description:
+            'Gunakan format nomor HP Indonesia yang valid (08xxxxxxxxxx)',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
         });
         return;
       }
+
+      // Validasi alamat
+      if (!manualAddress.trim()) {
+        setIsAddressInvalid(true);
+        hasError = true;
+      }
+
+      // Jika ada error, tampilkan toast umum
+      if (hasError) {
+        toast({
+          title: 'Form Tidak Lengkap',
+          description: 'Harap lengkapi semua data yang diperlukan.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+        return;
+      }
+
       setDisabled(true);
-      setIsNameInvalid(false);
+
+      // Format data sesuai dengan yang diharapkan backend
+      const requestData = {
+        customerInfo: {
+          name: customerName.trim(),
+          phone: phoneNumber.trim(),
+          address: manualAddress.trim(),
+          location: selectedLocation
+            ? {
+                latitude: selectedLocation.lat,
+                longitude: selectedLocation.lng,
+              }
+            : null,
+        },
+        paymentDetails: paymentDetails,
+        orderMetadata: {
+          orderDate: new Date(),
+          deviceInfo: navigator.userAgent || null,
+        },
+      };
+
+      console.log('Sending payment data:', requestData);
 
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
-        {
-          customerName: customerName,
-          paymentDetails: paymentDetails,
-        },
+        requestData,
       );
 
       setPaymentInfo(response.data.data);
+
+      toast({
+        title: 'Pembayaran Berhasil Dibuat',
+        description:
+          'Virtual Account telah dibuat. Silakan lakukan pembayaran.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right',
+      });
     } catch (error) {
-      console.error(error);
-      alert('Gagal membuat Virtual Account');
+      console.error('Payment error:', error);
+      setDisabled(false);
+
+      // Handle error response
+      const errorMessage =
+        error?.response?.data?.message || 'Gagal membuat Virtual Account';
+      toast({
+        title: 'Error Pembayaran',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right',
+      });
     }
   };
 
@@ -665,6 +762,12 @@ export default function Marketplace() {
           <ModalHeader>Detail Pembayaran</ModalHeader>
           <ModalCloseButton />
           <ModalBody
+            ref={modalBodyRef}
+            onWheel={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
             overflowY="auto" // Mengaktifkan scroll vertikal jika konten melebihi tinggi
             height="calc(85vh - 100px)"
           >
@@ -753,12 +856,25 @@ export default function Marketplace() {
         <ModalOverlay backdropFilter="blur(1.5px)" />
         <ModalContent
           maxWidth={{ base: '98%', md: '768px', lg: '1000px' }}
-          height="85vh"
+          maxHeight="85vh"
           overflowY="auto"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           <ModalHeader color={nameTextColor}>Proses Pembayaran</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody
+            ref={paymentModalBodyRef}
+            maxHeight="70vh"
+            overflowY="auto"
+            onWheel={(e) => {
+              if (!isMobileDevice) {
+                e.stopPropagation();
+              }
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             <VStack spacing={6} align="stretch">
               {/* Judul Section */}
               {!disabled && (
@@ -872,7 +988,9 @@ export default function Marketplace() {
 
                 {/* Alamat Manual */}
                 <FormControl isRequired mb={4}>
-                  <FormLabel color={nameTextColor}>Alamat Lengkap</FormLabel>
+                  <FormLabel color={nameTextColor}>
+                    Alamat Lengkap / Detail / Patokan
+                  </FormLabel>
                   <Textarea
                     placeholder="Masukkan alamat lengkap pengiriman"
                     focusBorderColor="blue.400"
@@ -889,7 +1007,7 @@ export default function Marketplace() {
                 </FormControl>
 
                 {/* Nomor WA / HP */}
-                <FormControl isRequired mb={4}>
+                <FormControl isRequired isInvalid={isPhoneInvalid} mb={4}>
                   <FormLabel color={nameTextColor}>
                     Nomor HP / WhatsApp
                   </FormLabel>
@@ -898,7 +1016,16 @@ export default function Marketplace() {
                     focusBorderColor="blue.400"
                     type="tel"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) => {
+                      // Hanya allow angka dan beberapa karakter khusus
+                      const value = e.target.value.replace(/[^0-9+]/g, '');
+                      if (value.length <= 15) {
+                        // Batasi panjang nomor
+                        setPhoneNumber(value);
+                        setIsPhoneInvalid(false); // Reset error saat user mengetik
+                      }
+                    }}
+                    onFocus={() => setIsPhoneInvalid(false)}
                     disabled={disabled}
                     background={
                       disabled
@@ -907,23 +1034,16 @@ export default function Marketplace() {
                     }
                     textColor={disabled ? nameTextColorDisabled : nameTextColor}
                   />
+                  {isPhoneInvalid && (
+                    <Text color="red.500" fontSize="sm">
+                      Nomor HP harus diisi dengan format yang benar.
+                    </Text>
+                  )}
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    Contoh: 08123456789 atau +6281234567890
+                  </Text>
                 </FormControl>
               </Box>
-
-              <a
-                href={`https://www.google.com/maps?q=${locationCoords.lat},${locationCoords.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Text
-                  fontSize="sm"
-                  color="blue.500"
-                  mt={1}
-                  textDecor="underline"
-                >
-                  Lihat di Google Maps
-                </Text>
-              </a>
 
               {/* Tombol Metode Pembayaran */}
               {!disabled && (
@@ -1323,6 +1443,7 @@ export default function Marketplace() {
                     name={product.product_name}
                     price={`${formatCurrency(product.price)}`}
                     description={product.description}
+                    stock={product.stock}
                     image={
                       product.icon
                         ? `/assets/img/products/${product.icon}`

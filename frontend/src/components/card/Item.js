@@ -30,6 +30,7 @@ export default function Item(props) {
     onTotalPriceChange,
     selectedQuantity = {},
     hidden = false,
+    stock,
   } = props;
 
   const [quantity, setQuantity] = useState(0);
@@ -48,16 +49,20 @@ export default function Item(props) {
   useEffect(() => {
     // Mengambil jumlah favorit dari backend saat komponen pertama kali dirender
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/api/favorite/${id}`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
-      })
+      .get(
+        `${process.env.REACT_APP_BACKEND_URL}/api/favorite/${id}`,
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // }
+      )
       .then((response) => {
         // console.log('response util : ', response.data.favorite);
         setFavoriteCount(response.data.favorite);
       })
       .catch((error) => {
+        console.log('id error :', id);
         console.error('Error fetching favorite count:', error);
       });
   }, [id]);
@@ -171,6 +176,8 @@ export default function Item(props) {
     if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice);
   };
 
+  // console.log('stock : ', stock);
+
   return (
     <Card hidden={hidden} p="20px">
       <Flex direction={{ base: 'column' }} justify="center">
@@ -187,7 +194,8 @@ export default function Item(props) {
             borderRadius="20px"
             maxH={{ base: '30vh', '3xl': '100%' }}
             transition="transform 0.3s ease-in-out"
-            transform={`scale(${scale})`} // Menggunakan nilai scale
+            transform={`scale(${scale})`}
+            className={stock <= 0 ? 'grayscale' : ''}
           />
           <Button
             position="absolute"
@@ -220,7 +228,12 @@ export default function Item(props) {
             <Text color={textColor} fontSize="xl" mb="5px" fontWeight="bold">
               {name}
             </Text>
-            <Text color={textColorPrice} fontSize="md" fontWeight="700">
+            <Text
+              color={textColorPrice}
+              fontSize="md"
+              fontWeight="700"
+              className={stock <= 0 ? 'grayscale' : ''}
+            >
               {price}
             </Text>
             <Text
@@ -255,9 +268,11 @@ export default function Item(props) {
               borderRadius="10px"
               px="16px"
               py="5px"
-              onClick={() =>
-                handleQuantityChange(quantity - 1 >= 0 ? quantity - 1 : 0)
-              }
+              disabled={stock <= 0}
+              onClick={() => {
+                if (stock <= 0) return;
+                handleQuantityChange(quantity - 1 >= 0 ? quantity - 1 : 0);
+              }}
             >
               -
             </Button>
@@ -266,11 +281,16 @@ export default function Item(props) {
             <Input
               type="text"
               value={quantity === null ? '' : quantity}
-              onChange={onChangeValue}
+              onChange={(e) => {
+                if (stock <= 0) return;
+                onChangeValue(e);
+              }}
               onFocus={() => {
+                if (stock <= 0) return;
                 if (quantity === 0) setQuantity(null);
               }}
               onBlur={() => {
+                if (stock <= 0) return;
                 if (quantity === null || isNaN(quantity)) setQuantity(0);
               }}
               inputMode="numeric"
@@ -283,6 +303,7 @@ export default function Item(props) {
               padding="5px"
               background={backgroundColorInput}
               color={textColor}
+              isDisabled={stock <= 0}
             />
 
             {/* Add Button */}
@@ -294,7 +315,11 @@ export default function Item(props) {
               borderRadius="10px"
               px="16px"
               py="5px"
-              onClick={() => handleQuantityChange(quantity + 1)}
+              disabled={stock <= 0}
+              onClick={() => {
+                if (stock <= 0) return;
+                handleQuantityChange(quantity + 1);
+              }}
             >
               +
             </Button>

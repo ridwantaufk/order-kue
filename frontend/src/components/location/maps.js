@@ -24,7 +24,7 @@ import L from 'leaflet';
 import { useEffect, useRef, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-// Patch default icon biar marker muncul
+// Patch icon Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -33,7 +33,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Komponen ini yang bakal update view peta secara otomatis saat position berubah
+// Komponen untuk update peta saat posisi berubah
 const MapUpdater = ({ position }) => {
   const map = useMap();
 
@@ -50,7 +50,6 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
   const [selectedPos, setSelectedPos] = useState(null);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef(null);
 
   const LocationMarker = () => {
@@ -75,11 +74,7 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
   };
 
   const goToPosition = (lat, lon) => {
-    const latNum = parseFloat(lat);
-    const lonNum = parseFloat(lon);
-    const latlng = L.latLng(latNum, lonNum);
-
-    // Set posisi terpilih dan otomatis peta akan pindah oleh MapUpdater
+    const latlng = L.latLng(parseFloat(lat), parseFloat(lon));
     setSelectedPos(latlng);
     setSearchResults([]);
   };
@@ -93,19 +88,10 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
-
-        const trySetMap = (retries = 5) => {
-          if (mapRef.current) {
-            mapRef.current.setView(latlng, 16);
-            setSelectedPos(latlng);
-          } else if (retries > 0) {
-            setTimeout(() => trySetMap(retries - 1), 200);
-          } else {
-            alert('Gagal menampilkan lokasi di peta. Coba ulangi.');
-          }
-        };
-
-        trySetMap();
+        setSelectedPos(latlng);
+        if (mapRef.current) {
+          mapRef.current.setView(latlng, 16);
+        }
       },
       () => {
         alert('Gagal mendapatkan lokasi.');
@@ -113,22 +99,20 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
     );
   };
 
-  // Reset saat modal ditutup
   useEffect(() => {
     if (!isOpen) {
       setSelectedPos(null);
       setSearch('');
       setSearchResults([]);
-      setMapReady(false);
     }
   }, [isOpen]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent style={{ touchAction: 'auto' }}>
         <ModalHeader>Pilih Lokasi di Peta</ModalHeader>
-        <ModalBody>
+        <ModalBody style={{ touchAction: 'auto' }}>
           <VStack spacing={3} mb={3}>
             <Input
               placeholder="Cari lokasi (misal: Monas, Jakarta)"
@@ -143,7 +127,6 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
               size="sm"
               colorScheme="green"
               onClick={handleGetCurrentLocation}
-              isDisabled={!mapRef.current}
             >
               Gunakan Lokasi Saya
             </Button>
@@ -174,10 +157,9 @@ const LocationPicker = ({ isOpen, onClose, onSave }) => {
             <MapContainer
               center={[-6.2, 106.8]}
               zoom={13}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', touchAction: 'auto' }}
               whenCreated={(mapInstance) => {
                 mapRef.current = mapInstance;
-                setMapReady(true);
               }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

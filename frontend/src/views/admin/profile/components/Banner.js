@@ -15,6 +15,15 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useRef } from 'react';
+import {
+  Box,
+  Flex,
+  Text,
+  Avatar,
+  useColorModeValue,
+  SimpleGrid,
+  Center,
+} from '@chakra-ui/react';
 
 // Mock toast for demonstration - replace with actual toast import
 const toast = (options) => {
@@ -40,6 +49,16 @@ const toast = (options) => {
 };
 
 export default function ModernUserProfile() {
+  const bgColor = useColorModeValue('gray.50', 'gray.800');
+  const headerBg = useColorModeValue(
+    'linear(to-r, blue.600, purple.600, pink.500)',
+    'linear(to-r, blue.800, purple.700, pink.600)',
+  );
+  const textColor = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const subTextColor = useColorModeValue('gray.600', 'gray.400');
+  const mutedText = useColorModeValue('gray.500', 'gray.300');
+  const avatarBorderColor = useColorModeValue('white', 'gray.700');
+
   const [userData, setUserData] = useState({
     id: null,
     username: '',
@@ -77,7 +96,7 @@ export default function ModernUserProfile() {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              'ngrok-skip-browser-warning': 'true',
+              // 'ngrok-skip-browser-warning': 'true',
             },
           },
         );
@@ -304,7 +323,7 @@ export default function ModernUserProfile() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'ngrok-skip-browser-warning': 'true',
+            // 'ngrok-skip-browser-warning': 'true',
             'Content-Type': 'application/json',
           },
         },
@@ -594,72 +613,99 @@ export default function ModernUserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br rounded-xl from-blue-50 via-white to-purple-50">
-      {/* Header with Banner */}
-      <div className="relative">
-        <div className="h-64 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 relative rounded-xl overflow-hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-        </div>
+    <Box minH="100vh" bg={bgColor} rounded="xl">
+      {/* Header */}
+      <Box position="relative">
+        <Box
+          h="16rem"
+          bgGradient={headerBg}
+          roundedTop="xl"
+          overflow="hidden"
+          position="relative"
+        >
+          <Box position="absolute" inset={0} bg="blackAlpha.300" zIndex={1} />
+          <Box
+            position="absolute"
+            inset={0}
+            bgGradient="linear(to-t, blackAlpha.400, transparent)"
+            zIndex={2}
+          />
+        </Box>
 
-        {/* Profile Avatar */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-16">
-          <div className="relative">
-            <img
+        {/* Avatar */}
+        <Center
+          position="absolute"
+          left="50%"
+          transform="translateX(-50%)"
+          bottom="-4rem"
+          zIndex={3}
+        >
+          <Box position="relative">
+            <Avatar
               src={`https://api.dicebear.com/8.x/icons/svg?seed=${
                 userData.id || '6'
               }`}
-              alt="Profile"
-              className="w-32 h-32 rounded-full border-4 border-white shadow-xl bg-white"
+              size="2xl"
+              border="4px solid"
+              borderColor={avatarBorderColor}
+              bg="white"
+              shadow="xl"
             />
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-2 border-white"></div>
-          </div>
-        </div>
-      </div>
+            <Box
+              position="absolute"
+              bottom={-2}
+              right={-2}
+              w={8}
+              h={8}
+              bg="green.500"
+              borderRadius="full"
+              border="2px solid white"
+            />
+          </Box>
+        </Center>
+      </Box>
 
-      {/* Profile Content */}
-      <div className="pt-20 pb-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Profile Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      {/* Content */}
+      <Box pt="6rem" pb={12} px={4}>
+        <Box maxW="4xl" mx="auto">
+          {/* Header Info */}
+          <Box textAlign="center" mb={12}>
+            <Text fontSize="3xl" fontWeight="bold" color={textColor} mb={2}>
               {userData.name || '-'}
-            </h1>
-            <p className="text-gray-600 mb-1">{userData.role || '-'}</p>
-            <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-              <span>ID: {userData.id || '-'}</span>
-              <span>•</span>
-              <span>Status: Aktif</span>
-            </div>
-          </div>
+            </Text>
+            <Text color={subTextColor} mb={1}>
+              {userData.role || '-'}
+            </Text>
+            <Flex
+              justify="center"
+              align="center"
+              gap={2}
+              fontSize="sm"
+              color={mutedText}
+            >
+              <Text>ID: {userData.id || '-'}</Text>
+              <Text>•</Text>
+              <Text>Status: Aktif</Text>
+            </Flex>
+          </Box>
 
-          {/* Profile Fields Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Fields */}
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             <ProfileField label="Username" field="username" icon={User} />
-
             <ProfileField label="Nama Lengkap" field="name" icon={User} />
-
             <ProfileField
               label="Tanggal Lahir"
               field="birth_date"
               icon={Calendar}
               type="date"
             />
-
-            <ProfileField
-              label="Umur"
-              field="age"
-              icon={Calendar}
-              readonly={true}
-            />
-
+            <ProfileField label="Umur" field="age" icon={Calendar} readonly />
             <ProfileField
               label="Nomor Telepon"
               field="phone_number"
               icon={Phone}
               type="tel"
             />
-
             <ProfileField
               label="Jabatan"
               field="role"
@@ -667,41 +713,37 @@ export default function ModernUserProfile() {
               type="select"
               options={['Admin', 'Developer', 'Super User']}
             />
-
-            <div className="md:col-span-2">
+            <Box gridColumn={{ md: 'span 2' }}>
               <ProfileField
                 label="Alamat"
                 field="address"
                 icon={MapPin}
                 type="textarea"
               />
-            </div>
-
+            </Box>
             <ProfileField
               label="Tanggal Dibuat"
               field="created_at"
               icon={Clock}
-              readonly={true}
+              readonly
             />
-
             <ProfileField
               label="Terakhir Diperbarui"
               field="updated_at"
               icon={Clock}
-              readonly={true}
+              readonly
             />
-
-            <div className="md:col-span-2">
+            <Box gridColumn={{ md: 'span 2' }}>
               <ProfileField
                 label="Kata Sandi"
                 field="password"
                 icon={User}
                 type="password"
               />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </SimpleGrid>
+        </Box>
+      </Box>
+    </Box>
   );
 }
