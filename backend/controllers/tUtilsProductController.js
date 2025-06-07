@@ -33,6 +33,7 @@ const getFavoriteProduct = async (req, res) => {
     }
     res.status(200).json(product);
   } catch (error) {
+    console.log("product_id : ", product_id);
     res.status(500).json({ error: error.message });
   }
 };

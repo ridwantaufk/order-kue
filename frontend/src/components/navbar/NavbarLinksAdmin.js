@@ -87,7 +87,7 @@ export default function HeaderLinks(props) {
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
-                'ngrok-skip-browser-warning': 'true',
+                // 'ngrok-skip-browser-warning': 'true',
               },
             },
           );
@@ -96,7 +96,7 @@ export default function HeaderLinks(props) {
           setIsLoggedIn(true);
         } catch (error) {
           console.error('Error message : ', error.message);
-          if (error.response.data.message) {
+          if (error?.response?.data?.message) {
             console.error(
               'Error response Auth MiddleWare : ',
               error.response.data.message,

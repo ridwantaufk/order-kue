@@ -2,6 +2,11 @@ const EventEmitter = require("events");
 const emitter = new EventEmitter();
 const Order = require("../models/tOrderModel");
 const tOrdersController = require("../controllers/tOrdersController");
+const {
+  Order: OrderCombined,
+  OrderItem: OrderItemCombined,
+  Product,
+} = require("../models/OrderModelAndOrderItemModel");
 
 // Mendapatkan semua pesanan
 exports.getOrders = async (req, res) => {
@@ -16,7 +21,29 @@ exports.getOrders = async (req, res) => {
 // Fungsi tambahan untuk socket.io agar dapat mengambil data
 exports.getOrdersForSocket = async () => {
   try {
-    const orders = await Order.findAll();
+    const orders = await OrderCombined.findAll({
+      include: [
+        {
+          model: OrderItemCombined,
+          attributes: [
+            "order_item_id",
+            "product_id",
+            "quantity",
+            "price",
+            "created_at",
+            "updated_at",
+          ],
+          include: [
+            {
+              model: Product,
+              as: "product",
+              attributes: ["product_name", "icon", "price"],
+            },
+          ],
+        },
+      ],
+    });
+
     return orders;
   } catch (error) {
     console.error("Error fetching orders for socket:", error);

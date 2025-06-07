@@ -21,6 +21,12 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  VStack,
+  HStack,
+  Badge,
+  Divider,
+  Link,
+  useToast,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -40,6 +46,12 @@ import {
   MdHourglassEmpty,
   MdLocalShipping,
   MdCheck,
+  MdLocationOn,
+  MdPhone,
+  MdCalendarToday,
+  MdDevices,
+  MdOpenInNew,
+  MdMap,
 } from 'react-icons/md';
 import { io } from 'socket.io-client';
 import { DateTime } from 'luxon';
@@ -47,6 +59,7 @@ import { DateTime } from 'luxon';
 const columnHelper = createColumnHelper();
 
 export default function ComplexTable() {
+  const toast = useToast();
   const [orders, setOrders] = React.useState([]);
   const [sorting, setSorting] = React.useState([
     { id: 'status', asc: true },
@@ -54,14 +67,26 @@ export default function ComplexTable() {
   ]);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [selectedOrderId, setSelectedOrderId] = React.useState(null);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [selectedOrder, setSelectedOrder] = React.useState(null);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const grayText = useColorModeValue('gray.600', 'gray.400');
 
   const statusMap = {
     Menunggu: 'Sedang diproses',
     'Sedang diproses': 'Sedang dikirim',
     'Sedang dikirim': 'Diterima',
+  };
+
+  const statusColors = {
+    Menunggu: 'gray',
+    'Sedang diproses': 'blue',
+    'Sedang dikirim': 'orange',
+    Diterima: 'green',
+    Batal: 'red',
   };
 
   React.useEffect(() => {
@@ -82,7 +107,10 @@ export default function ComplexTable() {
             return orderDate === today;
           })
           .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-      } else if (process.env.REACT_APP_BACKEND_URL.includes('ngrok')) {
+      } else if (
+        process.env.REACT_APP_BACKEND_URL.includes('ngrok') ||
+        process.env.REACT_APP_BACKEND_URL
+      ) {
         return ordersData
           .filter((order) => {
             const orderDate = DateTime.fromISO(order.updated_at, {
@@ -104,6 +132,11 @@ export default function ComplexTable() {
 
     return () => socket.disconnect();
   }, []);
+
+  const handleRowClick = (order) => {
+    setSelectedOrder(order);
+    setShowDetailModal(true);
+  };
 
   const columns = [
     columnHelper.accessor('order_code', {
@@ -142,9 +175,12 @@ export default function ComplexTable() {
       cell: (info) => {
         const row = info.row.original;
 
-        const handleStatusClick = () => {
+        const handleStatusClick = (e) => {
+          e.stopPropagation(); // Prevent row click event
+
           if (row.status === 'Menunggu') {
             setSelectedOrderId(row.order_id);
+            setSelectedOrder(row);
             setShowConfirm(true);
             return;
           }
@@ -166,6 +202,10 @@ export default function ComplexTable() {
         return (
           <Flex
             align="center"
+            _hover={{ bg: 'gray.300' }}
+            rounded={'lg'}
+            transition={'background-color 0.2s ease-in-out'}
+            padding="3px"
             onClick={
               row.status !== 'Batal' && row.status !== 'Diterima'
                 ? handleStatusClick
@@ -277,7 +317,7 @@ export default function ComplexTable() {
   ];
 
   const table = useReactTable({
-    data: orders, // Use orders data from state
+    data: orders,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -288,6 +328,7 @@ export default function ComplexTable() {
 
   return (
     <Card flexDirection="column" w="100%" px="0px" overflowX="scroll">
+      {/* Modal Konfirmasi Status */}
       <Modal
         isOpen={showConfirm}
         onClose={() => setShowConfirm(false)}
@@ -307,22 +348,70 @@ export default function ComplexTable() {
             <Button
               leftIcon={<MdCheck />}
               colorScheme="blue"
-              onClick={() => {
-                axios
-                  .put(
-                    `${process.env.REACT_APP_BACKEND_URL}/api/orders/${selectedOrderId}`,
+              onClick={async () => {
+                if (!selectedOrder) {
+                  toast({
+                    title: 'Error',
+                    description: 'Data pesanan tidak ditemukan',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                  setShowConfirm(false);
+                  return;
+                }
+
+                try {
+                  await axios.put(
+                    `${process.env.REACT_APP_BACKEND_URL}/api/products/0`,
                     {
-                      status: statusMap['Menunggu'],
+                      decreaseStock: true,
+                      items: selectedOrder.OrderItems.map((item) => ({
+                        product_id: item.product_id,
+                        quantity: item.quantity,
+                      })),
                     },
-                  )
-                  .catch((error) =>
-                    console.error('Error updating status:', error),
                   );
-                setShowConfirm(false);
+
+                  await axios.put(
+                    `${process.env.REACT_APP_BACKEND_URL}/api/orders/${selectedOrderId}`,
+                    { status: statusMap['Menunggu'] },
+                  );
+
+                  toast({
+                    title: 'Berhasil',
+                    description: 'Pesanan berhasil diproses',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                } catch (error) {
+                  let errMessage = 'Gagal memproses pesanan';
+                  console.error('Error updating status:', error);
+                  if (error?.response?.data?.message) {
+                    errMessage = `${error.response.data.message}`;
+                  }
+
+                  toast({
+                    title: 'Error',
+                    description: (
+                      <Box
+                        whiteSpace="pre-line"
+                        dangerouslySetInnerHTML={{ __html: errMessage }}
+                      />
+                    ),
+                    status: 'error',
+                    duration: 7000,
+                    isClosable: true,
+                  });
+                } finally {
+                  setShowConfirm(false);
+                }
               }}
             >
               Lanjutkan
             </Button>
+
             <Button
               leftIcon={<MdCancel />}
               colorScheme="red"
@@ -334,15 +423,382 @@ export default function ComplexTable() {
                       status: 'Batal',
                     },
                   )
-                  .catch((error) =>
-                    console.error('Error cancelling order:', error),
-                  );
-                setShowConfirm(false);
+                  .then(() => {
+                    toast({
+                      title: 'Berhasil',
+                      description: 'Pesanan berhasil dibatalkan',
+                      status: 'success',
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  })
+                  .catch((error) => {
+                    console.error('Error cancelling order:', error);
+                    toast({
+                      title: 'Error',
+                      description: 'Gagal membatalkan pesanan',
+                      status: 'error',
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  })
+                  .finally(() => {
+                    setShowConfirm(false);
+                  });
               }}
             >
               Batalkan
             </Button>
           </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Detail Order */}
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        size="2xl"
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent
+          zIndex="modal"
+          borderRadius="xl"
+          shadow="lg"
+          maxW="800px"
+          bg={cardBg}
+          maxH="calc(100vh - 50px)"
+          overflow="auto"
+        >
+          <ModalHeader fontSize="xl" fontWeight="bold" color={textColor}>
+            Detail Pemesanan
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            {selectedOrder && (
+              <VStack spacing={6} align="stretch">
+                {/* Order Info Section */}
+                <Box>
+                  <HStack justify="space-between" mb={4}>
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                        {selectedOrder.order_code}
+                      </Text>
+                      <Badge
+                        colorScheme={statusColors[selectedOrder.status]}
+                        fontSize="sm"
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                      >
+                        {selectedOrder.status}
+                      </Badge>
+                    </VStack>
+                    <VStack align="end" spacing={1}>
+                      <Text fontSize="sm" color={grayText}>
+                        Order ID: {selectedOrder.order_id}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Box>
+
+                <Divider />
+
+                {/* Customer Info Section */}
+                <Box>
+                  <Text
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    mb={3}
+                    color={textColor}
+                  >
+                    Informasi Pelanggan
+                  </Text>
+                  <VStack spacing={3} align="stretch">
+                    <HStack>
+                      <Icon as={MdLocationOn} color="blue.500" />
+                      <Box>
+                        <Text fontWeight="semibold" color={textColor}>
+                          {selectedOrder.customer_name}
+                        </Text>
+                      </Box>
+                    </HStack>
+
+                    <HStack>
+                      <Icon as={MdPhone} color="green.500" />
+                      <Text color={textColor}>
+                        {selectedOrder.customer_phone}
+                      </Text>
+                    </HStack>
+
+                    <HStack align="start">
+                      <Icon as={MdLocationOn} color="red.500" mt={1} />
+                      <Box>
+                        <Text color={textColor}>
+                          {selectedOrder.customer_address}
+                        </Text>
+                        {selectedOrder.location_latitude &&
+                          selectedOrder.location_longitude && (
+                            <Text fontSize="sm" color={grayText} mt={1}>
+                              Koordinat: {selectedOrder.location_latitude},{' '}
+                              {selectedOrder.location_longitude}
+                            </Text>
+                          )}
+                      </Box>
+                    </HStack>
+                  </VStack>
+                </Box>
+
+                <Divider />
+
+                {/* Date Info Section */}
+                <Box>
+                  <Text
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    mb={3}
+                    color={textColor}
+                  >
+                    Informasi Waktu
+                  </Text>
+                  <VStack spacing={3} align="stretch">
+                    <HStack>
+                      <Icon as={MdCalendarToday} color="purple.500" />
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="semibold" color={textColor}>
+                          Tanggal Order:
+                        </Text>
+                        <Text color={grayText} fontSize="sm">
+                          {new Date(selectedOrder.order_date).toLocaleString(
+                            'id-ID',
+                          )}
+                        </Text>
+                      </VStack>
+                    </HStack>
+
+                    <HStack>
+                      <Icon as={MdCalendarToday} color="blue.500" />
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="semibold" color={textColor}>
+                          Dibuat:
+                        </Text>
+                        <Text color={grayText} fontSize="sm">
+                          {new Date(selectedOrder.created_at).toLocaleString(
+                            'id-ID',
+                          )}
+                        </Text>
+                      </VStack>
+                    </HStack>
+
+                    <HStack>
+                      <Icon as={MdCalendarToday} color="orange.500" />
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="semibold" color={textColor}>
+                          Terakhir Update:
+                        </Text>
+                        <Text color={grayText} fontSize="sm">
+                          {new Date(selectedOrder.updated_at).toLocaleString(
+                            'id-ID',
+                          )}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                  </VStack>
+                </Box>
+
+                <Divider />
+
+                <Box>
+                  {/* Judul utama */}
+                  <Text
+                    fontSize="xl"
+                    fontWeight="bold"
+                    mb={4}
+                    color={textColor}
+                  >
+                    Detail Pesanan
+                  </Text>
+
+                  {/* List Item Pesanan */}
+                  <Box mb={6}>
+                    <Text
+                      fontSize="lg"
+                      fontWeight="semibold"
+                      mb={3}
+                      color={textColor}
+                    >
+                      Daftar Produk
+                    </Text>
+
+                    {selectedOrder.OrderItems.map((item) => (
+                      <HStack
+                        key={item.order_item_id}
+                        justify="space-between"
+                        bg="gray.50"
+                        p={3}
+                        borderRadius="md"
+                        alignItems="center"
+                      >
+                        <VStack align="start" spacing={0}>
+                          <Text fontWeight="medium" color={textColor}>
+                            {item.product?.product_name ??
+                              `Produk ID: ${item.product_id}`}
+                          </Text>
+                          <Text color={grayText}>Qty: {item.quantity}</Text>
+                        </VStack>
+
+                        <Text fontWeight="semibold" color={textColor}>
+                          Rp {Number(item.price).toLocaleString('id-ID')}
+                        </Text>
+                      </HStack>
+                    ))}
+                  </Box>
+
+                  {/* Ringkasan Total */}
+                  <Box>
+                    <Text
+                      fontSize="lg"
+                      fontWeight="semibold"
+                      mb={3}
+                      color={textColor}
+                    >
+                      Ringkasan Pesanan
+                    </Text>
+
+                    <HStack justify="space-between" mb={1}>
+                      <Text fontWeight="medium" color={grayText}>
+                        Total Item
+                      </Text>
+                      <Text fontWeight="semibold" color={textColor}>
+                        {selectedOrder.OrderItems.reduce(
+                          (total, item) => total + item.quantity,
+                          0,
+                        )}{' '}
+                        item
+                      </Text>
+                    </HStack>
+
+                    <HStack justify="space-between">
+                      <Text fontWeight="medium" color={grayText}>
+                        Total Harga
+                      </Text>
+                      <Text fontWeight="bold" fontSize="lg" color={textColor}>
+                        Rp{' '}
+                        {selectedOrder.OrderItems.reduce(
+                          (total, item) => total + Number(item.price),
+                          0,
+                        ).toLocaleString('id-ID')}
+                      </Text>
+                    </HStack>
+                  </Box>
+                </Box>
+
+                {/* Informasi Perangkat */}
+                <Box mb={6}>
+                  <Text
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    mb={3}
+                    color={textColor}
+                  >
+                    Informasi Perangkat
+                  </Text>
+                  <HStack align="start">
+                    <Icon as={MdDevices} color="gray.500" mt={1} />
+                    <Text color={grayText} fontSize="sm" lineHeight="1.4">
+                      {selectedOrder.device_info}
+                    </Text>
+                  </HStack>
+                </Box>
+
+                {/* Maps Section */}
+                {(selectedOrder.location_latitude &&
+                  selectedOrder.location_longitude) ||
+                selectedOrder.customer_address ? (
+                  <>
+                    <Divider />
+                    <Box>
+                      <Text
+                        fontSize="lg"
+                        fontWeight="semibold"
+                        mb={3}
+                        color={textColor}
+                      >
+                        Lokasi
+                      </Text>
+                      <VStack spacing={3}>
+                        {selectedOrder.location_latitude &&
+                        selectedOrder.location_longitude ? (
+                          <Box
+                            w="100%"
+                            h="200px"
+                            bg="gray.100"
+                            borderRadius="md"
+                            overflow="hidden"
+                          >
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              frameBorder="0"
+                              style={{ border: 0 }}
+                              loading="lazy"
+                              allowFullScreen
+                              src={`https://maps.google.com/maps?q=${selectedOrder.location_latitude},${selectedOrder.location_longitude}&z=15&output=embed`}
+                              title="Location Map"
+                            />
+                          </Box>
+                        ) : (
+                          <Box
+                            w="100%"
+                            h="200px"
+                            bg="gray.100"
+                            borderRadius="md"
+                            overflow="hidden"
+                          >
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              frameBorder="0"
+                              style={{ border: 0 }}
+                              loading="lazy"
+                              allowFullScreen
+                              src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                                selectedOrder.customer_address,
+                              )}&z=15&output=embed`}
+                              title="Location Map"
+                            />
+                          </Box>
+                        )}
+
+                        <Button
+                          leftIcon={<MdMap />}
+                          rightIcon={<MdOpenInNew />}
+                          colorScheme="blue"
+                          size="md"
+                          onClick={() => {
+                            const query =
+                              selectedOrder.location_latitude &&
+                              selectedOrder.location_longitude
+                                ? `${selectedOrder.location_latitude},${selectedOrder.location_longitude}`
+                                : selectedOrder.customer_address;
+                            window.open(
+                              `https://www.google.com/maps?q=${encodeURIComponent(
+                                query,
+                              )}`,
+                              '_blank',
+                            );
+                          }}
+                          w="full"
+                        >
+                          Buka di Google Maps
+                        </Button>
+                      </VStack>
+                    </Box>
+                  </>
+                ) : null}
+              </VStack>
+            )}
+          </ModalBody>
         </ModalContent>
       </Modal>
 
@@ -397,7 +853,12 @@ export default function ComplexTable() {
               .getRowModel()
               .rows.slice(0, 11)
               .map((row) => (
-                <Tr key={row.id}>
+                <Tr
+                  key={row.id}
+                  cursor="pointer"
+                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
+                  onClick={() => handleRowClick(row.original)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <Td
                       key={cell.id}

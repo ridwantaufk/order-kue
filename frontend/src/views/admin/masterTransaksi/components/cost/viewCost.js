@@ -110,11 +110,11 @@ export default function ViewCost({ onEdit }) {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/costs`,
-          {
-            headers: {
-              'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
-            },
-          },
+          // {
+          //   headers: {
+          //     'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
+          //   },
+          // },
         );
         console.log('Status Code:', response.status);
         console.log('Content-Type:', response.headers['content-type']);

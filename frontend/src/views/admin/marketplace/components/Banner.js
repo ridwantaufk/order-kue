@@ -20,20 +20,20 @@ export default function Banner({
       // Fetch data dari endpoint products dan orderItems
       const responseProducts = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       const responseOrderItems = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/orderItems`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Ambil data orderItems untuk menghitung total quantity setiap product_id
@@ -75,20 +75,20 @@ export default function Banner({
       // Ambil data dari tabel m_products dan t_utils_product
       const responseProducts = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       const responseFavorites = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/favorite`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Gabungkan data produk dengan data favorit berdasarkan product_id

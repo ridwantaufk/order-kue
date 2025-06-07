@@ -5,6 +5,7 @@ const {
   uploadToGitHub,
   deleteFileFromGitHub,
 } = require("../utils/githubUploadDelete");
+const sequelize = require("../config/db");
 
 // Mendapatkan semua produk
 exports.getProducts = async (req, res) => {
@@ -39,7 +40,58 @@ exports.createProduct = async (req, res) => {
 
 // Mengupdate produk
 exports.updateProduct = async (req, res) => {
-  console.log("kesini");
+  const isBulkUpdate =
+    req.params.id === "0" &&
+    (req.body.decreaseStock === "true" || req.body.decreaseStock === true);
+
+  if (isBulkUpdate) {
+    const { items } = req.body;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ message: "Invalid items format" });
+    }
+
+    const t = await sequelize.transaction();
+
+    try {
+      for (const item of items) {
+        const { product_id, quantity } = item;
+        const product = await Product.findByPk(product_id, { transaction: t });
+
+        if (!product) {
+          await t.rollback();
+          return res
+            .status(404)
+            .json({ message: `Produk ID ${product_id} tidak ditemukan.` });
+        }
+
+        if (product.stock < quantity) {
+          await t.rollback();
+          return res.status(400).json({
+            message: `Stok untuk produk <b>${
+              product.product_name
+            }</b> tidak cukup.\nKurang <b>${
+              quantity - product.stock
+            }</b> unit.`,
+          });
+        }
+
+        await product.update(
+          { stock: product.stock - quantity },
+          { transaction: t }
+        );
+      }
+
+      await t.commit();
+      return res.json({ message: "Stok berhasil diperbarui." });
+    } catch (error) {
+      console.error("Transaction error:", error);
+      await t.rollback();
+      return res
+        .status(500)
+        .json({ message: "Terjadi kesalahan saat memperbarui stok." });
+    }
+  }
+
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {

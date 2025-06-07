@@ -91,81 +91,81 @@ export default function UserReports() {
       // Fetch dashboard summary
       const summaryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/summary`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch top selling products
       const productsResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/top-products`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch daily sales trend
       const trendResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/daily-trend`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch inventory status
       const inventoryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/inventory-status`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch customer analysis
       const customerResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/customer-analysis`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch expense breakdown
       const expenseResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/expense-breakdown?period=${selectedPeriod}`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch sales by hour
       const salesHourResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/sales-by-hour`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Fetch revenue forecast
       const forecastResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/revenue-forecast`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        },
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // },
       );
 
       // Set all data
