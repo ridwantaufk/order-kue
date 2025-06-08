@@ -42,6 +42,7 @@ import {
   ExpenseBreakdown,
   CustomerInsights,
   SalesHourChart,
+  GlobalDashboardExport,
 } from 'components/dashboard/RevenueChart';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -65,6 +66,39 @@ export default function UserReports() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('current');
+
+  const [markedProducts, setMarkedProducts] = useState([]);
+
+  const markedBg = useColorModeValue('#fa8748', '#f08b26');
+
+  const toggleMark = (productName) => {
+    setMarkedProducts((prev) =>
+      prev.includes(productName)
+        ? prev.filter((p) => p !== productName)
+        : [...prev, productName],
+    );
+  };
+
+  const renderProductList = (products) =>
+    products.map((item, idx) => {
+      const isMarked = markedProducts.includes(item.product_name);
+      return (
+        <span
+          key={item.product_id || idx}
+          onClick={() => toggleMark(item.product_name)}
+          style={{
+            cursor: 'pointer',
+            padding: '2px 6px',
+            borderRadius: '6px',
+            backgroundColor: isMarked ? markedBg : 'transparent',
+            marginRight: '6px',
+          }}
+        >
+          {item.product_name}
+          {idx < products.length - 1 ? ',' : ''}
+        </span>
+      );
+    });
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -91,81 +125,41 @@ export default function UserReports() {
       // Fetch dashboard summary
       const summaryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/summary`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch top selling products
       const productsResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/top-products`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch daily sales trend
       const trendResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/daily-trend`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch inventory status
       const inventoryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/inventory-status`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch customer analysis
       const customerResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/customer-analysis`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch expense breakdown
       const expenseResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/expense-breakdown?period=${selectedPeriod}`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch sales by hour
       const salesHourResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/sales-by-hour`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Fetch revenue forecast
       const forecastResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/revenue-forecast`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // },
       );
 
       // Set all data
@@ -261,6 +255,19 @@ export default function UserReports() {
         </Select>
       </Flex>
 
+      <GlobalDashboardExport
+        revenueData={dailyTrend}
+        expenseData={expenseBreakdown}
+        customerData={customerStats?.customers || []}
+        customerSummary={customerStats?.summary || {}}
+        salesHourData={salesByHour}
+        // TAMBAHAN PROPS YANG DIPERLUKAN:
+        dashboardData={dashboardData}
+        topProducts={topProducts}
+        inventoryStatus={inventoryStatus}
+        revenueForecast={revenueForecast}
+      />
+
       {/* Stock Alerts */}
       {(criticalStock.length > 0 || lowStock.length > 0) && (
         <Alert status="warning" mb="20px">
@@ -270,13 +277,13 @@ export default function UserReports() {
             {criticalStock.length > 0 && (
               <Text>
                 {criticalStock.length} produk dengan stok kritis (≤5):{' '}
-                {criticalStock.map((item) => item.product_name).join(', ')}
+                {renderProductList(criticalStock)}
               </Text>
             )}
             {lowStock.length > 0 && (
               <Text>
                 {lowStock.length} produk dengan stok rendah (≤10):{' '}
-                {lowStock.map((item) => item.product_name).join(', ')}
+                {renderProductList(lowStock)}
               </Text>
             )}
           </Box>

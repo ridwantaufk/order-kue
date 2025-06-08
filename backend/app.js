@@ -109,7 +109,8 @@ sequelize
       if (fs.existsSync(envPath)) {
         // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
         // const backendUrl = `https://6df3-140-0-53-148.ngrok-free.app`; // ngrok
-        const backendUrl = `http://localhost:5000`; // ngrok
+        // const backendUrl = `http://localhost:5000`;
+        const backendUrl = `http://140.0.53.148:5000`;
         console.log("ada backend url : ", backendUrl);
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
         console.log(

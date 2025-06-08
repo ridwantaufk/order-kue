@@ -25,11 +25,960 @@ import {
   Progress,
   StatHelpText,
 } from '@chakra-ui/react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { MdPrint, MdPictureAsPdf, MdTableChart } from 'react-icons/md';
+import { Button, HStack } from '@chakra-ui/react';
+
+// Export Functions
+const exportFunctions = {
+  // Print Function
+  handlePrint: (elementId, title) => {
+    const printContent = document.getElementById(elementId);
+    const printWindow = window.open('', '_blank');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .chart-container { margin-bottom: 30px; }
+            .export-buttons { display: none !important; }
+            @media print {
+              body { margin: 0; }
+              .chart-container { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${title}</h1>
+          <div class="chart-container">
+            ${printContent.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  },
+
+  // PDF Export Function
+  handlePDFExport: async (elementId, filename, title) => {
+    const element = document.getElementById(elementId);
+    const buttons = element.querySelector('.export-buttons');
+
+    // Hide buttons temporarily
+    if (buttons) buttons.style.display = 'none';
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      // Add title
+      pdf.setFontSize(16);
+      pdf.text(title, 20, 20);
+
+      // Calculate image dimensions
+      const imgWidth = 170;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 20, 30, imgWidth, imgHeight);
+      pdf.save(`${filename}.pdf`);
+    } finally {
+      // Show buttons again
+      if (buttons) buttons.style.display = 'flex';
+    }
+  },
+
+  // Excel Export Functions
+  handleExcelExport: (data, filename, title, type) => {
+    let processedData = [];
+
+    switch (type) {
+      case 'revenue':
+        processedData = data.map((item) => ({
+          Tanggal: new Date(item.sale_date).toLocaleDateString('id-ID'),
+          'Pendapatan Harian': item.daily_revenue,
+          'Jumlah Transaksi': item.transaction_count || 0,
+          'Rata-rata per Transaksi':
+            item.daily_revenue / (item.transaction_count || 1),
+        }));
+        break;
+
+      case 'expense':
+        const total = data.reduce(
+          (sum, item) => sum + parseFloat(item.total_amount),
+          0,
+        );
+        processedData = data.map((item) => ({
+          'Jenis Pengeluaran': item.cost_name,
+          'Total Amount': parseFloat(item.total_amount),
+          Frekuensi: item.frequency,
+          'Rata-rata': parseFloat(item.avg_amount),
+          Persentase:
+            ((parseFloat(item.total_amount) / total) * 100).toFixed(2) + '%',
+        }));
+        break;
+
+      case 'customer':
+        processedData = data.map((item, index) => ({
+          Ranking: index + 1,
+          'Nama Pelanggan': item.customer_name,
+          'Total Pembelian': item.total_spent,
+          'Jumlah Pesanan': item.total_orders,
+          'Total Item': item.total_items_purchased,
+          Status: item.customer_status,
+          'Rata-rata per Pesanan': (
+            item.total_spent / item.total_orders
+          ).toFixed(0),
+        }));
+        break;
+
+      case 'sales-hour':
+        processedData = data.map((item) => ({
+          Jam: `${item.hour}:00`,
+          'Total Pendapatan': item.total_revenue,
+          'Jumlah Transaksi': item.transaction_count || 0,
+          'Rata-rata per Transaksi':
+            item.total_revenue / (item.transaction_count || 1),
+        }));
+        break;
+
+      default:
+        processedData = data;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(processedData);
+
+    // Auto-fit column widths
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    const colDeltas = [];
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      let max = 0;
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })];
+        if (cell && cell.v) {
+          max = Math.max(max, cell.v.toString().length);
+        }
+      }
+      colDeltas.push({ wch: Math.min(max + 2, 50) });
+    }
+    ws['!cols'] = colDeltas;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, title);
+
+    // Add summary sheet for some types
+    if (type === 'customer' && data.length > 0) {
+      const summaryData = [
+        ['Ringkasan Analisis Pelanggan', ''],
+        ['Total Pelanggan', data.length],
+        [
+          'Total Pendapatan',
+          data.reduce((sum, item) => sum + item.total_spent, 0),
+        ],
+        [
+          'Rata-rata Pendapatan per Pelanggan',
+          (
+            data.reduce((sum, item) => sum + item.total_spent, 0) / data.length
+          ).toFixed(0),
+        ],
+        [
+          'Total Pesanan',
+          data.reduce((sum, item) => sum + item.total_orders, 0),
+        ],
+        [
+          'Total Item Terjual',
+          data.reduce((sum, item) => sum + item.total_items_purchased, 0),
+        ],
+      ];
+
+      const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+      summaryWs['!cols'] = [{ wch: 30 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(wb, summaryWs, 'Ringkasan');
+    }
+
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+  },
+};
+
+const ExportButtons = ({
+  onPrint,
+  onPDFExport,
+  onExcelExport,
+  title,
+  size = 'sm',
+}) => {
+  const buttonBg = useColorModeValue('gray.300', 'navy.300');
+
+  return (
+    <HStack spacing="10px" className="export-buttons" mb="20px">
+      <Button
+        leftIcon={<MdPrint />}
+        size={size}
+        bg={buttonBg}
+        onClick={onPrint}
+        _hover={{ bg: useColorModeValue('gray.50', 'navy.600') }}
+      >
+        Print
+      </Button>
+      <Button
+        leftIcon={<MdPictureAsPdf />}
+        size={size}
+        colorScheme="red"
+        onClick={onPDFExport}
+      >
+        PDF
+      </Button>
+      <Button
+        leftIcon={<MdTableChart />}
+        size={size}
+        colorScheme="green"
+        onClick={onExcelExport}
+      >
+        Excel
+      </Button>
+    </HStack>
+  );
+};
+
+// PERBAIKAN UNTUK GLOBAL DASHBOARD EXPORT
+// File: components/dashboard/RevenueChart.js
+
+// 1. TAMBAHKAN PROPS BARU UNTUK GlobalDashboardExport COMPONENT
+const GlobalDashboardExport = ({
+  revenueData,
+  expenseData,
+  customerData,
+  customerSummary,
+  salesHourData,
+  // TAMBAHAN PROPS YANG DIPERLUKAN:
+  dashboardData,
+  topProducts,
+  inventoryStatus,
+  revenueForecast,
+  onExportAll,
+}) => {
+  const buttonBg = useColorModeValue('white', 'navy.700');
+  const textColor = useColorModeValue('secondaryGray.900', 'white');
+
+  // PERBAIKAN FUNGSI GLOBAL PRINT
+  const handleGlobalPrint = async () => {
+    const printWindow = window.open('', '_blank');
+
+    // FORMAT DATA UNTUK PRINT
+    const formatRupiah = (value) => {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+      }).format(value);
+    };
+
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('id-ID');
+    };
+
+    // BUAT KONTEN HTML LENGKAP
+    let printContent = `
+      <div class="dashboard-summary">
+        <h2>Ringkasan Dashboard</h2>
+        <table class="summary-table">
+          <tr><th>Pendapatan Bulan Ini</th><td>${formatRupiah(
+            dashboardData?.[0]?.total_sales || 0,
+          )}</td></tr>
+          <tr><th>Total Pengeluaran</th><td>${formatRupiah(
+            dashboardData?.[0]?.total_expenses || 0,
+          )}</td></tr>
+          <tr><th>Laba Bersih</th><td>${formatRupiah(
+            dashboardData?.[0]?.net_profit || 0,
+          )}</td></tr>
+          <tr><th>Total Pesanan</th><td>${
+            dashboardData?.[0]?.total_orders || 0
+          }</td></tr>
+          <tr><th>Pelanggan Unik</th><td>${
+            dashboardData?.[0]?.unique_customers || 0
+          }</td></tr>
+        </table>
+      </div>
+
+      <div class="revenue-section">
+        <h2>Data Penjualan Harian</h2>
+        <table class="data-table">
+          <thead>
+            <tr><th>Tanggal</th><th>Pendapatan</th><th>Transaksi</th></tr>
+          </thead>
+          <tbody>
+            ${revenueData
+              .map(
+                (item) => `
+              <tr>
+                <td>${formatDate(item.sale_date)}</td>
+                <td>${formatRupiah(item.daily_revenue)}</td>
+                <td>${item.transaction_count || 0}</td>
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="expense-section">
+        <h2>Rincian Pengeluaran</h2>
+        <table class="data-table">
+          <thead>
+            <tr><th>Jenis Pengeluaran</th><th>Total</th><th>Frekuensi</th><th>Rata-rata</th></tr>
+          </thead>
+          <tbody>
+            ${expenseData
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.cost_name}</td>
+                <td>${formatRupiah(item.total_amount)}</td>
+                <td>${item.frequency}</td>
+                <td>${formatRupiah(item.avg_amount)}</td>
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="products-section">
+        <h2>Produk Terlaris</h2>
+        <table class="data-table">
+          <thead>
+            <tr><th>Produk</th><th>Terjual</th><th>Pendapatan</th><th>Profit</th></tr>
+          </thead>
+          <tbody>
+            ${topProducts
+              .slice(0, 10)
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.product_name}</td>
+                <td>${item.total_sold} unit</td>
+                <td>${formatRupiah(item.total_revenue)}</td>
+                <td>${formatRupiah(item.total_profit)}</td>
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="customer-section">
+        <h2>Top Pelanggan</h2>
+        <table class="data-table">
+          <thead>
+            <tr><th>Nama</th><th>Total Belanja</th><th>Pesanan</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            ${customerData
+              .slice(0, 15)
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.customer_name}</td>
+                <td>${formatRupiah(item.total_spent)}</td>
+                <td>${item.total_orders}</td>
+                <td>${item.customer_status}</td>
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="inventory-section">
+        <h2>Status Inventori</h2>
+        <table class="data-table">
+          <thead>
+            <tr><th>Produk</th><th>Stok</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            ${inventoryStatus
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.product_name}</td>
+                <td>${item.current_stock} unit</td>
+                <td>${item.stock_status}</td>
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Complete Dashboard Report - ${new Date().toLocaleDateString(
+            'id-ID',
+          )}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              font-size: 12px;
+            }
+            h1 { 
+              color: #2D3748; 
+              text-align: center; 
+              margin-bottom: 30px; 
+              font-size: 24px;
+            }
+            h2 { 
+              color: #4A5568; 
+              margin-top: 30px; 
+              margin-bottom: 15px;
+              font-size: 16px;
+              border-bottom: 2px solid #E2E8F0;
+              padding-bottom: 5px;
+            }
+            .data-table, .summary-table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-bottom: 20px;
+            }
+            .data-table th, .data-table td, .summary-table th, .summary-table td { 
+              border: 1px solid #E2E8F0; 
+              padding: 8px; 
+              text-align: left;
+            }
+            .data-table th, .summary-table th { 
+              background-color: #F7FAFC; 
+              font-weight: bold;
+            }
+            .summary-table th { width: 40%; }
+            .dashboard-summary { margin-bottom: 30px; }
+            @media print {
+              body { margin: 0; }
+              .data-table { page-break-inside: avoid; }
+              h2 { page-break-after: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Complete Dashboard Report - ${new Date().toLocaleDateString(
+            'id-ID',
+          )}</h1>
+          ${printContent}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 1000);
+  };
+
+  // PERBAIKAN FUNGSI GLOBAL PDF
+  const handleGlobalPDF = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const formatRupiah = (value) => {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+      }).format(value);
+    };
+
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('id-ID');
+    };
+
+    // HALAMAN 1: RINGKASAN DASHBOARD
+    pdf.setFontSize(20);
+    pdf.text('Dashboard Report', 105, 30, { align: 'center' });
+    pdf.setFontSize(12);
+    pdf.text(`Generated: ${new Date().toLocaleDateString('id-ID')}`, 105, 40, {
+      align: 'center',
+    });
+
+    // Ringkasan Utama
+    pdf.setFontSize(14);
+    pdf.text('RINGKASAN DASHBOARD', 20, 60);
+
+    let yPos = 75;
+    pdf.setFontSize(10);
+    const summaryData = [
+      [
+        'Pendapatan Bulan Ini',
+        formatRupiah(dashboardData?.[0]?.total_sales || 0),
+      ],
+      [
+        'Total Pengeluaran',
+        formatRupiah(dashboardData?.[0]?.total_expenses || 0),
+      ],
+      ['Laba Bersih', formatRupiah(dashboardData?.[0]?.net_profit || 0)],
+      ['Total Pesanan', (dashboardData?.[0]?.total_orders || 0).toString()],
+      [
+        'Pelanggan Unik',
+        (dashboardData?.[0]?.unique_customers || 0).toString(),
+      ],
+    ];
+
+    summaryData.forEach(([label, value]) => {
+      pdf.text(label + ':', 20, yPos);
+      pdf.text(value, 120, yPos);
+      yPos += 8;
+    });
+
+    // HALAMAN 2: DATA PENJUALAN
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.text('DATA PENJUALAN HARIAN', 20, 30);
+
+    yPos = 45;
+    pdf.setFontSize(8);
+    pdf.text('Tanggal', 20, yPos);
+    pdf.text('Pendapatan', 80, yPos);
+    pdf.text('Transaksi', 140, yPos);
+    yPos += 5;
+
+    revenueData.slice(0, 30).forEach((item) => {
+      if (yPos > 280) {
+        pdf.addPage();
+        yPos = 30;
+      }
+      pdf.text(formatDate(item.sale_date), 20, yPos);
+      pdf.text(formatRupiah(item.daily_revenue), 80, yPos);
+      pdf.text((item.transaction_count || 0).toString(), 140, yPos);
+      yPos += 6;
+    });
+
+    // HALAMAN 3: PENGELUARAN
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.text('RINCIAN PENGELUARAN', 20, 30);
+
+    yPos = 45;
+    pdf.setFontSize(8);
+    pdf.text('Jenis Pengeluaran', 20, yPos);
+    pdf.text('Total', 100, yPos);
+    pdf.text('Frekuensi', 140, yPos);
+    pdf.text('Rata-rata', 170, yPos);
+    yPos += 5;
+
+    expenseData.forEach((item) => {
+      if (yPos > 280) {
+        pdf.addPage();
+        yPos = 30;
+      }
+      pdf.text(item.cost_name.substring(0, 25), 20, yPos);
+      pdf.text(formatRupiah(item.total_amount), 100, yPos);
+      pdf.text(item.frequency.toString(), 140, yPos);
+      pdf.text(formatRupiah(item.avg_amount), 170, yPos);
+      yPos += 6;
+    });
+
+    // HALAMAN 4: TOP PRODUCTS
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.text('PRODUK TERLARIS', 20, 30);
+
+    yPos = 45;
+    pdf.setFontSize(8);
+    pdf.text('Produk', 20, yPos);
+    pdf.text('Terjual', 80, yPos);
+    pdf.text('Pendapatan', 120, yPos);
+    pdf.text('Profit', 160, yPos);
+    yPos += 5;
+
+    topProducts.slice(0, 25).forEach((item) => {
+      if (yPos > 280) {
+        pdf.addPage();
+        yPos = 30;
+      }
+      pdf.text(item.product_name.substring(0, 20), 20, yPos);
+      pdf.text(item.total_sold + ' unit', 80, yPos);
+      pdf.text(formatRupiah(item.total_revenue), 120, yPos);
+      pdf.text(formatRupiah(item.total_profit), 160, yPos);
+      yPos += 6;
+    });
+
+    // HALAMAN 5: CUSTOMERS
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.text('TOP PELANGGAN', 20, 30);
+
+    yPos = 45;
+    pdf.setFontSize(8);
+    pdf.text('Nama Pelanggan', 20, yPos);
+    pdf.text('Total Belanja', 80, yPos);
+    pdf.text('Pesanan', 130, yPos);
+    pdf.text('Status', 160, yPos);
+    yPos += 5;
+
+    customerData.slice(0, 25).forEach((item) => {
+      if (yPos > 280) {
+        pdf.addPage();
+        yPos = 30;
+      }
+      pdf.text(item.customer_name.substring(0, 20), 20, yPos);
+      pdf.text(formatRupiah(item.total_spent), 80, yPos);
+      pdf.text(item.total_orders.toString(), 130, yPos);
+      pdf.text(item.customer_status, 160, yPos);
+      yPos += 6;
+    });
+
+    pdf.save(
+      `complete-dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`,
+    );
+  };
+
+  // PERBAIKAN FUNGSI GLOBAL EXCEL
+  const handleGlobalExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    // 1. DASHBOARD SUMMARY SHEET
+    const dashboardSummaryData = [
+      ['COMPLETE DASHBOARD REPORT', ''],
+      ['Generated Date', new Date().toLocaleDateString('id-ID')],
+      ['Generated Time', new Date().toLocaleTimeString('id-ID')],
+      ['', ''],
+      ['RINGKASAN UTAMA', ''],
+      ['Pendapatan Bulan Ini', dashboardData?.[0]?.total_sales || 0],
+      ['Total Pengeluaran', dashboardData?.[0]?.total_expenses || 0],
+      ['Laba Bersih', dashboardData?.[0]?.net_profit || 0],
+      ['Total Pesanan', dashboardData?.[0]?.total_orders || 0],
+      ['Pelanggan Unik', dashboardData?.[0]?.unique_customers || 0],
+      [
+        'Margin Keuntungan (%)',
+        dashboardData?.[0]?.profit_margin_percentage || 0,
+      ],
+      ['', ''],
+      ['PROYEKSI PENDAPATAN', ''],
+      ['Bulan Ini', revenueForecast?.current_month_sales || 0],
+      ['Proyeksi Bulan Depan', revenueForecast?.forecasted_next_month || 0],
+      ['Tingkat Pertumbuhan (%)', revenueForecast?.avg_growth_rate || 0],
+    ];
+
+    const summaryWs = XLSX.utils.aoa_to_sheet(dashboardSummaryData);
+    summaryWs['!cols'] = [{ wch: 30 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'Dashboard Summary');
+
+    // 2. COMPLETE REVENUE SHEET
+    if (revenueData && revenueData.length > 0) {
+      const revenueProcessed = revenueData.map((item) => ({
+        Tanggal: new Date(item.sale_date).toLocaleDateString('id-ID'),
+        'Pendapatan Harian': item.daily_revenue,
+        'Jumlah Transaksi': item.transaction_count || 0,
+        'Rata-rata per Transaksi': (
+          item.daily_revenue / (item.transaction_count || 1)
+        ).toFixed(0),
+        Hari: new Date(item.sale_date).toLocaleDateString('id-ID', {
+          weekday: 'long',
+        }),
+      }));
+
+      // Tambah total dan statistik
+      const totalRevenue = revenueData.reduce(
+        (sum, item) => sum + item.daily_revenue,
+        0,
+      );
+      const totalTransactions = revenueData.reduce(
+        (sum, item) => sum + (item.transaction_count || 0),
+        0,
+      );
+
+      revenueProcessed.push({
+        Tanggal: 'TOTAL',
+        'Pendapatan Harian': totalRevenue,
+        'Jumlah Transaksi': totalTransactions,
+        'Rata-rata per Transaksi': (totalRevenue / totalTransactions).toFixed(
+          0,
+        ),
+        Hari: '',
+      });
+
+      const revenueWs = XLSX.utils.json_to_sheet(revenueProcessed);
+      revenueWs['!cols'] = [
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 18 },
+        { wch: 22 },
+        { wch: 12 },
+      ];
+      XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue Complete');
+    }
+
+    // 3. COMPLETE EXPENSE SHEET
+    if (expenseData && expenseData.length > 0) {
+      const total = expenseData.reduce(
+        (sum, item) => sum + parseFloat(item.total_amount),
+        0,
+      );
+      const expenseProcessed = expenseData.map((item) => ({
+        'Jenis Pengeluaran': item.cost_name,
+        'Total Amount': parseFloat(item.total_amount),
+        Frekuensi: item.frequency,
+        'Rata-rata': parseFloat(item.avg_amount),
+        'Persentase (%)': (
+          (parseFloat(item.total_amount) / total) *
+          100
+        ).toFixed(2),
+        'Total dari Keseluruhan': total,
+      }));
+
+      const expenseWs = XLSX.utils.json_to_sheet(expenseProcessed);
+      expenseWs['!cols'] = [
+        { wch: 25 },
+        { wch: 18 },
+        { wch: 12 },
+        { wch: 18 },
+        { wch: 15 },
+        { wch: 20 },
+      ];
+      XLSX.utils.book_append_sheet(wb, expenseWs, 'Expenses Complete');
+    }
+
+    // 4. COMPLETE TOP PRODUCTS SHEET
+    if (topProducts && topProducts.length > 0) {
+      const productsProcessed = topProducts.map((item, index) => ({
+        Ranking: index + 1,
+        'Nama Produk': item.product_name,
+        'Total Terjual (Unit)': item.total_sold,
+        'Total Pendapatan': item.total_revenue,
+        'Total Profit': item.total_profit,
+        'Profit per Unit': item.profit_per_unit,
+        'Margin Profit (%)': (
+          (item.total_profit / item.total_revenue) *
+          100
+        ).toFixed(2),
+      }));
+
+      const productsWs = XLSX.utils.json_to_sheet(productsProcessed);
+      productsWs['!cols'] = [
+        { wch: 10 },
+        { wch: 30 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 18 },
+      ];
+      XLSX.utils.book_append_sheet(wb, productsWs, 'Top Products Complete');
+    }
+
+    // 5. COMPLETE CUSTOMER SHEET
+    if (customerData && customerData.length > 0) {
+      const customerProcessed = customerData.map((item, index) => ({
+        Ranking: index + 1,
+        'Nama Pelanggan': item.customer_name,
+        'Total Pembelian': item.total_spent,
+        'Jumlah Pesanan': item.total_orders,
+        'Total Item': item.total_items_purchased,
+        'Status Pelanggan': item.customer_status,
+        'Rata-rata per Pesanan': (item.total_spent / item.total_orders).toFixed(
+          0,
+        ),
+        'Rata-rata Item per Pesanan': (
+          item.total_items_purchased / item.total_orders
+        ).toFixed(1),
+      }));
+
+      const customerWs = XLSX.utils.json_to_sheet(customerProcessed);
+      customerWs['!cols'] = [
+        { wch: 10 },
+        { wch: 25 },
+        { wch: 18 },
+        { wch: 15 },
+        { wch: 12 },
+        { wch: 15 },
+        { wch: 22 },
+        { wch: 25 },
+      ];
+      XLSX.utils.book_append_sheet(wb, customerWs, 'Customers Complete');
+
+      // Customer Summary Sheet
+      if (customerSummary) {
+        const customerSummaryData = [
+          ['RINGKASAN ANALISIS PELANGGAN', ''],
+          ['Total Pelanggan', customerSummary.total_customers || 0],
+          ['Pelanggan Aktif', customerSummary.active_customers || 0],
+          ['Pelanggan Tidak Aktif', customerSummary.inactive_customers || 0],
+          ['Pelanggan Hilang', customerSummary.lost_customers || 0],
+          ['', ''],
+          ['ANALISIS MENDALAM', ''],
+          [
+            'Total Pendapatan dari Semua Pelanggan',
+            customerData.reduce((sum, item) => sum + item.total_spent, 0),
+          ],
+          [
+            'Rata-rata Pendapatan per Pelanggan',
+            (
+              customerData.reduce((sum, item) => sum + item.total_spent, 0) /
+              customerData.length
+            ).toFixed(0),
+          ],
+          [
+            'Total Pesanan Keseluruhan',
+            customerData.reduce((sum, item) => sum + item.total_orders, 0),
+          ],
+          [
+            'Total Item Terjual',
+            customerData.reduce(
+              (sum, item) => sum + item.total_items_purchased,
+              0,
+            ),
+          ],
+          [
+            'Rata-rata Pesanan per Pelanggan',
+            (
+              customerData.reduce((sum, item) => sum + item.total_orders, 0) /
+              customerData.length
+            ).toFixed(1),
+          ],
+        ];
+        const customerSummaryWs = XLSX.utils.aoa_to_sheet(customerSummaryData);
+        customerSummaryWs['!cols'] = [{ wch: 35 }, { wch: 25 }];
+        XLSX.utils.book_append_sheet(wb, customerSummaryWs, 'Customer Summary');
+      }
+    }
+
+    // 6. COMPLETE INVENTORY SHEET
+    if (inventoryStatus && inventoryStatus.length > 0) {
+      const inventoryProcessed = inventoryStatus.map((item) => ({
+        'Nama Produk': item.product_name,
+        'Stok Saat Ini': item.current_stock,
+        'Status Stok': item.stock_status,
+        'Kategori Peringatan':
+          item.stock_status === 'Critical'
+            ? 'URGENT'
+            : item.stock_status === 'Low'
+            ? 'PERHATIAN'
+            : item.stock_status === 'Medium'
+            ? 'PANTAU'
+            : 'AMAN',
+      }));
+
+      const inventoryWs = XLSX.utils.json_to_sheet(inventoryProcessed);
+      inventoryWs['!cols'] = [
+        { wch: 30 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 20 },
+      ];
+      XLSX.utils.book_append_sheet(wb, inventoryWs, 'Inventory Status');
+    }
+
+    // 7. SALES BY HOUR COMPLETE SHEET
+    if (salesHourData && salesHourData.length > 0) {
+      const salesHourProcessed = salesHourData.map((item) => ({
+        'Jam Operasional': `${item.hour}:00 - ${item.hour + 1}:00`,
+        Jam: item.hour,
+        'Total Pendapatan': item.total_revenue,
+        'Jumlah Transaksi': item.transaction_count || 0,
+        'Rata-rata per Transaksi': (
+          item.total_revenue / (item.transaction_count || 1)
+        ).toFixed(0),
+        'Persentase dari Total Harian': '',
+      }));
+
+      // Hitung persentase
+      const totalDailyRevenue = salesHourData.reduce(
+        (sum, item) => sum + item.total_revenue,
+        0,
+      );
+      salesHourProcessed.forEach((item) => {
+        item['Persentase dari Total Harian'] =
+          ((item['Total Pendapatan'] / totalDailyRevenue) * 100).toFixed(2) +
+          '%';
+      });
+
+      const salesHourWs = XLSX.utils.json_to_sheet(salesHourProcessed);
+      salesHourWs['!cols'] = [
+        { wch: 20 },
+        { wch: 8 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 22 },
+        { wch: 25 },
+      ];
+      XLSX.utils.book_append_sheet(wb, salesHourWs, 'Sales by Hour Complete');
+    }
+
+    XLSX.writeFile(wb, `complete-dashboard-report-${timestamp}.xlsx`);
+  };
+
+  return (
+    <Box bg={buttonBg} borderRadius="20px" p="20px" mb="20px" shadow="md">
+      <Flex justify="space-between" align="center">
+        <Box>
+          <Text fontSize="lg" fontWeight="bold" color={textColor} mb="5px">
+            Complete Dashboard Export
+          </Text>
+          <Text fontSize="sm" color="gray.500">
+            Export semua data dashboard lengkap dalam berbagai format
+          </Text>
+        </Box>
+        <HStack spacing="10px">
+          <Button
+            leftIcon={<MdPrint />}
+            size="md"
+            colorScheme="gray"
+            onClick={handleGlobalPrint}
+            _hover={{ bg: 'gray.50' }}
+          >
+            Print All Data
+          </Button>
+          <Button
+            leftIcon={<MdPictureAsPdf />}
+            size="md"
+            colorScheme="red"
+            onClick={handleGlobalPDF}
+          >
+            Export Complete PDF
+          </Button>
+          <Button
+            leftIcon={<MdTableChart />}
+            size="md"
+            colorScheme="green"
+            onClick={handleGlobalExcel}
+          >
+            Export Complete Excel
+          </Button>
+        </HStack>
+      </Flex>
+    </Box>
+  );
+};
 
 const RevenueChart = ({ data, title = 'Tren Penjualan Harian' }) => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const brandColor = useColorModeValue('brand.500', 'white');
   const revenueChartBgColor = useColorModeValue('white', 'navy.700');
+  const chartId = `revenue-chart-${Date.now()}`;
 
   const formatRupiah = (value) => {
     return new Intl.NumberFormat('id-ID', {
@@ -47,11 +996,34 @@ const RevenueChart = ({ data, title = 'Tren Penjualan Harian' }) => {
   };
 
   return (
-    <Box bg={revenueChartBgColor} borderRadius="20px" p="20px" h="400px">
-      <Text fontSize="lg" fontWeight="bold" mb="20px" color={textColor}>
-        {title}
-      </Text>
-      <ResponsiveContainer width="100%" height="90%">
+    <Box
+      bg={revenueChartBgColor}
+      borderRadius="20px"
+      p="20px"
+      h="480px"
+      id={chartId}
+    >
+      <Flex justify="space-between" align="center" mb="20px">
+        <Text fontSize="lg" fontWeight="bold" color={textColor}>
+          {title}
+        </Text>
+        <ExportButtons
+          onPrint={() => exportFunctions.handlePrint(chartId, title)}
+          onPDFExport={() =>
+            exportFunctions.handlePDFExport(chartId, 'revenue-chart', title)
+          }
+          onExcelExport={() =>
+            exportFunctions.handleExcelExport(
+              data,
+              'revenue-data',
+              'Revenue',
+              'revenue',
+            )
+          }
+          title={title}
+        />
+      </Flex>
+      <ResponsiveContainer width="100%" height="85%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="sale_date" tickFormatter={formatDate} fontSize={12} />
@@ -79,6 +1051,7 @@ const ExpenseBreakdown = ({ data, title = 'Rincian Pengeluaran' }) => {
   const brandColor = useColorModeValue('brand.500', 'white');
   const expensesBgColor = useColorModeValue('white', 'navy.700');
   const progressBgColor = useColorModeValue('gray.100', 'whiteAlpha.100');
+  const chartId = `expense-chart-${Date.now()}`;
 
   const formatRupiah = (value) => {
     return new Intl.NumberFormat('id-ID', {
@@ -92,21 +1065,36 @@ const ExpenseBreakdown = ({ data, title = 'Rincian Pengeluaran' }) => {
     (sum, item) => sum + parseFloat(item.total_amount),
     0,
   );
-  const colors = [
-    '#4481EB',
-    '#04BEFE',
-    '#FF6B6B',
-    '#4ECDC4',
-    '#45B7D1',
-    '#96CEB4',
-  ];
 
   return (
-    <Box bg={expensesBgColor} borderRadius="20px" p="20px" h="400px">
-      <Text fontSize="lg" fontWeight="bold" mb="20px" color={textColor}>
-        {title}
-      </Text>
-      <Box overflowY="auto" h="320px">
+    <Box
+      bg={expensesBgColor}
+      borderRadius="20px"
+      p="20px"
+      h="480px"
+      id={chartId}
+    >
+      <Flex justify="space-between" align="center" mb="20px">
+        <Text fontSize="lg" fontWeight="bold" color={textColor}>
+          {title}
+        </Text>
+        <ExportButtons
+          onPrint={() => exportFunctions.handlePrint(chartId, title)}
+          onPDFExport={() =>
+            exportFunctions.handlePDFExport(chartId, 'expense-breakdown', title)
+          }
+          onExcelExport={() =>
+            exportFunctions.handleExcelExport(
+              data,
+              'expense-data',
+              'Expenses',
+              'expense',
+            )
+          }
+          title={title}
+        />
+      </Flex>
+      <Box overflowY="auto" h="380px">
         {data.map((item, index) => {
           const percentage = (
             (parseFloat(item.total_amount) / totalExpenses) *
@@ -145,6 +1133,7 @@ const CustomerInsights = ({ data, summary, title = 'Analisis Pelanggan' }) => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const brandColor = useColorModeValue('brand.500', 'white');
   const customerInsightBgColor = useColorModeValue('white', 'navy.700');
+  const chartId = `customer-chart-${Date.now()}`;
 
   const formatRupiah = (value) => {
     return new Intl.NumberFormat('id-ID', {
@@ -168,10 +1157,28 @@ const CustomerInsights = ({ data, summary, title = 'Analisis Pelanggan' }) => {
   };
 
   return (
-    <Box bg={customerInsightBgColor} borderRadius="20px" p="20px">
-      <Text fontSize="lg" fontWeight="bold" mb="20px" color={textColor}>
-        {title}
-      </Text>
+    <Box bg={customerInsightBgColor} borderRadius="20px" p="20px" id={chartId}>
+      <Flex justify="space-between" align="center" mb="20px">
+        <Text fontSize="lg" fontWeight="bold" color={textColor}>
+          {title}
+        </Text>
+        <ExportButtons
+          onPrint={() => exportFunctions.handlePrint(chartId, title)}
+          onPDFExport={() =>
+            exportFunctions.handlePDFExport(chartId, 'customer-insights', title)
+          }
+          onExcelExport={() =>
+            exportFunctions.handleExcelExport(
+              data,
+              'customer-data',
+              'Customers',
+              'customer',
+              summary,
+            )
+          }
+          title={title}
+        />
+      </Flex>
 
       {/* Summary Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} gap="20px" mb="20px">
@@ -246,6 +1253,7 @@ const SalesHourChart = ({ data, title = 'Penjualan per Jam' }) => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const brandColor = useColorModeValue('brand.500', 'white');
   const salesHourChartBgColor = useColorModeValue('white', 'navy.700');
+  const chartId = `sales-hour-chart-${Date.now()}`;
 
   const formatRupiah = (value) => {
     return new Intl.NumberFormat('id-ID', {
@@ -256,12 +1264,42 @@ const SalesHourChart = ({ data, title = 'Penjualan per Jam' }) => {
   };
 
   return (
-    <Box bg={salesHourChartBgColor} borderRadius="20px" p="20px" h="400px">
-      <Text fontSize="lg" fontWeight="bold" mb="20px" color={textColor}>
-        {title}
-      </Text>
-      <ResponsiveContainer width="100%" height="90%">
+    <Box
+      bg={salesHourChartBgColor}
+      borderRadius="20px"
+      p="20px"
+      h="480px"
+      id={chartId}
+    >
+      <Flex justify="space-between" align="center" mb="20px">
+        <Text fontSize="lg" fontWeight="bold" color={textColor}>
+          {title}
+        </Text>
+        <ExportButtons
+          onPrint={() => exportFunctions.handlePrint(chartId, title)}
+          onPDFExport={() =>
+            exportFunctions.handlePDFExport(chartId, 'sales-hour-chart', title)
+          }
+          onExcelExport={() =>
+            exportFunctions.handleExcelExport(
+              data,
+              'sales-hour-data',
+              'Sales Hour',
+              'sales-hour',
+            )
+          }
+          title={title}
+        />
+      </Flex>
+      <ResponsiveContainer width="100%" height="85%">
         <BarChart data={data}>
+          <defs>
+            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#63b3ed" stopOpacity={0.8} />
+              <stop offset="100%" stopColor="#2b6cb0" stopOpacity={0.8} />
+            </linearGradient>
+          </defs>
+
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="hour"
@@ -275,7 +1313,7 @@ const SalesHourChart = ({ data, title = 'Penjualan per Jam' }) => {
           />
           <Bar
             dataKey="total_revenue"
-            fill={brandColor}
+            fill="url(#barGradient)"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
@@ -284,4 +1322,10 @@ const SalesHourChart = ({ data, title = 'Penjualan per Jam' }) => {
   );
 };
 
-export { RevenueChart, ExpenseBreakdown, CustomerInsights, SalesHourChart };
+export {
+  RevenueChart,
+  ExpenseBreakdown,
+  CustomerInsights,
+  SalesHourChart,
+  GlobalDashboardExport,
+};
