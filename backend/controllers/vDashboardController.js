@@ -236,6 +236,7 @@ class DashboardController {
   async getExpenseBreakdown(req, res) {
     try {
       const { period = "current" } = req.query;
+      console.log("req.query : ", req.query);
 
       let dateFilter = `DATE_TRUNC('month', cost_date) = DATE_TRUNC('month', CURRENT_DATE)`;
 
@@ -260,6 +261,8 @@ class DashboardController {
       `;
 
       const result = await pool.query(query);
+
+      console.log("result expense breakdown : ", result.rows);
       res.json(result.rows);
     } catch (error) {
       console.error("Error fetching expense breakdown:", error);
