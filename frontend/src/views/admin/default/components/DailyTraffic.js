@@ -67,6 +67,8 @@ export default function DailyTraffic(props) {
           axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`),
           axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`),
         ]);
+        // console.log('statsResponse.data:', statsResponse.data);
+        // console.log('dailyResponse.data:', dailyResponse.data);
 
         setVisitorStats(statsResponse.data);
         setDailyData(dailyResponse.data);

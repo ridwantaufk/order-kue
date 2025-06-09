@@ -8,8 +8,10 @@ import {
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useSearchStore } from 'components/search/searchStore';
+import { useLocation } from 'react-router-dom';
 
 export function SearchBar(props) {
+  const location = useLocation();
   const { variant, background, placeholder, borderRadius, ...rest } = props;
   const setSearchTerm = useSearchStore((state) => state.setSearchTerm);
 
@@ -43,15 +45,36 @@ export function SearchBar(props) {
       <Input
         variant="search"
         fontSize="sm"
-        bg={background || inputBg}
+        bg={
+          !location.pathname !== '/admin/data-tables' ||
+          !location.pathname !== '/orderan'
+            ? inputBg
+            : background || inputBg
+        }
         color={inputText}
         fontWeight="500"
         _placeholder={{ color: 'gray.400', fontSize: '14px' }}
         borderRadius={borderRadius || '30px'}
         placeholder={placeholder || 'Search...'}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onFocus={() =>
+          !location.pathname !== '/admin/data-tables' &&
+          !location.pathname !== '/orderan' &&
+          setIsFocused(true)
+        }
+        onBlur={() =>
+          !location.pathname !== '/admin/data-tables' &&
+          !location.pathname !== '/orderan' &&
+          setIsFocused(false)
+        }
+        onChange={(e) =>
+          !location.pathname !== '/admin/data-tables' &&
+          !location.pathname !== '/orderan' &&
+          setSearchTerm(e.target.value)
+        }
+        disabled={
+          location.pathname !== '/admin/data-tables' &&
+          location.pathname !== '/orderan'
+        }
       />
     </InputGroup>
   );
