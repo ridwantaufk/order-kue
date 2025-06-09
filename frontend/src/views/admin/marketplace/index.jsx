@@ -622,8 +622,17 @@ export default function Marketplace() {
         `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
         requestData,
       );
+      // console.log('Payment response:', response.data.data);
 
       setPaymentInfo(response.data.data);
+      const orderCodePrev = localStorage.getItem('order_code');
+      const orderIdNow = response.data.data.orderID;
+
+      if (orderCodePrev && orderCodePrev !== 'null' && orderCodePrev !== '') {
+        localStorage.setItem('order_code', `${orderCodePrev},${orderIdNow}`);
+      } else {
+        localStorage.setItem('order_code', orderIdNow);
+      }
 
       toast({
         title: 'Pembayaran Berhasil Dibuat',
@@ -1019,7 +1028,7 @@ export default function Marketplace() {
                     onChange={(e) => {
                       // Hanya allow angka dan beberapa karakter khusus
                       const value = e.target.value.replace(/[^0-9+]/g, '');
-                      if (value.length <= 15) {
+                      if (value.length <= 12) {
                         // Batasi panjang nomor
                         setPhoneNumber(value);
                         setIsPhoneInvalid(false); // Reset error saat user mengetik

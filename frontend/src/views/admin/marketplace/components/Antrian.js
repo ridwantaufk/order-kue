@@ -33,7 +33,7 @@ export default function Antrian() {
   const [orders, setOrders] = useState([]);
   const searchTerm = useSearchStore((state) => state.searchTerm);
   const [sorting, setSorting] = useState([
-    { id: 'status', desc: true },
+    // { id: 'status', desc: true },
     { id: 'updated_at', desc: true },
   ]);
 
@@ -82,10 +82,12 @@ export default function Antrian() {
     };
 
     socket.on('initialOrders', (initialDataOrders) => {
+      // console.log('initialOrders:', initialDataOrders);
       setOrders(filterOrdersByDate(initialDataOrders));
     });
 
     socket.on('ordersUpdate', (updatedDataOrders) => {
+      // console.log('ordersUpdate:', updatedDataOrders);
       setOrders(filterOrdersByDate(updatedDataOrders));
     });
 

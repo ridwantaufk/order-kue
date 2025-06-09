@@ -1,5 +1,8 @@
 Catatan Ridwan ReactJs+NodeJs+ExpressJs anjay
 
+export database local ke postgresql :
+pg_dump -U postgres -W -F p -d db_orderkue -f sql_terbaru_setelah_improvement_ke2.sql
+
 import database postgreSQL local ke railway :
 1. Create PostgreSQL di railway
 2. dapatkan informasi variable dan akses postgres public network

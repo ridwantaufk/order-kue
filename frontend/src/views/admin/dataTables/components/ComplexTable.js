@@ -55,14 +55,16 @@ import {
 } from 'react-icons/md';
 import { io } from 'socket.io-client';
 import { DateTime } from 'luxon';
+import { useSearchStore } from 'components/search/searchStore';
 
 const columnHelper = createColumnHelper();
 
 export default function ComplexTable() {
+  const searchTerm = useSearchStore((state) => state.searchTerm);
   const toast = useToast();
   const [orders, setOrders] = React.useState([]);
   const [sorting, setSorting] = React.useState([
-    { id: 'status', asc: true },
+    // { id: 'status', asc: true },
     { id: 'updated_at', desc: true },
   ]);
   const [showConfirm, setShowConfirm] = React.useState(false);
@@ -123,10 +125,12 @@ export default function ComplexTable() {
     };
 
     socket.on('initialOrders', (initialDataOrders) => {
+      console.log('initialDataOrders:', initialDataOrders);
       setOrders(filterOrdersByDate(initialDataOrders));
     });
 
     socket.on('ordersUpdate', (updatedDataOrders) => {
+      console.log('updatedDataOrders:', updatedDataOrders);
       setOrders(filterOrdersByDate(updatedDataOrders));
     });
 
@@ -316,8 +320,21 @@ export default function ComplexTable() {
     }),
   ];
 
+  React.useEffect(() => {
+    console.log('orders hasill :', orders);
+  }, [orders]);
+
+  const filteredOrders = React.useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return orders.filter((order) => {
+      const code = order.order_code?.toLowerCase() || '';
+      const name = order.customer_name?.toLowerCase() || '';
+      return code.includes(term) || name.includes(term);
+    });
+  }, [orders, searchTerm]);
+
   const table = useReactTable({
-    data: orders,
+    data: filteredOrders,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -849,31 +866,25 @@ export default function ComplexTable() {
             ))}
           </Thead>
           <Tbody>
-            {table
-              .getRowModel()
-              .rows.slice(0, 11)
-              .map((row) => (
-                <Tr
-                  key={row.id}
-                  cursor="pointer"
-                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
-                  onClick={() => handleRowClick(row.original)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <Td
-                      key={cell.id}
-                      fontSize={{ sm: '14px' }}
-                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                      borderColor="transparent"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </Td>
-                  ))}
-                </Tr>
-              ))}
+            {table.getRowModel().rows.map((row) => (
+              <Tr
+                key={row.id}
+                cursor="pointer"
+                _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
+                onClick={() => handleRowClick(row.original)}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <Td
+                    key={cell.id}
+                    fontSize={{ sm: '14px' }}
+                    minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                    borderColor="transparent"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Td>
+                ))}
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </Box>
