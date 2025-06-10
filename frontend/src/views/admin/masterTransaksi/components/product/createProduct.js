@@ -12,6 +12,7 @@ import {
   Input,
   Textarea,
   useToast,
+  Select,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
@@ -27,12 +28,14 @@ export default function CreateProduct() {
     cost_price: '',
     price: '',
     stock: '',
+    category: '',
   });
   const [isReadOnly, setIsReadOnly] = React.useState(false);
   const [countdown, setCountdown] = React.useState(0);
   const [iconFile, setIconFile] = React.useState(null);
   const toast = useToast();
   const iconInputRef = React.useRef(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     let timer;
@@ -48,6 +51,7 @@ export default function CreateProduct() {
         cost_price: '',
         price: '',
         stock: '',
+        category: '',
       });
       setIconFile(null);
       if (iconInputRef.current) {
@@ -107,12 +111,17 @@ export default function CreateProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     if (
       !productData.product_name ||
       !productData.description ||
       !productData.cost_price ||
       !productData.price ||
-      !productData.stock
+      !productData.stock ||
+      !productData.category
     ) {
       toast({
         title: 'Error.',
@@ -140,6 +149,7 @@ export default function CreateProduct() {
         'stock',
         parseInt(productData.stock.replace(/[^0-9]/g, '')),
       );
+      formData.append('category', productData.category);
       if (iconFile) {
         formData.append('icon', iconFile);
       }
@@ -157,8 +167,21 @@ export default function CreateProduct() {
           },
         },
       );
+      console.log('Response create : ', response.data);
+      // return;
 
-      console.log('Product added:', response.data);
+      const productId = response.data?.product_id;
+
+      if (productId) {
+        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/favorite`, {
+          product_id: productId,
+          favorite: 0,
+        });
+      } else {
+        console.warn('product_id tidak ditemukan di response.');
+      }
+
+      // console.log('Product added:', response.data);
 
       toast({
         title: 'Berhasil!',
@@ -170,6 +193,7 @@ export default function CreateProduct() {
 
       setIsReadOnly(true);
       setCountdown(5);
+      setIsSubmitting(false);
     } catch (error) {
       console.error(
         'Error adding product:',
@@ -182,6 +206,7 @@ export default function CreateProduct() {
         duration: 3000,
         isClosable: true,
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -292,6 +317,28 @@ export default function CreateProduct() {
         </FormControl>
         <FormControl mb={4}>
           <FormLabel color={useColorModeValue('gray.800', 'white')}>
+            Kategori Produk
+          </FormLabel>
+          <Select
+            name="category"
+            value={productData.category}
+            onChange={handleChange}
+            placeholder="Pilih kategori"
+            required
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? readOnlyBg : createTableBg}
+            color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Kategori harus dipilih.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          >
+            <option value="makanan">Makanan</option>
+            <option value="minuman">Minuman</option>
+          </Select>
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel color={useColorModeValue('gray.800', 'white')}>
             Unggah Icon
           </FormLabel>
           <Input
@@ -311,6 +358,7 @@ export default function CreateProduct() {
         <Flex justifyContent="flex-end">
           <Button
             type="submit"
+            isLoading={isSubmitting}
             colorScheme="teal"
             isDisabled={isReadOnly}
             bg={useColorModeValue('teal.500', 'teal.300')}

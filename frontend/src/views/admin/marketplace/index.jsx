@@ -1440,10 +1440,9 @@ export default function Marketplace() {
 
                 // Logika untuk menyembunyikan produk
                 const isHidden =
-                  (searchKeyword === 'brownies' &&
-                    !productName.includes('brownies')) ||
-                  (searchKeyword === 'minuman' &&
-                    productName.includes('brownies'));
+                  searchKeyword &&
+                  product.category.toLowerCase() !==
+                    searchKeyword.toLowerCase();
 
                 return (
                   <Item

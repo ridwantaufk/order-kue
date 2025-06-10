@@ -30,6 +30,10 @@ const Product = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    category: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
     available: {
       type: DataTypes.BOOLEAN,
       allowNull: true,

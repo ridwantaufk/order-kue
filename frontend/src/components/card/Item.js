@@ -69,11 +69,14 @@ export default function Item(props) {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
-      })
+      .get(
+        `${process.env.REACT_APP_BACKEND_URL}/api/orderItems`,
+        // {
+        //   headers: {
+        //     'ngrok-skip-browser-warning': 'true',
+        //   },
+        // }
+      )
       .then((response) => {
         let totalQuantity = 0;
 

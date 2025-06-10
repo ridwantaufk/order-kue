@@ -21,6 +21,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Image,
+  Badge,
 } from '@chakra-ui/react';
 import * as React from 'react';
 import axios from 'axios';
@@ -259,6 +260,7 @@ export default function ViewProduct({ onEdit }) {
             <Th cursor="pointer" isNumeric onClick={() => handleSort('stock')}>
               Stok
             </Th>
+            <Th>Kategori</Th>
             <Th>Gambar</Th>
             <Th>Aksi</Th>
           </Tr>
@@ -356,6 +358,35 @@ export default function ViewProduct({ onEdit }) {
               >
                 {formatStock(product.stock)}{' '}
               </Td>
+              <Td
+                textDecoration={
+                  product.stock <= 0 && product.available === false
+                    ? 'line-through'
+                    : 'none'
+                }
+                color={
+                  product.stock <= 0 && product.available === false
+                    ? rowBgColorTd
+                    : undefined
+                }
+              >
+                <Badge
+                  colorScheme={
+                    product.category === 'makanan'
+                      ? 'green'
+                      : product.category === 'minuman'
+                      ? 'blue'
+                      : 'gray'
+                  }
+                >
+                  {product.category === 'makanan'
+                    ? 'Makanan'
+                    : product.category === 'minuman'
+                    ? 'Minuman'
+                    : 'Lainnya'}
+                </Badge>
+              </Td>
+
               <Td>
                 <Image
                   src={
