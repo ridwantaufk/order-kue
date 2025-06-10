@@ -108,9 +108,11 @@ sequelize
       const envPath = path.join(__dirname, "../frontend/.env");
       if (fs.existsSync(envPath)) {
         // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-        // const backendUrl = `https://6df3-140-0-53-148.ngrok-free.app`; // ngrok
+        // const backendUrl = `https://1fd7-140-0-53-148.ngrok-free.app`; // ngrok
         // const backendUrl = `http://localhost:5000`;
         const backendUrl = `http://140.0.53.148:5000`;
+        // const backendUrl = `https://mighty-wings-vanish.loca.lt`;
+        // const backendUrl = `https://estimated-else-horse-fairly.trycloudflare.com`;
         console.log("ada backend url : ", backendUrl);
         fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
         console.log(

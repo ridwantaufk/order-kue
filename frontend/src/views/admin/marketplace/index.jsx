@@ -265,7 +265,10 @@ export default function Marketplace() {
   useEffect(() => {
     deleteInputRef.current = deleteInput;
   }, [deleteInput]);
-
+  // console.log(
+  //   'process.env.REACT_APP_BACKEND_URL : ',
+  //   process.env.REACT_APP_BACKEND_URL,
+  // );
   useEffect(() => {
     const fetchProducts = async () => {
       console.log(
@@ -283,7 +286,6 @@ export default function Marketplace() {
         );
         console.log('response.data : ', response.data);
 
-        // Sort data
         const sortedData = response.data.sort((a, b) =>
           a.product_name.localeCompare(b.product_name),
         );

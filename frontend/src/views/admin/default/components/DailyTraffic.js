@@ -37,9 +37,9 @@ export default function DailyTraffic(props) {
   const [visitorStats, setVisitorStats] = useState({
     totalVisitors: 0,
     todayVisitors: 0,
+    uniqueIPs: 0,
   });
   const [dailyData, setDailyData] = useState([]);
-  const [visitorDetails, setVisitorDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [growthPercentage, setGrowthPercentage] = useState(0);
@@ -48,7 +48,8 @@ export default function DailyTraffic(props) {
     topCities: [],
     topPages: [],
     deviceTypes: { mobile: 0, desktop: 0 },
-    uniqueIPs: 0,
+    hourlyDistribution: [],
+    locationAccuracy: { withGPS: 0, withoutGPS: 0, gpsPercentage: 0 },
   });
 
   // Chakra Color Mode
@@ -62,16 +63,27 @@ export default function DailyTraffic(props) {
       try {
         setLoading(true);
 
-        // Fetch visitor stats dan daily data secara bersamaan
-        const [statsResponse, dailyResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`),
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`),
-        ]);
-        // console.log('statsResponse.data:', statsResponse.data);
-        // console.log('dailyResponse.data:', dailyResponse.data);
+        // Fetch visitor stats, daily data, dan insights secara bersamaan
+        const [statsResponse, dailyResponse, insightsResponse] =
+          await Promise.all([
+            axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`,
+            ),
+            axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`,
+            ),
+            axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/api/visitors/insights`,
+            ),
+          ]);
+
+        console.log('Stats:', statsResponse.data);
+        console.log('Daily:', dailyResponse.data);
+        console.log('Insights:', insightsResponse.data);
 
         setVisitorStats(statsResponse.data);
         setDailyData(dailyResponse.data);
+        setInsights(insightsResponse.data);
 
         // Hitung persentase pertumbuhan berdasarkan data 7 hari terakhir
         const dailyDataArray = dailyResponse.data;
@@ -84,38 +96,6 @@ export default function DailyTraffic(props) {
             setGrowthPercentage(growth);
           }
         }
-
-        // Simulasi data insights berdasarkan pola data yang Anda berikan
-        // Dalam implementasi nyata, ini harus dari API terpisah
-        setInsights({
-          topCountries: [
-            {
-              country: 'Indonesia',
-              code: 'ID',
-              count: statsResponse.data.totalVisitors,
-            },
-          ],
-          topCities: [
-            {
-              city: 'Sidoarjo',
-              region: 'Jawa Timur',
-              count: Math.floor(statsResponse.data.totalVisitors * 0.6),
-            },
-            {
-              city: 'Bandung',
-              region: 'Jawa Barat',
-              count: Math.floor(statsResponse.data.totalVisitors * 0.4),
-            },
-          ],
-          topPages: [
-            { page: '/orderan', count: statsResponse.data.totalVisitors },
-          ],
-          deviceTypes: {
-            mobile: Math.floor(statsResponse.data.totalVisitors * 0.7),
-            desktop: Math.floor(statsResponse.data.totalVisitors * 0.3),
-          },
-          uniqueIPs: Math.floor(statsResponse.data.totalVisitors * 0.8),
-        });
       } catch (err) {
         console.error('Error fetching visitor data:', err);
         setError('Failed to load visitor data');
@@ -303,7 +283,7 @@ export default function DailyTraffic(props) {
                   fontSize="sm"
                   fontWeight="500"
                 >
-                  Daily Traffic Analytics
+                  Analisis <i>Traffic</i> Harian
                 </Text>
               </Flex>
               <Flex align="end">
@@ -321,7 +301,7 @@ export default function DailyTraffic(props) {
                   fontSize="sm"
                   fontWeight="500"
                 >
-                  Today
+                  Hari ini
                 </Text>
               </Flex>
               <HStack spacing={4} mt={2}>
@@ -329,7 +309,7 @@ export default function DailyTraffic(props) {
                   Total: {visitorStats.totalVisitors.toLocaleString()} visitors
                 </Text>
                 <Text color="secondaryGray.600" fontSize="xs">
-                  Unique IPs: {insights.uniqueIPs.toLocaleString()}
+                  Unique IPs: {visitorStats.uniqueIPs.toLocaleString()}
                 </Text>
               </HStack>
             </Flex>
@@ -349,7 +329,7 @@ export default function DailyTraffic(props) {
             </Flex>
           </Flex>
 
-          {/* <Box h="200px" mt="20px" w="100%">
+          <Box h="200px" mt="20px" w="100%">
             {dailyData.length > 0 ? (
               <BarChart
                 chartData={formatChartData()}
@@ -360,7 +340,7 @@ export default function DailyTraffic(props) {
                 <Text color="secondaryGray.600">No data available</Text>
               </Flex>
             )}
-          </Box> */}
+          </Box>
         </Card>
       </GridItem>
 
@@ -373,24 +353,31 @@ export default function DailyTraffic(props) {
               <HStack>
                 <Icon as={RiGlobalLine} color="blue.500" />
                 <Text fontWeight="600" fontSize="md">
-                  Geographic Distribution
+                  Distribusi geografis
                 </Text>
               </HStack>
               <Divider />
               <VStack align="start" spacing={2} w="100%">
-                {insights.topCities.map((city, index) => (
-                  <Flex key={index} justify="space-between" w="100%">
-                    <HStack>
-                      <Icon as={RiMapPinLine} color="gray.500" size="sm" />
-                      <Text fontSize="sm">
-                        {city.city}, {city.region}
-                      </Text>
-                    </HStack>
-                    <Badge colorScheme="blue" size="sm">
-                      {city.count}
-                    </Badge>
-                  </Flex>
-                ))}
+                {insights.topCities.length > 0 ? (
+                  insights.topCities.slice(0, 5).map((city, index) => (
+                    <Flex key={index} justify="space-between" w="100%">
+                      <HStack>
+                        <Icon as={RiMapPinLine} color="gray.500" size="sm" />
+                        <Text fontSize="sm">
+                          {city.city}
+                          {city.region && `, ${city.region}`}
+                        </Text>
+                      </HStack>
+                      <Badge colorScheme="blue" size="sm">
+                        {city.count}
+                      </Badge>
+                    </Flex>
+                  ))
+                ) : (
+                  <Text fontSize="sm" color="gray.500">
+                    No location data available
+                  </Text>
+                )}
               </VStack>
             </VStack>
           </Card>
@@ -401,7 +388,7 @@ export default function DailyTraffic(props) {
               <HStack>
                 <Icon as={RiPhoneLine} color="green.500" />
                 <Text fontWeight="600" fontSize="md">
-                  Device Types
+                  Jenis Perangkat
                 </Text>
               </HStack>
               <Divider />
@@ -413,11 +400,13 @@ export default function DailyTraffic(props) {
                   </HStack>
                   <Badge colorScheme="green" size="sm">
                     {insights.deviceTypes.mobile} (
-                    {Math.round(
-                      (insights.deviceTypes.mobile /
-                        visitorStats.totalVisitors) *
-                        100,
-                    )}
+                    {visitorStats.totalVisitors > 0
+                      ? Math.round(
+                          (insights.deviceTypes.mobile /
+                            visitorStats.totalVisitors) *
+                            100,
+                        )
+                      : 0}
                     %)
                   </Badge>
                 </Flex>
@@ -428,11 +417,13 @@ export default function DailyTraffic(props) {
                   </HStack>
                   <Badge colorScheme="purple" size="sm">
                     {insights.deviceTypes.desktop} (
-                    {Math.round(
-                      (insights.deviceTypes.desktop /
-                        visitorStats.totalVisitors) *
-                        100,
-                    )}
+                    {visitorStats.totalVisitors > 0
+                      ? Math.round(
+                          (insights.deviceTypes.desktop /
+                            visitorStats.totalVisitors) *
+                            100,
+                        )
+                      : 0}
                     %)
                   </Badge>
                 </Flex>
@@ -446,28 +437,69 @@ export default function DailyTraffic(props) {
               <HStack>
                 <Icon as={RiTimeLine} color="orange.500" />
                 <Text fontWeight="600" fontSize="md">
-                  Popular Pages
+                  Halaman Akses
                 </Text>
               </HStack>
               <Divider />
               <VStack align="start" spacing={2} w="100%">
-                {insights.topPages.map((page, index) => (
-                  <Flex key={index} justify="space-between" w="100%">
-                    <Text
-                      fontSize="sm"
-                      fontFamily="mono"
-                      bg="gray.100"
-                      px={2}
-                      py={1}
-                      borderRadius="md"
-                    >
-                      {page.page}
-                    </Text>
-                    <Badge colorScheme="orange" size="sm">
-                      {page.count} visits
-                    </Badge>
-                  </Flex>
-                ))}
+                {insights.topPages.length > 0 ? (
+                  insights.topPages.slice(0, 5).map((page, index) => (
+                    <Flex key={index} justify="space-between" w="100%">
+                      <Text
+                        fontSize="sm"
+                        fontFamily="mono"
+                        bg="gray.100"
+                        px={2}
+                        py={1}
+                        borderRadius="md"
+                      >
+                        {page.page}
+                      </Text>
+                      <Badge colorScheme="orange" size="sm">
+                        {page.count} visits
+                      </Badge>
+                    </Flex>
+                  ))
+                ) : (
+                  <Text fontSize="sm" color="gray.500">
+                    No page data available
+                  </Text>
+                )}
+              </VStack>
+            </VStack>
+          </Card>
+
+          {/* Location Accuracy */}
+          <Card>
+            <VStack align="start" spacing={3} w="100%">
+              <HStack>
+                <Icon as={RiGlobalLine} color="teal.500" />
+                <Text fontWeight="600" fontSize="md">
+                  Loc Tracking (Track Lokasi)
+                </Text>
+              </HStack>
+              <Divider />
+              <VStack align="start" spacing={2} w="100%">
+                <Flex justify="space-between" w="100%">
+                  <HStack>
+                    <Icon as={RiMapPinLine} color="green.500" size="sm" />
+                    <Text fontSize="sm">GPS Diaktifkan</Text>
+                  </HStack>
+                  <Badge colorScheme="green" size="sm">
+                    {insights.locationAccuracy.withGPS} (
+                    {insights.locationAccuracy.gpsPercentage}%)
+                  </Badge>
+                </Flex>
+                <Flex justify="space-between" w="100%">
+                  <HStack>
+                    <Icon as={RiGlobalLine} color="gray.500" size="sm" />
+                    <Text fontSize="sm">IP Only</Text>
+                  </HStack>
+                  <Badge colorScheme="gray" size="sm">
+                    {insights.locationAccuracy.withoutGPS} (
+                    {100 - insights.locationAccuracy.gpsPercentage}%)
+                  </Badge>
+                </Flex>
               </VStack>
             </VStack>
           </Card>

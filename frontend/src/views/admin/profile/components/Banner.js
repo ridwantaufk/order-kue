@@ -313,7 +313,7 @@ export default function ModernUserProfile() {
         completeData.password = value;
       }
 
-      console.log('req.body update : ', completeData);
+      // console.log('req.body update : ', completeData);
 
       const response = await axios.put(
         `${

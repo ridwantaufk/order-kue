@@ -143,6 +143,11 @@ class DashboardController {
 
       const summaryResult = await pool.query(summaryQuery);
 
+      // console.log("data backend : ", {
+      //   customers: result.rows,
+      //   summary: summaryResult.rows[0],
+      // });
+
       res.json({
         customers: result.rows,
         summary: summaryResult.rows[0],
@@ -217,7 +222,7 @@ class DashboardController {
           FROM t_order_items oi
           JOIN t_orders o ON oi.order_id = o.order_id
           WHERE o.created_at >= CURRENT_DATE - INTERVAL '${period} days'
-            AND o.status != 'cancelled'
+            AND o.status NOT IN ('Batal', 'Menunggu')
           GROUP BY oi.product_id
         ) sales ON p.product_id = sales.product_id
         WHERE p.available = true
@@ -238,32 +243,64 @@ class DashboardController {
       const { period = "current" } = req.query;
       console.log("req.query : ", req.query);
 
-      let dateFilter = `DATE_TRUNC('month', cost_date) = DATE_TRUNC('month', CURRENT_DATE)`;
+      // Filter tanggal untuk m_costs
+      let costDateFilter = `DATE_TRUNC('month', cost_date) = DATE_TRUNC('month', CURRENT_DATE)`;
+      // Filter tanggal untuk m_ingredients (asumsi pakai kolom created_at)
+      let ingredientDateFilter = `DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)`;
 
       if (period === "last3months") {
-        dateFilter = `cost_date >= CURRENT_DATE - INTERVAL '3 months'`;
+        costDateFilter = `cost_date >= CURRENT_DATE - INTERVAL '3 months'`;
+        ingredientDateFilter = `created_at >= CURRENT_DATE - INTERVAL '3 months'`;
       } else if (period === "last6months") {
-        dateFilter = `cost_date >= CURRENT_DATE - INTERVAL '6 months'`;
+        costDateFilter = `cost_date >= CURRENT_DATE - INTERVAL '6 months'`;
+        ingredientDateFilter = `created_at >= CURRENT_DATE - INTERVAL '6 months'`;
       }
 
-      const query = `
-        SELECT 
-          cost_name,
-          SUM(amount) as total_amount,
-          COUNT(*) as frequency,
-          AVG(amount) as avg_amount,
-          MAX(amount) as max_amount,
-          MIN(amount) as min_amount
-        FROM m_costs
-        WHERE active = true AND ${dateFilter}
-        GROUP BY cost_name
-        ORDER BY total_amount DESC
-      `;
+      // Query untuk m_costs
+      const costsQuery = `
+      SELECT 
+        cost_name,
+        SUM(amount) as total_amount,
+        COUNT(*) as frequency,
+        AVG(amount) as avg_amount,
+        MAX(amount) as max_amount,
+        MIN(amount) as min_amount
+      FROM m_costs
+      WHERE active = true AND ${costDateFilter}
+      GROUP BY cost_name
+    `;
 
-      const result = await pool.query(query);
+      // Query untuk m_ingredients
+      // total_amount dihitung dari quantity * price_per_unit
+      const ingredientsQuery = `
+      SELECT
+        ingredient_name AS cost_name,
+        SUM(quantity * price_per_unit) AS total_amount,
+        COUNT(*) AS frequency,
+        AVG(quantity * price_per_unit) AS avg_amount,
+        MAX(quantity * price_per_unit) AS max_amount,
+        MIN(quantity * price_per_unit) AS min_amount
+      FROM m_ingredients
+      WHERE ${ingredientDateFilter}
+      GROUP BY ingredient_name
+    `;
 
-      console.log("result expense breakdown : ", result.rows);
-      res.json(result.rows);
+      // Eksekusi kedua query secara paralel
+      const [costsResult, ingredientsResult] = await Promise.all([
+        pool.query(costsQuery),
+        pool.query(ingredientsQuery),
+      ]);
+
+      // Gabungkan hasil keduanya
+      const combined = [...costsResult.rows, ...ingredientsResult.rows];
+
+      // Jika ingin mengurutkan gabungan berdasarkan total_amount DESC
+      combined.sort(
+        (a, b) => parseFloat(b.total_amount) - parseFloat(a.total_amount)
+      );
+
+      console.log("Combined expense breakdown: ", combined);
+      res.json(combined);
     } catch (error) {
       console.error("Error fetching expense breakdown:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -284,7 +321,7 @@ class DashboardController {
         FROM t_orders o
         JOIN t_order_items oi ON o.order_id = oi.order_id
         WHERE o.created_at >= CURRENT_DATE - INTERVAL '${days} days'
-          AND o.status != 'cancelled'
+          AND o.status NOT IN ('Batal', 'Menunggu')
         GROUP BY EXTRACT(HOUR FROM o.created_at)
         ORDER BY hour
       `;
