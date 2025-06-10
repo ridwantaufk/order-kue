@@ -6,6 +6,7 @@ const {
   deleteFileFromGitHub,
 } = require("../utils/githubUploadDelete");
 const sequelize = require("../config/db");
+const ProductUtils = require("../models/tUtilsProductModel");
 
 // Mendapatkan semua produk
 exports.getProducts = async (req, res) => {
@@ -34,9 +35,32 @@ exports.createProduct = async (req, res) => {
       category,
     });
 
-    res.status(201).json(newProduct);
+    console.log("New product created:", newProduct);
+
+    // Tambahkan favorite default 0 untuk produk baru
+    try {
+      console.log("Data sebelum ProductUtils.create:", {
+        product_id: newProduct.dataValues.product_id,
+        favorite: 0,
+      });
+
+      await ProductUtils.create({
+        product_id: newProduct.dataValues.product_id,
+        favorite: 0,
+      });
+    } catch (utilsError) {
+      console.error("Error in ProductUtils.create:", utilsError);
+      return res
+        .status(500)
+        .json({ message: "Gagal menambahkan data ke ProductUtils" });
+    }
+
+    res.status(201).json(newProduct.dataValues);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error in createProduct:", error);
+    res
+      .status(400)
+      .json({ message: error.message || "Gagal menambahkan produk" });
   }
 };
 

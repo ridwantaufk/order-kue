@@ -421,7 +421,7 @@ export default function HeaderLinks(props) {
         ]);
 
         setVisitorStats(statsResponse.data);
-        console.log('Visitor stats updated:', statsResponse.data);
+        // console.log('Visitor stats updated:', statsResponse.data);
       } catch (error) {
         console.error('Error fetching visitor stats:', error);
       }
