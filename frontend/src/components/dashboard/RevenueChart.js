@@ -936,7 +936,7 @@ const GlobalDashboardExport = ({
       <Flex justify="space-between" align="center">
         <Box>
           <Text fontSize="lg" fontWeight="bold" color={textColor} mb="5px">
-            Complete Dashboard Export
+            Export Dashboard Lengkap
           </Text>
           <Text fontSize="sm" color="gray.500">
             Export semua data dashboard lengkap dalam berbagai format
@@ -950,7 +950,7 @@ const GlobalDashboardExport = ({
             onClick={handleGlobalPrint}
             _hover={{ bg: 'gray.50' }}
           >
-            Print All Data
+            Print Semua Data
           </Button>
           <Button
             leftIcon={<MdPictureAsPdf />}
@@ -958,7 +958,7 @@ const GlobalDashboardExport = ({
             colorScheme="red"
             onClick={handleGlobalPDF}
           >
-            Export Complete PDF
+            Export PDF
           </Button>
           <Button
             leftIcon={<MdTableChart />}
@@ -966,7 +966,7 @@ const GlobalDashboardExport = ({
             colorScheme="green"
             onClick={handleGlobalExcel}
           >
-            Export Complete Excel
+            Export Excel
           </Button>
         </HStack>
       </Flex>

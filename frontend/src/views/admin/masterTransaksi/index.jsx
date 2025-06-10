@@ -8,7 +8,7 @@ import Ingredients from './components/ingredient';
 import Tools from './components/tool';
 
 export default function Settings() {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(true);
   const handleExpand = () => {
     setIsExpanded((prev) => !prev); // Toggle between expanded and not
   };

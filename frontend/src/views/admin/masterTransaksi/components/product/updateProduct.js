@@ -14,6 +14,7 @@ import {
   Tooltip,
   Spinner,
   Textarea,
+  Select,
 } from '@chakra-ui/react';
 import { CloseIcon, RepeatIcon } from '@chakra-ui/icons';
 
@@ -110,6 +111,7 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
     );
     formData.append('product_name', product.product_name);
     formData.append('description', product.description);
+    formData.append('category', product.category);
 
     // Jika ada file ikon, tambahkan ke FormData
     console.log(iconFile, ' dan ', previewIconFile);
@@ -266,6 +268,25 @@ const UpdateProduct = ({ product: productToEdit, onUpdateComplete }) => {
             color={isReadOnly ? readOnlyColor : textColor}
             onInvalid={(e) => e.target.setCustomValidity('Stok harus diisi.')}
           />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel>Kategori Produk</FormLabel>
+          <Select
+            name="category"
+            value={product?.category || ''}
+            onChange={handleChange}
+            placeholder="Pilih kategori"
+            isReadOnly={isReadOnly}
+            bg={isReadOnly ? readOnlyBg : editableBg}
+            color={isReadOnly ? readOnlyColor : textColor}
+            onInvalid={(e) =>
+              e.target.setCustomValidity('Kategori produk harus dipilih.')
+            }
+            onInput={(e) => e.target.setCustomValidity('')}
+          >
+            <option value="makanan">Makanan</option>
+            <option value="minuman">Minuman</option>
+          </Select>
         </FormControl>
         <FormControl mb={4}>
           <FormLabel color={useColorModeValue('gray.800', 'white')}>

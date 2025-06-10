@@ -20,7 +20,8 @@ exports.getProducts = async (req, res) => {
 // Menambahkan produk baru
 exports.createProduct = async (req, res) => {
   try {
-    const { product_name, description, price, stock, cost_price } = req.body;
+    const { product_name, description, price, stock, cost_price, category } =
+      req.body;
     const icon = req.file ? req.file.filename : null;
 
     const newProduct = await Product.create({
@@ -30,6 +31,7 @@ exports.createProduct = async (req, res) => {
       stock,
       cost_price,
       icon,
+      category,
     });
 
     res.status(201).json(newProduct);
@@ -99,8 +101,15 @@ exports.updateProduct = async (req, res) => {
     }
 
     // Ambil data dari body permintaan
-    const { product_name, description, price, cost_price, stock, icon } =
-      req.body;
+    const {
+      product_name,
+      description,
+      price,
+      cost_price,
+      stock,
+      icon,
+      category,
+    } = req.body;
     let iconFile = product.icon;
 
     // // Cek jika `icon` dari body adalah 'delete', maka hapus ikon lama (berlaku di project local, bukan github. Perhatikan penyimpanan untuk kebutuhan github atau project lokal)
@@ -169,6 +178,7 @@ exports.updateProduct = async (req, res) => {
       cost_price,
       stock,
       icon: iconFile,
+      category,
     });
 
     res.status(200).json({ success: true, product });
