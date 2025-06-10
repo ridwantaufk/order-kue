@@ -158,7 +158,7 @@ export default function CreateProduct() {
 
       // return;
 
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/api/products`,
         formData,
         {
@@ -167,21 +167,6 @@ export default function CreateProduct() {
           },
         },
       );
-      console.log('Response create : ', response.data);
-      // return;
-
-      const productId = response.data?.product_id;
-
-      if (productId) {
-        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/favorite`, {
-          product_id: productId,
-          favorite: 0,
-        });
-      } else {
-        console.warn('product_id tidak ditemukan di response.');
-      }
-
-      // console.log('Product added:', response.data);
 
       toast({
         title: 'Berhasil!',

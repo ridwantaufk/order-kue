@@ -46,8 +46,36 @@ function SignUp() {
   });
   const [error, setError] = useState('');
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'name') {
+      setForm({
+        ...form,
+        [name]: value.replace(/\b\w/g, (char) => char.toUpperCase()),
+      });
+    } else if (name === 'birth_date') {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      setForm({
+        ...form,
+        birth_date: value,
+        age: age >= 0 ? age : '', // biar ga negatif
+      });
+    } else if (name === 'phone_number') {
+      // Hanya izinkan angka
+      const numericValue = value.replace(/\D/g, '');
+      setForm({ ...form, [name]: numericValue });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -174,6 +202,7 @@ function SignUp() {
                   size="lg"
                   fontSize="sm"
                   borderRadius="md"
+                  readOnly
                 />
               </FormControl>
             </Flex>
@@ -188,7 +217,8 @@ function SignUp() {
                   value={form.phone_number}
                   onChange={handleChange}
                   type="tel"
-                  placeholder="No. HP"
+                  maxLength={12}
+                  placeholder="08xxxxxxxx"
                   size="lg"
                   fontSize="sm"
                   borderRadius="md"
