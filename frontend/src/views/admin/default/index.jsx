@@ -127,40 +127,53 @@ export default function UserReports() {
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/summary`,
       );
 
+      // console.log('summaryResponse.data :', summaryResponse.data);
+
       // Fetch top selling products
       const productsResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/top-products`,
       );
 
+      // console.log('productsResponse.data :', productsResponse.data);
+
       // Fetch daily sales trend
       const trendResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/daily-trend`,
       );
+      // console.log('trendResponse.data :', trendResponse.data);
 
       // Fetch inventory status
       const inventoryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/inventory-status`,
       );
 
+      // console.log('inventoryResponse.data :', inventoryResponse.data);
+
       // Fetch customer analysis
       const customerResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/customer-analysis`,
       );
+      // console.log('customerResponse.data :', customerResponse.data);
 
       // Fetch expense breakdown
       const expenseResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/expense-breakdown?period=${selectedPeriod}`,
       );
 
+      // console.log('expenseResponse.data :', expenseResponse.data);
+
       // Fetch sales by hour
       const salesHourResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/sales-by-hour`,
       );
 
+      // console.log('salesHourResponse.data :', salesHourResponse.data);
+
       // Fetch revenue forecast
       const forecastResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/revenue-forecast`,
       );
+      // console.log('forecastResponse.data :', forecastResponse.data);
 
       // Set all data
       setDashboardData(summaryResponse.data);

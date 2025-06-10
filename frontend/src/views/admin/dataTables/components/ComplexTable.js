@@ -94,7 +94,7 @@ export default function ComplexTable() {
   React.useEffect(() => {
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      // extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
     const today = DateTime.now().setZone('Asia/Jakarta').toISODate();

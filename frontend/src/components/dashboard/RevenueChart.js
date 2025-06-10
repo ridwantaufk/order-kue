@@ -114,9 +114,9 @@ const exportFunctions = {
         processedData = data.map((item) => ({
           Tanggal: new Date(item.sale_date).toLocaleDateString('id-ID'),
           'Pendapatan Harian': item.daily_revenue,
-          'Jumlah Transaksi': item.transaction_count || 0,
+          'Jumlah Transaksi': item.daily_orders || 0,
           'Rata-rata per Transaksi':
-            item.daily_revenue / (item.transaction_count || 1),
+            item.daily_revenue / (item.daily_orders || 1),
         }));
         break;
 
@@ -153,9 +153,9 @@ const exportFunctions = {
         processedData = data.map((item) => ({
           Jam: `${item.hour}:00`,
           'Total Pendapatan': item.total_revenue,
-          'Jumlah Transaksi': item.transaction_count || 0,
+          'Jumlah Transaksi': item.total_orders || 0,
           'Rata-rata per Transaksi':
-            item.total_revenue / (item.transaction_count || 1),
+            item.total_revenue / (item.total_orders || 1),
         }));
         break;
 
@@ -330,7 +330,7 @@ const GlobalDashboardExport = ({
               <tr>
                 <td>${formatDate(item.sale_date)}</td>
                 <td>${formatRupiah(item.daily_revenue)}</td>
-                <td>${item.transaction_count || 0}</td>
+                <td>${item.daily_orders || 0}</td>
               </tr>
             `,
               )
@@ -571,7 +571,7 @@ const GlobalDashboardExport = ({
       }
       pdf.text(formatDate(item.sale_date), 20, yPos);
       pdf.text(formatRupiah(item.daily_revenue), 80, yPos);
-      pdf.text((item.transaction_count || 0).toString(), 140, yPos);
+      pdf.text((item.daily_orders || 0).toString(), 140, yPos);
       yPos += 6;
     });
 
@@ -660,6 +660,13 @@ const GlobalDashboardExport = ({
     const wb = XLSX.utils.book_new();
     const timestamp = new Date().toISOString().split('T')[0];
 
+    // Helper function to safely convert to number
+    const toNumber = (value) => {
+      if (value === null || value === undefined || value === '') return 0;
+      const num = Number(value);
+      return isNaN(num) ? 0 : num;
+    };
+
     // 1. DASHBOARD SUMMARY SHEET
     const dashboardSummaryData = [
       ['COMPLETE DASHBOARD REPORT', ''],
@@ -667,20 +674,23 @@ const GlobalDashboardExport = ({
       ['Generated Time', new Date().toLocaleTimeString('id-ID')],
       ['', ''],
       ['RINGKASAN UTAMA', ''],
-      ['Pendapatan Bulan Ini', dashboardData?.[0]?.total_sales || 0],
-      ['Total Pengeluaran', dashboardData?.[0]?.total_expenses || 0],
-      ['Laba Bersih', dashboardData?.[0]?.net_profit || 0],
-      ['Total Pesanan', dashboardData?.[0]?.total_orders || 0],
-      ['Pelanggan Unik', dashboardData?.[0]?.unique_customers || 0],
+      ['Pendapatan Bulan Ini', toNumber(dashboardData?.[0]?.total_sales)],
+      ['Total Pengeluaran', toNumber(dashboardData?.[0]?.total_expenses)],
+      ['Laba Bersih', toNumber(dashboardData?.[0]?.net_profit)],
+      ['Total Pesanan', toNumber(dashboardData?.[0]?.total_orders)],
+      ['Pelanggan Unik', toNumber(dashboardData?.[0]?.unique_customers)],
       [
         'Margin Keuntungan (%)',
-        dashboardData?.[0]?.profit_margin_percentage || 0,
+        toNumber(dashboardData?.[0]?.profit_margin_percentage),
       ],
       ['', ''],
       ['PROYEKSI PENDAPATAN', ''],
-      ['Bulan Ini', revenueForecast?.current_month_sales || 0],
-      ['Proyeksi Bulan Depan', revenueForecast?.forecasted_next_month || 0],
-      ['Tingkat Pertumbuhan (%)', revenueForecast?.avg_growth_rate || 0],
+      ['Bulan Ini', toNumber(revenueForecast?.current_month_sales)],
+      [
+        'Proyeksi Bulan Depan',
+        toNumber(revenueForecast?.forecasted_next_month),
+      ],
+      ['Tingkat Pertumbuhan (%)', toNumber(revenueForecast?.avg_growth_rate)],
     ];
 
     const summaryWs = XLSX.utils.aoa_to_sheet(dashboardSummaryData);
@@ -688,70 +698,130 @@ const GlobalDashboardExport = ({
     XLSX.utils.book_append_sheet(wb, summaryWs, 'Dashboard Summary');
 
     // 2. COMPLETE REVENUE SHEET
-    if (revenueData && revenueData.length > 0) {
-      const revenueProcessed = revenueData.map((item) => ({
-        Tanggal: new Date(item.sale_date).toLocaleDateString('id-ID'),
-        'Pendapatan Harian': item.daily_revenue,
-        'Jumlah Transaksi': item.transaction_count || 0,
-        'Rata-rata per Transaksi': (
-          item.daily_revenue / (item.transaction_count || 1)
-        ).toFixed(0),
-        Hari: new Date(item.sale_date).toLocaleDateString('id-ID', {
-          weekday: 'long',
-        }),
-      }));
+    console.log('revenueDatas:', revenueData);
+    if (revenueData && Array.isArray(revenueData) && revenueData.length > 0) {
+      try {
+        const revenueProcessed = revenueData.map((item) => ({
+          Tanggal: new Date(item.sale_date).toLocaleDateString('id-ID'),
+          'Pendapatan Harian': toNumber(item.daily_revenue),
+          'Jumlah Transaksi': toNumber(item.daily_orders),
+          'Rata-rata per Transaksi':
+            toNumber(item.daily_orders) > 0
+              ? Math.round(
+                  toNumber(item.daily_revenue) / toNumber(item.daily_orders),
+                )
+              : 0,
+          Hari: new Date(item.sale_date).toLocaleDateString('id-ID', {
+            weekday: 'long',
+          }),
+        }));
 
-      // Tambah total dan statistik
-      const totalRevenue = revenueData.reduce(
-        (sum, item) => sum + item.daily_revenue,
-        0,
-      );
-      const totalTransactions = revenueData.reduce(
-        (sum, item) => sum + (item.transaction_count || 0),
-        0,
-      );
-
-      revenueProcessed.push({
-        Tanggal: 'TOTAL',
-        'Pendapatan Harian': totalRevenue,
-        'Jumlah Transaksi': totalTransactions,
-        'Rata-rata per Transaksi': (totalRevenue / totalTransactions).toFixed(
+        // Tambah total dan statistik
+        const totalRevenue = revenueData.reduce(
+          (sum, item) => sum + toNumber(item.daily_revenue),
           0,
-        ),
-        Hari: '',
-      });
+        );
+        const totalTransactions = revenueData.reduce(
+          (sum, item) => sum + toNumber(item.daily_orders),
+          0,
+        );
 
-      const revenueWs = XLSX.utils.json_to_sheet(revenueProcessed);
-      revenueWs['!cols'] = [
+        revenueProcessed.push({
+          Tanggal: '=== TOTAL ===',
+          'Pendapatan Harian': totalRevenue,
+          'Jumlah Transaksi': totalTransactions,
+          'Rata-rata per Transaksi':
+            totalTransactions > 0
+              ? Math.round(totalRevenue / totalTransactions)
+              : 0,
+          Hari: '',
+        });
+
+        const revenueWs = XLSX.utils.json_to_sheet(revenueProcessed);
+        revenueWs['!cols'] = [
+          { wch: 15 },
+          { wch: 20 },
+          { wch: 18 },
+          { wch: 22 },
+          { wch: 12 },
+        ];
+        XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue Complete');
+        console.log('Revenue sheet berhasil dibuat');
+      } catch (error) {
+        console.error('Error creating revenue sheet:', error);
+      }
+    } else {
+      console.log('Revenue data kosong atau tidak valid');
+      // Buat sheet kosong dengan header
+      const emptyRevenueData = [
+        [
+          'Tanggal',
+          'Pendapatan Harian',
+          'Jumlah Transaksi',
+          'Rata-rata per Transaksi',
+          'Hari',
+        ],
+        ['Data tidak tersedia', '', '', '', ''],
+      ];
+      const emptyRevenueWs = XLSX.utils.aoa_to_sheet(emptyRevenueData);
+      emptyRevenueWs['!cols'] = [
         { wch: 15 },
         { wch: 20 },
         { wch: 18 },
         { wch: 22 },
         { wch: 12 },
       ];
-      XLSX.utils.book_append_sheet(wb, revenueWs, 'Revenue Complete');
+      XLSX.utils.book_append_sheet(wb, emptyRevenueWs, 'Revenue Complete');
     }
 
     // 3. COMPLETE EXPENSE SHEET
-    if (expenseData && expenseData.length > 0) {
-      const total = expenseData.reduce(
-        (sum, item) => sum + parseFloat(item.total_amount),
-        0,
-      );
-      const expenseProcessed = expenseData.map((item) => ({
-        'Jenis Pengeluaran': item.cost_name,
-        'Total Amount': parseFloat(item.total_amount),
-        Frekuensi: item.frequency,
-        'Rata-rata': parseFloat(item.avg_amount),
-        'Persentase (%)': (
-          (parseFloat(item.total_amount) / total) *
-          100
-        ).toFixed(2),
-        'Total dari Keseluruhan': total,
-      }));
+    if (expenseData && Array.isArray(expenseData) && expenseData.length > 0) {
+      try {
+        const total = expenseData.reduce(
+          (sum, item) => sum + toNumber(item.total_amount),
+          0,
+        );
+        const expenseProcessed = expenseData.map((item) => ({
+          'Jenis Pengeluaran': item.cost_name || 'N/A',
+          'Total Amount': toNumber(item.total_amount),
+          Frekuensi: toNumber(item.frequency),
+          'Rata-rata': toNumber(item.avg_amount),
+          'Persentase (%)':
+            total > 0
+              ? Number(((toNumber(item.total_amount) / total) * 100).toFixed(2))
+              : 0,
+          'Total dari Keseluruhan': total,
+        }));
 
-      const expenseWs = XLSX.utils.json_to_sheet(expenseProcessed);
-      expenseWs['!cols'] = [
+        const expenseWs = XLSX.utils.json_to_sheet(expenseProcessed);
+        expenseWs['!cols'] = [
+          { wch: 25 },
+          { wch: 18 },
+          { wch: 12 },
+          { wch: 18 },
+          { wch: 15 },
+          { wch: 20 },
+        ];
+        XLSX.utils.book_append_sheet(wb, expenseWs, 'Expenses Complete');
+        console.log('Expense sheet berhasil dibuat');
+      } catch (error) {
+        console.error('Error creating expense sheet:', error);
+      }
+    } else {
+      console.log('Expense data kosong atau tidak valid');
+      const emptyExpenseData = [
+        [
+          'Jenis Pengeluaran',
+          'Total Amount',
+          'Frekuensi',
+          'Rata-rata',
+          'Persentase (%)',
+          'Total dari Keseluruhan',
+        ],
+        ['Data tidak tersedia', '', '', '', '', ''],
+      ];
+      const emptyExpenseWs = XLSX.utils.aoa_to_sheet(emptyExpenseData);
+      emptyExpenseWs['!cols'] = [
         { wch: 25 },
         { wch: 18 },
         { wch: 12 },
@@ -759,26 +829,62 @@ const GlobalDashboardExport = ({
         { wch: 15 },
         { wch: 20 },
       ];
-      XLSX.utils.book_append_sheet(wb, expenseWs, 'Expenses Complete');
+      XLSX.utils.book_append_sheet(wb, emptyExpenseWs, 'Expenses Complete');
     }
 
     // 4. COMPLETE TOP PRODUCTS SHEET
-    if (topProducts && topProducts.length > 0) {
-      const productsProcessed = topProducts.map((item, index) => ({
-        Ranking: index + 1,
-        'Nama Produk': item.product_name,
-        'Total Terjual (Unit)': item.total_sold,
-        'Total Pendapatan': item.total_revenue,
-        'Total Profit': item.total_profit,
-        'Profit per Unit': item.profit_per_unit,
-        'Margin Profit (%)': (
-          (item.total_profit / item.total_revenue) *
-          100
-        ).toFixed(2),
-      }));
+    if (topProducts && Array.isArray(topProducts) && topProducts.length > 0) {
+      try {
+        const productsProcessed = topProducts.map((item, index) => ({
+          Ranking: index + 1,
+          'Nama Produk': item.product_name || 'N/A',
+          'Total Terjual (Unit)': toNumber(item.total_sold),
+          'Total Pendapatan': toNumber(item.total_revenue),
+          'Total Profit': toNumber(item.total_profit),
+          'Profit per Unit': toNumber(item.profit_per_unit),
+          'Margin Profit (%)':
+            toNumber(item.total_revenue) > 0
+              ? Number(
+                  (
+                    (toNumber(item.total_profit) /
+                      toNumber(item.total_revenue)) *
+                    100
+                  ).toFixed(2),
+                )
+              : 0,
+        }));
 
-      const productsWs = XLSX.utils.json_to_sheet(productsProcessed);
-      productsWs['!cols'] = [
+        const productsWs = XLSX.utils.json_to_sheet(productsProcessed);
+        productsWs['!cols'] = [
+          { wch: 10 },
+          { wch: 30 },
+          { wch: 18 },
+          { wch: 18 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 18 },
+        ];
+        XLSX.utils.book_append_sheet(wb, productsWs, 'Top Products Complete');
+        console.log('Products sheet berhasil dibuat');
+      } catch (error) {
+        console.error('Error creating products sheet:', error);
+      }
+    } else {
+      console.log('Products data kosong atau tidak valid');
+      const emptyProductsData = [
+        [
+          'Ranking',
+          'Nama Produk',
+          'Total Terjual (Unit)',
+          'Total Pendapatan',
+          'Total Profit',
+          'Profit per Unit',
+          'Margin Profit (%)',
+        ],
+        ['', 'Data tidak tersedia', '', '', '', '', ''],
+      ];
+      const emptyProductsWs = XLSX.utils.aoa_to_sheet(emptyProductsData);
+      emptyProductsWs['!cols'] = [
         { wch: 10 },
         { wch: 30 },
         { wch: 18 },
@@ -787,28 +893,136 @@ const GlobalDashboardExport = ({
         { wch: 15 },
         { wch: 18 },
       ];
-      XLSX.utils.book_append_sheet(wb, productsWs, 'Top Products Complete');
+      XLSX.utils.book_append_sheet(
+        wb,
+        emptyProductsWs,
+        'Top Products Complete',
+      );
     }
 
     // 5. COMPLETE CUSTOMER SHEET
-    if (customerData && customerData.length > 0) {
-      const customerProcessed = customerData.map((item, index) => ({
-        Ranking: index + 1,
-        'Nama Pelanggan': item.customer_name,
-        'Total Pembelian': item.total_spent,
-        'Jumlah Pesanan': item.total_orders,
-        'Total Item': item.total_items_purchased,
-        'Status Pelanggan': item.customer_status,
-        'Rata-rata per Pesanan': (item.total_spent / item.total_orders).toFixed(
-          0,
-        ),
-        'Rata-rata Item per Pesanan': (
-          item.total_items_purchased / item.total_orders
-        ).toFixed(1),
-      }));
+    if (
+      customerData &&
+      Array.isArray(customerData) &&
+      customerData.length > 0
+    ) {
+      try {
+        const customerProcessed = customerData.map((item, index) => ({
+          Ranking: index + 1,
+          'Nama Pelanggan': item.customer_name || 'N/A',
+          'Total Pembelian': toNumber(item.total_spent),
+          'Jumlah Pesanan': toNumber(item.total_orders),
+          'Total Item': toNumber(item.total_items_purchased),
+          'Status Pelanggan': item.customer_status || 'N/A',
+          'Rata-rata per Pesanan':
+            toNumber(item.total_orders) > 0
+              ? Math.round(
+                  toNumber(item.total_spent) / toNumber(item.total_orders),
+                )
+              : 0,
+          'Rata-rata Item per Pesanan':
+            toNumber(item.total_orders) > 0
+              ? Number(
+                  (
+                    toNumber(item.total_items_purchased) /
+                    toNumber(item.total_orders)
+                  ).toFixed(1),
+                )
+              : 0,
+        }));
 
-      const customerWs = XLSX.utils.json_to_sheet(customerProcessed);
-      customerWs['!cols'] = [
+        const customerWs = XLSX.utils.json_to_sheet(customerProcessed);
+        customerWs['!cols'] = [
+          { wch: 10 },
+          { wch: 25 },
+          { wch: 18 },
+          { wch: 15 },
+          { wch: 12 },
+          { wch: 15 },
+          { wch: 22 },
+          { wch: 25 },
+        ];
+        XLSX.utils.book_append_sheet(wb, customerWs, 'Customers Complete');
+        console.log('Customer sheet berhasil dibuat');
+
+        // Customer Summary Sheet
+        if (customerSummary) {
+          try {
+            const totalCustomerRevenue = customerData.reduce(
+              (sum, item) => sum + toNumber(item.total_spent),
+              0,
+            );
+            const totalCustomerOrders = customerData.reduce(
+              (sum, item) => sum + toNumber(item.total_orders),
+              0,
+            );
+            const totalItemsSold = customerData.reduce(
+              (sum, item) => sum + toNumber(item.total_items_purchased),
+              0,
+            );
+
+            const customerSummaryData = [
+              ['RINGKASAN ANALISIS PELANGGAN', ''],
+              ['Total Pelanggan', toNumber(customerSummary.total_customers)],
+              ['Pelanggan Aktif', toNumber(customerSummary.active_customers)],
+              [
+                'Pelanggan Tidak Aktif',
+                toNumber(customerSummary.inactive_customers),
+              ],
+              ['Pelanggan Hilang', toNumber(customerSummary.lost_customers)],
+              ['', ''],
+              ['ANALISIS MENDALAM', ''],
+              ['Total Pendapatan dari Semua Pelanggan', totalCustomerRevenue],
+              [
+                'Rata-rata Pendapatan per Pelanggan',
+                customerData.length > 0
+                  ? Math.round(totalCustomerRevenue / customerData.length)
+                  : 0,
+              ],
+              ['Total Pesanan Keseluruhan', totalCustomerOrders],
+              ['Total Item Terjual', totalItemsSold],
+              [
+                'Rata-rata Pesanan per Pelanggan',
+                customerData.length > 0
+                  ? Number(
+                      (totalCustomerOrders / customerData.length).toFixed(1),
+                    )
+                  : 0,
+              ],
+            ];
+            const customerSummaryWs =
+              XLSX.utils.aoa_to_sheet(customerSummaryData);
+            customerSummaryWs['!cols'] = [{ wch: 35 }, { wch: 25 }];
+            XLSX.utils.book_append_sheet(
+              wb,
+              customerSummaryWs,
+              'Customer Summary',
+            );
+            console.log('Customer summary sheet berhasil dibuat');
+          } catch (error) {
+            console.error('Error creating customer summary sheet:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error creating customer sheet:', error);
+      }
+    } else {
+      console.log('Customer data kosong atau tidak valid');
+      const emptyCustomerData = [
+        [
+          'Ranking',
+          'Nama Pelanggan',
+          'Total Pembelian',
+          'Jumlah Pesanan',
+          'Total Item',
+          'Status Pelanggan',
+          'Rata-rata per Pesanan',
+          'Rata-rata Item per Pesanan',
+        ],
+        ['', 'Data tidak tersedia', '', '', '', '', '', ''],
+      ];
+      const emptyCustomerWs = XLSX.utils.aoa_to_sheet(emptyCustomerData);
+      emptyCustomerWs['!cols'] = [
         { wch: 10 },
         { wch: 25 },
         { wch: 18 },
@@ -818,106 +1032,128 @@ const GlobalDashboardExport = ({
         { wch: 22 },
         { wch: 25 },
       ];
-      XLSX.utils.book_append_sheet(wb, customerWs, 'Customers Complete');
-
-      // Customer Summary Sheet
-      if (customerSummary) {
-        const customerSummaryData = [
-          ['RINGKASAN ANALISIS PELANGGAN', ''],
-          ['Total Pelanggan', customerSummary.total_customers || 0],
-          ['Pelanggan Aktif', customerSummary.active_customers || 0],
-          ['Pelanggan Tidak Aktif', customerSummary.inactive_customers || 0],
-          ['Pelanggan Hilang', customerSummary.lost_customers || 0],
-          ['', ''],
-          ['ANALISIS MENDALAM', ''],
-          [
-            'Total Pendapatan dari Semua Pelanggan',
-            customerData.reduce((sum, item) => sum + item.total_spent, 0),
-          ],
-          [
-            'Rata-rata Pendapatan per Pelanggan',
-            (
-              customerData.reduce((sum, item) => sum + item.total_spent, 0) /
-              customerData.length
-            ).toFixed(0),
-          ],
-          [
-            'Total Pesanan Keseluruhan',
-            customerData.reduce((sum, item) => sum + item.total_orders, 0),
-          ],
-          [
-            'Total Item Terjual',
-            customerData.reduce(
-              (sum, item) => sum + item.total_items_purchased,
-              0,
-            ),
-          ],
-          [
-            'Rata-rata Pesanan per Pelanggan',
-            (
-              customerData.reduce((sum, item) => sum + item.total_orders, 0) /
-              customerData.length
-            ).toFixed(1),
-          ],
-        ];
-        const customerSummaryWs = XLSX.utils.aoa_to_sheet(customerSummaryData);
-        customerSummaryWs['!cols'] = [{ wch: 35 }, { wch: 25 }];
-        XLSX.utils.book_append_sheet(wb, customerSummaryWs, 'Customer Summary');
-      }
+      XLSX.utils.book_append_sheet(wb, emptyCustomerWs, 'Customers Complete');
     }
 
     // 6. COMPLETE INVENTORY SHEET
-    if (inventoryStatus && inventoryStatus.length > 0) {
-      const inventoryProcessed = inventoryStatus.map((item) => ({
-        'Nama Produk': item.product_name,
-        'Stok Saat Ini': item.current_stock,
-        'Status Stok': item.stock_status,
-        'Kategori Peringatan':
-          item.stock_status === 'Critical'
-            ? 'URGENT'
-            : item.stock_status === 'Low'
-            ? 'PERHATIAN'
-            : item.stock_status === 'Medium'
-            ? 'PANTAU'
-            : 'AMAN',
-      }));
+    if (
+      inventoryStatus &&
+      Array.isArray(inventoryStatus) &&
+      inventoryStatus.length > 0
+    ) {
+      try {
+        const inventoryProcessed = inventoryStatus.map((item) => ({
+          'Nama Produk': item.product_name || 'N/A',
+          'Stok Saat Ini': toNumber(item.current_stock),
+          'Status Stok': item.stock_status || 'N/A',
+          'Kategori Peringatan':
+            item.stock_status === 'Critical'
+              ? 'URGENT'
+              : item.stock_status === 'Low'
+              ? 'PERHATIAN'
+              : item.stock_status === 'Medium'
+              ? 'PANTAU'
+              : 'AMAN',
+        }));
 
-      const inventoryWs = XLSX.utils.json_to_sheet(inventoryProcessed);
-      inventoryWs['!cols'] = [
+        const inventoryWs = XLSX.utils.json_to_sheet(inventoryProcessed);
+        inventoryWs['!cols'] = [
+          { wch: 30 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 20 },
+        ];
+        XLSX.utils.book_append_sheet(wb, inventoryWs, 'Inventory Status');
+        console.log('Inventory sheet berhasil dibuat');
+      } catch (error) {
+        console.error('Error creating inventory sheet:', error);
+      }
+    } else {
+      console.log('Inventory data kosong atau tidak valid');
+      const emptyInventoryData = [
+        ['Nama Produk', 'Stok Saat Ini', 'Status Stok', 'Kategori Peringatan'],
+        ['Data tidak tersedia', '', '', ''],
+      ];
+      const emptyInventoryWs = XLSX.utils.aoa_to_sheet(emptyInventoryData);
+      emptyInventoryWs['!cols'] = [
         { wch: 30 },
         { wch: 15 },
         { wch: 15 },
         { wch: 20 },
       ];
-      XLSX.utils.book_append_sheet(wb, inventoryWs, 'Inventory Status');
+      XLSX.utils.book_append_sheet(wb, emptyInventoryWs, 'Inventory Status');
     }
 
     // 7. SALES BY HOUR COMPLETE SHEET
-    if (salesHourData && salesHourData.length > 0) {
-      const salesHourProcessed = salesHourData.map((item) => ({
-        'Jam Operasional': `${item.hour}:00 - ${item.hour + 1}:00`,
-        Jam: item.hour,
-        'Total Pendapatan': item.total_revenue,
-        'Jumlah Transaksi': item.transaction_count || 0,
-        'Rata-rata per Transaksi': (
-          item.total_revenue / (item.transaction_count || 1)
-        ).toFixed(0),
-        'Persentase dari Total Harian': '',
-      }));
+    if (
+      salesHourData &&
+      Array.isArray(salesHourData) &&
+      salesHourData.length > 0
+    ) {
+      try {
+        const salesHourProcessed = salesHourData.map((item) => ({
+          'Jam Operasional': `${toNumber(item.hour)}:00 - ${
+            toNumber(item.hour) + 1
+          }:00`,
+          Jam: toNumber(item.hour),
+          'Total Pendapatan': toNumber(item.total_revenue),
+          'Jumlah Transaksi': toNumber(item.total_orders),
+          'Rata-rata per Transaksi':
+            toNumber(item.total_orders) > 0
+              ? Math.round(
+                  toNumber(item.total_revenue) / toNumber(item.total_orders),
+                )
+              : 0,
+          'Persentase dari Total Harian': 0, // Will be calculated below
+        }));
 
-      // Hitung persentase
-      const totalDailyRevenue = salesHourData.reduce(
-        (sum, item) => sum + item.total_revenue,
-        0,
-      );
-      salesHourProcessed.forEach((item) => {
-        item['Persentase dari Total Harian'] =
-          ((item['Total Pendapatan'] / totalDailyRevenue) * 100).toFixed(2) +
-          '%';
-      });
+        // Hitung persentase
+        const totalDailyRevenue = salesHourData.reduce(
+          (sum, item) => sum + toNumber(item.total_revenue),
+          0,
+        );
 
-      const salesHourWs = XLSX.utils.json_to_sheet(salesHourProcessed);
-      salesHourWs['!cols'] = [
+        salesHourProcessed.forEach((item) => {
+          item['Persentase dari Total Harian'] =
+            totalDailyRevenue > 0
+              ? Number(
+                  (
+                    (item['Total Pendapatan'] / totalDailyRevenue) *
+                    100
+                  ).toFixed(2),
+                )
+              : 0;
+        });
+
+        const salesHourWs = XLSX.utils.json_to_sheet(salesHourProcessed);
+        salesHourWs['!cols'] = [
+          { wch: 20 },
+          { wch: 8 },
+          { wch: 18 },
+          { wch: 18 },
+          { wch: 22 },
+          { wch: 25 },
+        ];
+        XLSX.utils.book_append_sheet(wb, salesHourWs, 'Sales by Hour Complete');
+        console.log('Sales by hour sheet berhasil dibuat');
+      } catch (error) {
+        console.error('Error creating sales by hour sheet:', error);
+      }
+    } else {
+      console.log('Sales by hour data kosong atau tidak valid');
+      const emptySalesHourData = [
+        [
+          'Jam Operasional',
+          'Jam',
+          'Total Pendapatan',
+          'Jumlah Transaksi',
+          'Rata-rata per Transaksi',
+          'Persentase dari Total Harian',
+        ],
+        ['Data tidak tersedia', '', '', '', '', ''],
+      ];
+      const emptySalesHourWs = XLSX.utils.aoa_to_sheet(emptySalesHourData);
+      emptySalesHourWs['!cols'] = [
         { wch: 20 },
         { wch: 8 },
         { wch: 18 },
@@ -925,10 +1161,23 @@ const GlobalDashboardExport = ({
         { wch: 22 },
         { wch: 25 },
       ];
-      XLSX.utils.book_append_sheet(wb, salesHourWs, 'Sales by Hour Complete');
+      XLSX.utils.book_append_sheet(
+        wb,
+        emptySalesHourWs,
+        'Sales by Hour Complete',
+      );
     }
 
-    XLSX.writeFile(wb, `complete-dashboard-report-${timestamp}.xlsx`);
+    // Save file
+    try {
+      XLSX.writeFile(wb, `complete-dashboard-report-${timestamp}.xlsx`);
+      console.log(
+        'File Excel berhasil dibuat:',
+        `complete-dashboard-report-${timestamp}.xlsx`,
+      );
+    } catch (error) {
+      console.error('Error saving Excel file:', error);
+    }
   };
 
   return (
@@ -975,25 +1224,27 @@ const GlobalDashboardExport = ({
 };
 
 const RevenueChart = ({ data, title = 'Tren Penjualan Harian' }) => {
-  const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const brandColor = useColorModeValue('brand.500', 'white');
-  const revenueChartBgColor = useColorModeValue('white', 'navy.700');
+  const textColor = useColorModeValue('#1A202C', '#F6E05E'); // dark gray & gold
+  const axisTextColor = useColorModeValue('#2D3748', '#FBD38D'); // darker gray & soft orange
+  const brandColor = useColorModeValue('#E53E3E', '#63B3ED'); // red (light) & blue (dark)
+  const dotColor = useColorModeValue('#9B2C2C', '#90CDF4'); // dark red & light blue
+  const tooltipBg = useColorModeValue('#FFFFFF', '#2D3748'); // white & dark gray
+  const revenueChartBgColor = useColorModeValue('#FFF5F5', '#1A202C'); // very light pink & dark gray-blue
+
   const chartId = `revenue-chart-${Date.now()}`;
 
-  const formatRupiah = (value) => {
-    return new Intl.NumberFormat('id-ID', {
+  const formatRupiah = (value) =>
+    new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(value);
-  };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('id-ID', {
       day: '2-digit',
       month: '2-digit',
     });
-  };
 
   return (
     <Box
@@ -1023,12 +1274,27 @@ const RevenueChart = ({ data, title = 'Tren Penjualan Harian' }) => {
           title={title}
         />
       </Flex>
+
       <ResponsiveContainer width="100%" height="85%">
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="sale_date" tickFormatter={formatDate} fontSize={12} />
-          <YAxis tickFormatter={(value) => formatRupiah(value)} fontSize={12} />
+          <CartesianGrid strokeDasharray="3 3" stroke={axisTextColor} />
+          <XAxis
+            dataKey="sale_date"
+            tickFormatter={formatDate}
+            fontSize={12}
+            stroke={axisTextColor}
+          />
+          <YAxis
+            tickFormatter={formatRupiah}
+            fontSize={12}
+            stroke={axisTextColor}
+          />
           <Tooltip
+            contentStyle={{
+              backgroundColor: tooltipBg,
+              borderRadius: '8px',
+              color: textColor,
+            }}
             formatter={(value) => [formatRupiah(value), 'Pendapatan']}
             labelFormatter={(label) => `Tanggal: ${formatDate(label)}`}
           />
@@ -1036,9 +1302,9 @@ const RevenueChart = ({ data, title = 'Tren Penjualan Harian' }) => {
             type="monotone"
             dataKey="daily_revenue"
             stroke={brandColor}
-            strokeWidth={3}
-            dot={{ fill: brandColor, strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6 }}
+            strokeWidth={4}
+            dot={{ fill: dotColor, stroke: brandColor, strokeWidth: 2, r: 5 }}
+            activeDot={{ r: 7 }}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -1250,6 +1516,7 @@ const CustomerInsights = ({ data, summary, title = 'Analisis Pelanggan' }) => {
 };
 
 const SalesHourChart = ({ data, title = 'Penjualan per Jam' }) => {
+  // console.log('SalesHourChart data:', data);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const brandColor = useColorModeValue('brand.500', 'white');
   const salesHourChartBgColor = useColorModeValue('white', 'navy.700');

@@ -48,7 +48,7 @@ export default function Antrian() {
   useEffect(() => {
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      // extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
     socket.on('connect', () => console.log('Connected to Socket.IO server'));

@@ -244,7 +244,7 @@ export default function HeaderLinks(props) {
 
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      // extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
     socketRef.current = socket;
@@ -835,7 +835,7 @@ export default function HeaderLinks(props) {
             </Stat>
 
             {/* Informasi IP Unik */}
-            <Stat mb={4}>
+            {/* <Stat mb={4}>
               <StatLabel
                 fontSize="lg"
                 fontWeight="bold"
@@ -850,7 +850,7 @@ export default function HeaderLinks(props) {
               <StatHelpText fontSize="sm" color="gray.500">
                 Jumlah IP address yang berbeda
               </StatHelpText>
-            </Stat>
+            </Stat> */}
 
             {/* Informasi Orders Hari Ini */}
             <Stat>
