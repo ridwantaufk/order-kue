@@ -1,0 +1,217 @@
+@startuml ObjectDiagram_Orders
+
+' === OBJEK BAHAN & BIAYA ===
+object "ingredientCocoa : MIngredients" {
+  ingredient_id = 9
+  ingredient_name = "Bubuk Cokelat"
+  quantity = 1.00
+  unit = "kg"
+  price_per_unit = 100000
+  available = true
+}
+
+object "ingredientSugar : MIngredients" {
+  ingredient_id = 10
+  ingredient_name = "Gula Pasir"
+  quantity = 1.00
+  unit = "kg"
+  price_per_unit = 15000
+  available = true
+}
+
+object "ingredientFlour : MIngredients" {
+  ingredient_id = 11
+  ingredient_name = "Tepung Terigu"
+  quantity = 1.00
+  unit = "kg"
+  price_per_unit = 10000
+  available = true
+}
+
+object "ingredientEggs : MIngredients" {
+  ingredient_id = 12
+  ingredient_name = "Telur"
+  quantity = 30.00
+  unit = "butir"
+  price_per_unit = 60000
+  available = true
+}
+
+object "costGas : MCosts" {
+  cost_id = 8
+  cost_name = "Gas Elpiji 3kg"
+  amount = 60000
+  active = true
+}
+
+' === OBJEK PRODUK ===
+object "productChoco : MProducts" {
+  product_id = 120
+  product_name = "Brownies Chocochips"
+  price = 35000
+  available = false
+  cost_price = 20000
+  current_stock = 0
+}
+
+object "productCeres : MProducts" {
+  product_id = 121
+  product_name = "Brownies Ceres"
+  price = 35000
+  available = false
+  cost_price = 20000
+  current_stock = 0
+}
+
+' === OBJEK ITEM PESANAN ===
+object "itemChoco : TOrderItems" {
+  order_item_id = 192
+  order_id = 195
+  product_id = 120
+  quantity = 1
+  price = 35000
+}
+
+object "itemCeres : TOrderItems" {
+  order_item_id = 193
+  order_id = 195
+  product_id = 121
+  quantity = 1
+  price = 35000
+}
+
+' === OBJEK PESANAN ===
+object "orderAgnia : TOrders" {
+  order_id = 195
+  order_code = "ORDER-1749550000962-8558"
+  customer_name = "Agnia Clara"
+  status = "Diterima"
+  order_date = 2025-06-10
+  address = "Margacinta No. 12"
+  created_by = 8
+}
+
+object "superuser : Users" {
+  id = 8
+  name = "Ridwan Taufik"
+  role = "Super Admin"
+}
+
+object "visitorAgnia : Visitors" {
+  id = 192
+  ip_address = "192.168.1.10"
+  country = "Indonesia"
+  city = "Bandung"
+  page_visited = "/produk"
+  visit_time = "2025-06-10 13:45"
+  user_agent = "Mobile Safari"
+}
+
+' === OBJEK VIEW DASHBOARD ===
+object "summaryJune : VDashboardSummary" {
+  month_year = "2025-06"
+  total_sales = 700000
+  total_orders = 20
+  unique_customers = 15
+  avg_order_value = 35000
+  total_items_sold = 30
+  total_operational_cost = 600000
+  total_ingredients_cost = 250000
+  total_expenses = 850000
+  net_profit = -150000
+  profit_margin_percentage = -21.4
+}
+
+object "inventoryChoco : VInventoryStatus" {
+  product_id = 120
+  product_name = "Brownies Chocochips"
+  current_stock = 0
+  monthly_sold = 10
+  price = 35000
+  cost_price = 20000
+  stock_status = "Critical"
+  months_of_stock_remaining = 0.0
+}
+
+object "customerAgnia : VCustomerAnalysis" {
+  customer_name = "Agnia Clara"
+  total_orders = 5
+  total_spent = 175000
+  avg_order_value = 35000
+  last_order_date = 2025-06-10
+  first_order_date = 2025-05-01
+  total_items_purchased = 5
+  customer_status = "Active"
+}
+
+object "salesJune10 : VDailySalesTrend" {
+  sale_date = "2025-06-10"
+  daily_orders = 3
+  daily_revenue = 105000
+  daily_items_sold = 3
+  daily_unique_customers = 3
+}
+
+object "expensesJune10 : VExpenses" {
+  created_date = "2025-06-10"
+  total_ingredients_cost = 45000
+  total_operational_cost = 60000
+  total_sales = 105000
+  total_cost_price = 60000
+  total_profit = 45000
+}
+
+object "projectionJuly : Projection" {
+  month = "2025-07"
+  projected_sales = 750000
+  projected_profit = 120000
+}
+
+object "topChoco : VTopSellingProducts" {
+  product_id = 120
+  product_name = "Brownies Chocochips"
+  total_sold = 100
+  total_revenue = 3500000
+  profit_per_unit = 15000
+  total_profit = 1500000
+}
+
+object "exportReport : ExportedReport" {
+  report_type = "Laporan Penjualan"
+  format = "PDF"
+  exported_by = "Super Admin"
+  export_time = "2025-06-11 09:00"
+}
+
+' === RELASI LOGIS PRODUKSI → ORDER ===
+"ingredientCocoa : MIngredients" ..> "productChoco : MProducts" : bahan_dari
+"ingredientSugar : MIngredients" ..> "productChoco : MProducts" : bahan_dari
+"ingredientFlour : MIngredients" ..> "productChoco : MProducts" : bahan_dari
+"ingredientEggs : MIngredients" ..> "productChoco : MProducts" : bahan_dari
+"costGas : MCosts" ..> "productChoco : MProducts" : biaya_pendukung
+
+"ingredientCocoa : MIngredients" ..> "productCeres : MProducts" : bahan_dari
+"ingredientSugar : MIngredients" ..> "productCeres : MProducts" : bahan_dari
+"ingredientFlour : MIngredients" ..> "productCeres : MProducts" : bahan_dari
+"ingredientEggs : MIngredients" ..> "productCeres : MProducts" : bahan_dari
+"costGas : MCosts" ..> "productCeres : MProducts" : biaya_pendukung
+
+"productChoco : MProducts" --o "itemChoco : TOrderItems" : dipesan_sebagai
+"productCeres : MProducts" --o "itemCeres : TOrderItems" : dipesan_sebagai
+
+"itemChoco : TOrderItems" --* "orderAgnia : TOrders" : bagian_dari
+"itemCeres : TOrderItems" --* "orderAgnia : TOrders" : bagian_dari
+
+"orderAgnia : TOrders" ..> "superuser : Users" : dibuat_oleh
+"visitorAgnia : Visitors" ..> "orderAgnia : TOrders" : kunjungan
+
+' === RELASI KE DASHBOARD ===
+"customerAgnia : VCustomerAnalysis" ..> "summaryJune : VDashboardSummary" : menyumbang_data
+"salesJune10 : VDailySalesTrend" ..> "summaryJune : VDashboardSummary" : tren_penjualan
+"inventoryChoco : VInventoryStatus" ..> "summaryJune : VDashboardSummary" : status_stok
+"expensesJune10 : VExpenses" ..> "summaryJune : VDashboardSummary" : data_pengeluaran
+"projectionJuly : Projection" ..> "summaryJune : VDashboardSummary" : proyeksi
+"topChoco : VTopSellingProducts" ..> "summaryJune : VDashboardSummary" : produk_terlaris
+"exportReport : ExportedReport" ..> "summaryJune : VDashboardSummary" : laporan_diekspor
+
+@enduml

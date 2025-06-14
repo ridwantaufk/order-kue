@@ -1,0 +1,73 @@
+@startuml
+title State Diagram - Alur Pemesanan Produk oleh Pelanggan & Penjual
+
+' === Titik awal ===
+[*] --> MengisiForm : Pembeli mengisi form pemesanan
+
+MengisiForm --> MenungguPembayaran : <<createOrder>>
+
+' === Transisi Pembatalan ===
+MenungguPembayaran --> Batal : Tidak ada pembayaran\natau batal via chat
+MenungguPembayaran --> Dibatalkan : Dibatalkan langsung oleh pembeli
+MenungguPembayaran --> SedangDiproses : Pembeli melakukan pembayaran
+
+' === Proses normal ===
+SedangDiproses --> Ditunda : Bahan / stok tidak tersedia
+Ditunda --> SedangDiproses : Stok tersedia kembali
+
+SedangDiproses --> SedangDikirim : Produk selesai dibuat
+SedangDikirim --> Diterima : Produk diterima oleh pembeli
+Diterima --> Diarsipkan : Order selesai & masuk histori
+
+' === Pembatalan oleh sistem atau admin ===
+SedangDiproses --> Dibatalkan : Dibatalkan oleh admin/penjual
+Ditunda --> Dibatalkan : Terlalu lama menunggu stok
+
+' === Titik akhir ===
+Diarsipkan --> [*]
+Dibatalkan --> [*]
+Batal --> [*]
+
+' === Keterangan tambahan ===
+note right of MengisiForm
+  State awal saat pembeli 
+  mengisi data pemesanan
+  tanpa login
+end note
+
+note right of MenungguPembayaran
+  Menunggu pembayaran dari pembeli
+end note
+
+note right of Batal
+  Order dibatalkan oleh penjual karena\n
+  tidak ada pembayaran setelah waktu tertentu\n
+  atau pembeli meminta lewat chat/wa
+end note
+
+note right of SedangDiproses
+  Produk sedang dibuat oleh penjual
+end note
+
+note right of Ditunda
+  Produksi tertunda karena\n
+  stok atau bahan habis
+end note
+
+note right of SedangDikirim
+  Produk sedang dalam pengiriman
+end note
+
+note right of Diterima
+  Produk telah diterima pembeli
+end note
+
+note right of Diarsipkan
+  Order selesai, masuk ke histori
+end note
+
+note right of Dibatalkan
+  Order dibatalkan oleh pembeli\n
+  atau penjual secara eksplisit
+end note
+@enduml

@@ -1,0 +1,198 @@
+Project SistemPenjualanBrownies {
+  database_type: "PostgreSQL"
+}
+
+Table auth_users {
+  id uuid [pk]
+  username varchar
+  password_hash text
+  role varchar
+  is_active boolean
+  biodata_id uuid
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table auth_biodata {
+  biodata_id uuid [pk]
+  first_name varchar
+  last_name varchar
+  date_of_birth date
+  email varchar
+  phone varchar
+  occupation varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table t_orders {
+  order_id int [pk]
+  order_code text
+  customer_name varchar
+  customer_phone varchar
+  customer_address text
+  location_latitude decimal
+  location_longitude decimal
+  order_date timestamp
+  status varchar
+  device_info text
+  created_by uuid
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table t_order_items {
+  order_item_id int [pk]
+  order_id int
+  product_id int
+  quantity int
+  price decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table m_products {
+  product_id int [pk]
+  product_name varchar
+  description text
+  price decimal
+  stock int
+  cost_price decimal
+  category varchar
+  available boolean
+  icon text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table m_ingredients {
+  ingredient_id int [pk]
+  ingredient_name varchar
+  quantity decimal
+  unit varchar
+  price_per_unit decimal
+  available boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table m_costs {
+  cost_id int [pk]
+  cost_name varchar
+  cost_description text
+  amount decimal
+  cost_date date
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table m_tools {
+  tool_id int [pk]
+  tool_name varchar
+  tool_description text
+  purchase_date date
+  price decimal
+  quantity int
+  available boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table visitors {
+  id int [pk]
+  ip_address varchar
+  country varchar
+  region varchar
+  city varchar
+  page_visited varchar
+  visit_time timestamp
+  user_agent text
+  latitude decimal
+  longitude decimal
+  latitude_gps double
+  longitude_gps double
+  location_details_gps jsonb
+}
+
+Table t_utils_product {
+  id int [pk]
+  product_id int
+  favorite int
+}
+
+Table exported_report {
+  id int [pk]
+  report_type varchar
+  format varchar
+  exported_by varchar
+  export_time timestamp
+}
+
+Table v_dashboard_summary [note: 'View'] {
+  month_year timestamp
+  total_sales decimal
+  total_orders bigint
+  unique_customers bigint
+  avg_order_value decimal
+  total_items_sold bigint
+  total_operational_cost decimal
+  total_ingredients_cost decimal
+  total_expenses decimal
+  net_profit decimal
+  profit_margin_percentage decimal
+}
+
+Table v_inventory_status [note: 'View'] {
+  product_id int
+  product_name varchar
+  current_stock int
+  monthly_sold bigint
+  price decimal
+  cost_price decimal
+  stock_status varchar
+  months_of_stock_remaining decimal
+}
+
+Table v_customer_analysis [note: 'View'] {
+  customer_name varchar
+  total_orders bigint
+  total_spent decimal
+  avg_order_value decimal
+  last_order_date timestamp
+  first_order_date timestamp
+  total_items_purchased bigint
+  customer_status varchar
+}
+
+Table v_expenses [note: 'View'] {
+  created_date date
+  total_ingredients_cost decimal
+  total_operational_cost decimal
+  total_sales decimal
+  total_cost_price decimal
+  total_profit decimal
+}
+
+Table v_daily_sales_trend [note: 'View'] {
+  sale_date date
+  daily_orders int
+  daily_revenue decimal
+  daily_items_sold int
+  daily_unique_customers int
+}
+
+Table v_top_selling_products [note: 'View'] {
+  product_id int
+  product_name varchar
+  total_sold int
+  total_revenue decimal
+  profit_per_unit decimal
+  total_profit decimal
+}
+
+Ref: auth_users.biodata_id > auth_biodata.biodata_id
+Ref: t_orders.created_by > auth_users.id
+Ref: t_order_items.order_id > t_orders.order_id
+Ref: t_order_items.product_id > m_products.product_id
+Ref: t_utils_product.product_id > m_products.product_id

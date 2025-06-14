@@ -1,0 +1,42 @@
+@startuml
+title Activity Diagram – Alur Pemesanan & Pengelolaan Pesanan
+
+start
+
+:Customer mengisi form pemesanan;
+:Data disimpan ke TOrders;
+
+:Menunggu pembayaran;
+
+if (Pembayaran dilakukan?) then (Ya)
+  :Validasi pembayaran;
+  :Ubah status menjadi 'Sedang diproses';
+  
+  if (Stok/Bahan tersedia?) then (Ya)
+    :Produksi/Penyiapan produk;
+    :Ubah status menjadi 'Sedang dikirim';
+    :Kirim produk ke alamat customer;
+
+    :Produk diterima customer;
+    :Status menjadi 'Diterima';
+    :Order diarsipkan;
+  else (Tidak)
+    :Tunda proses;
+    if (Stok tersedia kembali?) then (Ya)
+      :Lanjut ke proses produksi;
+    else (Tidak)
+      :Batalkan pesanan karena stok tidak tersedia;
+    endif
+  endif
+
+else (Tidak)
+  if (Pembeli membatalkan?) then (Ya)
+    :Batalkan order oleh pembeli;
+  else (Tidak)
+    :Tunggu beberapa waktu;
+    :Admin batalkan secara manual via WA/chat;
+  endif
+endif
+
+stop
+@enduml

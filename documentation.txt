@@ -50,3 +50,10 @@ ditempatkan di GitHub atau local
 
 Adapun untuk deploy agar diakses oleh user dalam bentuk UI Frontend perlu dideploy, dapat di vercel atau railway, begitu juga backend. Saat ini saya men-deploy frontend di vecel, men-deploy backend di railway
 ====================================================================================================
+
+GENERATE KODE PUML :
+https://www.plantuml.com, atau
+CTR + SHIFT + P > PlantUML: Preview Current Diagram (download dulu ekstensi : PlantUML, atau sejenisnya)
+
+GENERATE KODE .MD / .MMD :
+CTR + SHIFT + P > Markdown: preview (download dulu ekstensi : Markdown preview, atau sejenisnya)

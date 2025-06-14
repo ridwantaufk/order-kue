@@ -1,0 +1,44 @@
+@startuml DeploymentDiagram_OrderSystem
+title Deployment Diagram – Sistem Manajemen Pemesanan & Laporan
+
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+' === INFRASTRUCTURE NODES ===
+node "Client Browser\n(Pembeli / Admin / Superuser)" as Browser {
+  component "React.js App\n[Frontend]" as Frontend
+}
+
+node "Web Server\n(Node.js + Express)" as AppServer {
+  component Backend
+  component AuthModule
+  component OrderModule
+  component ReportModule
+}
+
+node "Database Server\n(PostgreSQL)" as DBServer {
+  database PostgreSQL
+}
+
+node "Build Optimizer" as Optimizer {
+  component "UglifyJS"
+  component "Terser"
+  component "JS Obfuscator"
+}
+
+' === CONNECTIONS (Communication) ===
+Frontend --> Backend : HTTPS Request
+Backend --> PostgreSQL : SQL Query
+
+' === DEPENDENCIES ===
+Frontend ..> "UglifyJS" : <<minify>>
+Frontend ..> "Terser" : <<compress>>
+Frontend ..> "JS Obfuscator" : <<obfuscate>>
+
+AuthModule --> Backend : <<uses>>
+OrderModule --> Backend : <<uses>>
+ReportModule --> Backend : <<uses>>
+
+Backend --> AuthModule
+Backend --> OrderModule
+Backend --> ReportModule

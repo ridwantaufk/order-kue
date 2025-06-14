@@ -1,0 +1,93 @@
+@startuml
+title Component Diagram – Sistem Manajemen Pemesanan dan Laporan
+
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+' === FRONTEND ===
+package "Frontend (React.js)" {
+  [LoginPage]
+  [OrderForm]
+  [Dashboard]
+  [InventoryPage]
+  [CustomerReport]
+  [AnalyticsView]
+
+  component "HTTP-only Cookie\n(Session Storage)" as CookieStorage
+  component "REST API Consumer\n(Fetch/Axios)" as APIConsumer
+
+  LoginPage --> APIConsumer
+  OrderForm --> APIConsumer
+  Dashboard --> APIConsumer
+  InventoryPage --> APIConsumer
+  CustomerReport --> APIConsumer
+  AnalyticsView --> APIConsumer
+
+  APIConsumer --> CookieStorage : simpan token
+}
+
+' === BACKEND ===
+package "Backend (Node.js + Express.js)" {
+  component "Express Server" as Express
+  component "Auth Controller\n(JWT-based)" as Auth
+  component "Order Controller" as Order
+  component "Product Controller" as Product
+  component "Inventory Controller" as Inventory
+  component "Report Controller" as Report
+  component "Customer Analysis Controller" as CustomerAnalysis
+  component "Visitor Logger" as Visitor
+
+  Express --> Auth
+  Express --> Order
+  Express --> Product
+  Express --> Inventory
+  Express --> Report
+  Express --> CustomerAnalysis
+  Express --> Visitor
+}
+
+' === DATABASE (PostgreSQL) ===
+database "PostgreSQL" {
+  [auth.users]
+  [t_orders]
+  [t_order_items]
+  [m_products]
+  [m_ingredients]
+  [m_costs]
+  [m_tools]
+  [visitors]
+  [v_dashboard_summary]
+  [v_inventory_status]
+  [v_customer_analysis]
+}
+
+' === OPTIMIZATION TOOLS ===
+package "Frontend Build Optimizer" {
+  [UglifyJS]
+  [Terser]
+  [JavaScript Obfuscator]
+}
+
+' === RELATIONSHIP ===
+APIConsumer --> Express
+
+' Backend -> DB
+Auth --> [auth.users]
+Order --> [t_orders]
+Order --> [t_order_items]
+Product --> [m_products]
+Product --> [m_ingredients]
+Inventory --> [m_ingredients]
+Inventory --> [m_products]
+Visitor --> [visitors]
+CustomerAnalysis --> [v_customer_analysis]
+Report --> [v_dashboard_summary]
+Report --> [v_inventory_status]
+Report --> [v_customer_analysis]
+Report --> [m_costs]
+
+' Optimization tools
+[LoginPage] --> [UglifyJS] : build
+[OrderForm] --> [Terser] : build
+[Dashboard] --> [JavaScript Obfuscator] : build
+@enduml

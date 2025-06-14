@@ -1,0 +1,76 @@
+@startuml
+' === SKIN DAN STYLE ===
+skinparam style strictuml
+skinparam sequence {
+    ArrowColor Black
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor #DDDDDD
+    ActorBorderColor Black
+    ActorBackgroundColor #F5F5F5
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor #FFFFFF
+    ActivationBorderColor Black
+    ActivationBackgroundColor #EEEEEE
+}
+
+' === AKTOR ===
+actor Pembeli as CUST
+actor Admin as ADM
+actor SuperUser as SU
+
+' === OBJEK DALAM SISTEM ===
+participant "order : TOrders" as ORDER
+participant "items : TOrderItems" as ITEMS
+participant "product : MProducts" as PRODUCT
+participant "ingredients : MIngredients" as ING
+participant "costs : MCosts" as COST
+participant "dashboard : VDashboardSummary" as DASH
+participant "analysis : VCustomerAnalysis" as ANALYSIS
+participant "inventory : VInventoryStatus" as INV
+
+' === SEQUENCE FLOW CUSTOMER ===
+CUST -> ORDER : 1: createOrder(data) <<create>>
+activate ORDER
+ORDER -> ITEMS : 2: createOrderItems()
+activate ITEMS
+ITEMS -> PRODUCT : 3: getProductDetail()
+ITEMS -> PRODUCT : 4: updateStock()
+ITEMS --> ORDER : 5: return totalItems
+deactivate ITEMS
+
+ORDER -> ORDER : 6: calculateTotal() 'self-call
+ORDER -> CUST : 7: confirmOrder()
+deactivate ORDER
+
+' === SEQUENCE FLOW ADMIN ===
+ADM -> ORDER : 1: viewAllOrders()
+ADM -> ORDER : 2: updateOrderStatus()
+ADM -> PRODUCT : 3: checkStock()
+ADM -> ING : 4: viewIngredients()
+ADM -> COST : 5: viewOperationalCost()
+
+' === SEQUENCE FLOW SUPERUSER ===
+SU -> DASH : 1: viewSummary()
+activate DASH
+DASH -> ORDER : 2: fetchOrderData()
+DASH -> ITEMS : 3: fetchItemData()
+DASH -> COST : 4: fetchCosts()
+DASH -> ING : 5: fetchIngredients()
+deactivate DASH
+
+SU -> ANALYSIS : 6: viewCustomerTrends()
+activate ANALYSIS
+ANALYSIS -> ORDER : 7: getOrderHistory()
+ANALYSIS -> ITEMS : 8: getItemStats()
+deactivate ANALYSIS
+
+SU -> INV : 9: viewInventory()
+activate INV
+INV -> PRODUCT : 10: getProductStock()
+INV -> ITEMS : 11: getMonthlySales()
+deactivate INV
+
+' === DESTRUCTION (opsional contoh destroy objek session) ===
+CUST -> ORDER : destroy() <<destroy>>
+ORDER -> X : x
+@enduml
