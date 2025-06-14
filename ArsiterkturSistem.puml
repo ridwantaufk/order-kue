@@ -1,0 +1,88 @@
+@startuml ArsitekturSistemLengkap
+
+title Arsitektur Sistem Informasi Penjualan Brownies (Client-Server dengan REST API)
+
+skinparam rectangle {
+  BackgroundColor<<frontend>> #E8F8F5
+  BackgroundColor<<backend>> #FCF3CF
+  BackgroundColor<<database>> #EAF2F8
+  BorderColor Black
+  RoundCorner 10
+}
+
+actor "Pembeli\n(Costumer)" as Customer
+actor "Admin / Superuser\n(Penjual)" as Admin
+
+' === Frontend (Client-Side) ===
+rectangle "Frontend\nReact.js + Tailwind + Chakra UI" <<frontend>> {
+  [OrderFormPage]
+  [DashboardPage]
+  [InventoryPage]
+  [CustomerAnalysisView]
+}
+
+' === REST API Layer ===
+rectangle "REST API\n(Express.js Routes)" {
+  [Auth API]
+  [Order API]
+  [Product API]
+  [Report API]
+  [Visitor Tracker API]
+}
+
+' === Backend (Server-Side) ===
+rectangle "Backend Services\nNode.js + Express" <<backend>> {
+  [Auth Service]
+  [Order Service]
+  [Product Service]
+  [Report Service]
+  [Visitor Service]
+}
+
+' === Database ===
+database "PostgreSQL" <<database>> {
+  [auth.users]
+  [t_orders]
+  [t_order_items]
+  [m_products]
+  [m_ingredients]
+  [m_costs]
+  [m_tools]
+  [visitors]
+  [v_dashboard_summary]
+  [v_inventory_status]
+  [v_customer_analysis]
+}
+
+' === Interaksi User ===
+Customer --> OrderFormPage : Buat Pemesanan
+Admin --> DashboardPage : Kelola & Pantau Order
+Admin --> InventoryPage : Kelola Produk / Stok
+Admin --> CustomerAnalysisView : Lihat Laporan
+
+' === Frontend ke REST API ===
+OrderFormPage --> [Order API] : POST /orders
+DashboardPage --> [Report API] : GET /summary
+InventoryPage --> [Product API] : GET /products
+CustomerAnalysisView --> [Report API] : GET /customers
+
+' === REST API ke Backend Services ===
+[Order API] --> [Order Service]
+[Product API] --> [Product Service]
+[Auth API] --> [Auth Service]
+[Report API] --> [Report Service]
+[Visitor Tracker API] --> [Visitor Service]
+
+' === Backend Services ke Database ===
+[Order Service] --> [t_orders]
+[Order Service] --> [t_order_items]
+[Product Service] --> [m_products]
+[Product Service] --> [m_ingredients]
+[Auth Service] --> [auth.users]
+[Report Service] --> [v_dashboard_summary]
+[Report Service] --> [v_customer_analysis]
+[Report Service] --> [v_inventory_status]
+[Report Service] --> [m_costs]
+[Visitor Service] --> [visitors]
+
+@enduml

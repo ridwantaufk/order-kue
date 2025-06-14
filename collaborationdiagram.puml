@@ -1,0 +1,62 @@
+@startuml
+skinparam style strictuml
+skinparam roundcorner 10
+skinparam sequence {
+    ArrowColor Black
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor #DDDDDD
+    ActorBorderColor Black
+    ActorBackgroundColor #F5F5F5
+}
+
+' === Aktor ===
+actor "Customer\n(Pembeli)" as Customer
+actor "Admin\n(Penjual)" as Admin
+actor "SuperUser\n(Penjual & Pemilik Usaha)" as SuperUser
+
+' === Objek Sistem ===
+participant "TOrders" as TOrders
+participant "TOrderItems" as TOrderItems
+participant "MProducts" as MProducts
+participant "MIngredients" as MIngredients
+participant "MCosts" as MCosts
+participant "VDashboardSummary" as Dashboard
+participant "VInventoryStatus" as VInventory
+participant "VCustomerAnalysis" as CustomerAnalysis
+
+' === Flow Pembeli (tanpa akun) ===
+Customer -> TOrders : createOrder(data)
+TOrders -> TOrderItems : createOrderItems()
+TOrderItems -> MProducts : getProductDetail()
+TOrderItems -> MProducts : updateStock()
+TOrders -> TOrders : calculateTotal() ' self-call melengkung
+TOrders -> Customer : confirmOrder()
+
+' === Flow Admin (tanpa akses view) ===
+Admin -> TOrders : viewAllOrders()
+Admin -> TOrders : updateOrderStatus()
+Admin -> MProducts : checkStock()
+Admin -> MIngredients : viewIngredients()
+Admin -> MCosts : viewOperationalCost()
+
+' === Flow SuperUser (akses penuh termasuk view) ===
+SuperUser -> TOrders : viewAllOrders()
+SuperUser -> TOrders : updateOrderStatus()
+SuperUser -> MProducts : checkStock()
+SuperUser -> MIngredients : viewIngredients()
+SuperUser -> MCosts : viewOperationalCost()
+
+SuperUser -> Dashboard : viewSummary()
+Dashboard -> TOrders : fetchOrderData()
+Dashboard -> TOrderItems : fetchItemData()
+Dashboard -> MIngredients : fetchIngredients()
+Dashboard -> MCosts : fetchCosts()
+
+SuperUser -> CustomerAnalysis : viewCustomerTrends()
+CustomerAnalysis -> TOrders : getOrderHistory()
+CustomerAnalysis -> TOrderItems : getItemStats()
+
+SuperUser -> VInventory : viewInventory()
+VInventory -> MProducts : getProductStock()
+VInventory -> TOrderItems : getMonthlySales()
+@enduml
