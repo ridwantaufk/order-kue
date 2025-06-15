@@ -242,9 +242,9 @@ export default function Marketplace() {
     }
     setActiveCategory(category);
     if (category === 'makanan') {
-      setSearchKeyword('brownies'); // Set kata kunci pencarian menjadi 'brownies' ketika klik kategori Makanan
+      setSearchKeyword(category); // Set kata kunci pencarian menjadi 'brownies' ketika klik kategori Makanan
     } else if (category === 'minuman') {
-      setSearchKeyword('minuman'); // Kosongkan kata kunci pencarian untuk "Minuman"
+      setSearchKeyword(category); // Kosongkan kata kunci pencarian untuk "Minuman"
     } else if (category === 'semua') {
       setSearchKeyword(''); // Kosongkan kata kunci untuk "Semua Menu" agar semua produk tampil
     }
