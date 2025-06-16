@@ -1,6 +1,7 @@
 // Chakra imports
 import { Portal, Box, useDisclosure } from '@chakra-ui/react';
-import ChatFloating from 'components/chat/chat';
+import ChatBuyer from 'components/chat/chatBuyer.js';
+import ChatSeller from 'components/chat/chatSeller.js';
 import Footer from 'components/footer/FooterAdmin.js';
 // Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
@@ -21,6 +22,7 @@ export default function Dashboard(props) {
     return !!token;
   };
   const orderCode = localStorage.getItem('order_code');
+  const token = localStorage.getItem('token');
 
   // console.log('isAuthenticated : ', isAuthenticated());
 
@@ -131,7 +133,6 @@ export default function Dashboard(props) {
           }}
         >
           {isAuthenticated() && <Sidebar routes={routes} {...rest} />}
-
           <Box
             float="right"
             minHeight="100vh"
@@ -195,7 +196,8 @@ export default function Dashboard(props) {
           {orderCode &&
             orderCode !== 'null' &&
             orderCode !== 'undefined' &&
-            orderCode.trim() !== '' && <ChatFloating />}
+            orderCode.trim() !== '' && <ChatBuyer />}
+          {isAuthenticated() && <ChatSeller />}
         </SidebarContext.Provider>
       </Box>
     </Box>
