@@ -3,6 +3,10 @@ const OrderItem = require("../models/tOrderItemModel");
 const tOrdersController = require("../controllers/tOrdersController");
 const { generateVA, generateOrderID } = require("../utils/generateVA");
 const sequelize = require("../config/db");
+const { Op } = require("sequelize");
+const ChatSession = require("../models/chatSessionModel");
+const ChatMessage = require("../models/chatMessageModel");
+const User = require("../models/userModel");
 
 let payments = []; // Menyimpan data pembayaran sementara
 
@@ -101,6 +105,40 @@ exports.createPayment = async (req, res) => {
     }));
 
     await OrderItem.bulkCreate(orderItems, { transaction });
+
+    const admin = await User.findOne({
+      where: {
+        role: {
+          [Op.iLike]: "admin",
+        },
+      },
+    });
+
+    // Buat sesi chat
+    const newSession = await ChatSession.create(
+      {
+        order_id: newOrder.order_id,
+        order_code: orderID,
+        created_by_device: orderMetadata?.deviceInfo || null,
+        assigned_admin_id: admin?.id || null,
+      },
+      { transaction }
+    );
+
+    // Buat pesan otomatis dari admin (penjual)
+    await ChatMessage.create(
+      {
+        session_id: newSession.session_id,
+        sender_type: "admin",
+        sender_id: admin?.id, // fallback id 1 kalau nggak ada admin ditemukan
+        message: `Pesanan Anda dengan kode ${orderID} sedang diproses. Silakan lakukan pembayaran untuk melanjutkan.`,
+        file_url: null,
+        file_type: null,
+        location_latitude: null,
+        location_longitude: null,
+      },
+      { transaction }
+    );
 
     // Commit transaksi
     await transaction.commit();
