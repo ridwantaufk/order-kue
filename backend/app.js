@@ -50,6 +50,7 @@ const toolRoutes = require("./routes/mToolsRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const tUtilsProductRoutes = require("./routes/tUtilsProductRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/configurations", configurationsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -63,6 +64,7 @@ app.use("/api/ingredients", ingredientRoutes);
 app.use("/api/tools", toolRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/favorite", tUtilsProductRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api", visitorRoutes);
 
 tOrdersController.listenForOrderUpdates(io);

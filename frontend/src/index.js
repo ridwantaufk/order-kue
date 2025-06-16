@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './assets/css/App.css';
 import 'leaflet/dist/leaflet.css';
+import ChatFloating from 'components/chat/chat';
 
 import App from './App';
 
