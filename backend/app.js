@@ -69,11 +69,199 @@ app.use("/api", visitorRoutes);
 
 tOrdersController.listenForOrderUpdates(io);
 
+const adminSockets = new Map();
+const buyerSockets = new Map();
+
 // Inisialisasi Socket.IO
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
-  // Mengirim data awal saat klien terhubung
+  // Admin join chat
+  socket.on("admin_join", async ({ userId, token }) => {
+    try {
+      // Verify admin token here if needed
+      adminSockets.set(userId, socket.id);
+      socket.userId = userId;
+      socket.userType = "admin";
+
+      console.log(`Admin ${userId} joined chat`);
+
+      // Send all chat sessions to admin
+      const ChatSession = require("./models/chatSessionModel");
+      const ChatMessage = require("./models/chatMessageModel");
+
+      const sessions = await ChatSession.findAll({
+        include: [
+          {
+            model: ChatMessage,
+            order: [["created_at", "DESC"]],
+            limit: 1,
+          },
+        ],
+        order: [["created_at", "DESC"]],
+      });
+
+      socket.emit("chat_sessions", sessions);
+    } catch (error) {
+      console.error("Admin join error:", error);
+    }
+  });
+
+  // Buyer join chat
+  socket.on("buyer_join", async ({ orderCode }) => {
+    try {
+      buyerSockets.set(orderCode, socket.id);
+      socket.orderCode = orderCode;
+      socket.userType = "buyer";
+
+      console.log(`Buyer with order ${orderCode} joined chat`);
+
+      // Find or create chat session
+      const ChatSession = require("./models/chatSessionModel");
+      const ChatMessage = require("./models/chatMessageModel");
+
+      let session = await ChatSession.findOne({
+        where: { order_code: orderCode },
+      });
+
+      if (!session) {
+        // Create new session if not exists
+        session = await ChatSession.create({
+          order_code: orderCode,
+          status: "active",
+        });
+      }
+
+      // Send session data to buyer
+      socket.emit("chat_session", session);
+
+      // Send messages to buyer
+      const messages = await ChatMessage.findAll({
+        where: { session_id: session.session_id },
+        order: [["created_at", "ASC"]],
+      });
+
+      socket.emit("chat_messages", messages);
+
+      // Notify admin that buyer is online
+      adminSockets.forEach((adminSocketId) => {
+        io.to(adminSocketId).emit("buyer_online", {
+          orderCode,
+          online: true,
+        });
+      });
+    } catch (error) {
+      console.error("Buyer join error:", error);
+    }
+  });
+
+  // Handle sending messages
+  socket.on("send_message", async (messageData) => {
+    try {
+      console.log("Broadcasting message:", messageData);
+
+      // Broadcast to admin sockets
+      adminSockets.forEach((adminSocketId) => {
+        if (adminSocketId !== socket.id) {
+          io.to(adminSocketId).emit("new_message", messageData);
+        }
+      });
+
+      // Broadcast to buyer socket
+      if (messageData.sender_type === "admin") {
+        // Find buyer socket by session
+        const ChatSession = require("./models/chatSessionModel");
+        const session = await ChatSession.findOne({
+          where: { session_id: messageData.session_id },
+        });
+
+        if (session && buyerSockets.has(session.order_code)) {
+          const buyerSocketId = buyerSockets.get(session.order_code);
+          io.to(buyerSocketId).emit("new_message", messageData);
+        }
+      }
+
+      // If message from buyer, broadcast to all admins
+      if (messageData.sender_type === "buyer" && socket.orderCode) {
+        adminSockets.forEach((adminSocketId) => {
+          io.to(adminSocketId).emit("new_message", messageData);
+        });
+      }
+    } catch (error) {
+      console.error("Send message error:", error);
+    }
+  });
+
+  // Handle typing indicators
+  socket.on("typing", async ({ session_id, typing, user_id, order_code }) => {
+    try {
+      if (socket.userType === "admin") {
+        // Admin typing - send to buyer
+        const ChatSession = require("./models/chatSessionModel");
+        const session = await ChatSession.findOne({
+          where: { session_id },
+        });
+
+        if (session && buyerSockets.has(session.order_code)) {
+          const buyerSocketId = buyerSockets.get(session.order_code);
+          io.to(buyerSocketId).emit("admin_typing", { typing });
+        }
+      } else if (socket.userType === "buyer") {
+        // Buyer typing - send to all admins
+        adminSockets.forEach((adminSocketId) => {
+          io.to(adminSocketId).emit("user_typing", {
+            session_id,
+            user_id: order_code,
+            typing,
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Typing error:", error);
+    }
+  });
+
+  // Mark messages as read
+  socket.on(
+    "mark_messages_read",
+    async ({ session_id, user_id, order_code }) => {
+      try {
+        const ChatMessage = require("./models/chatMessageModel");
+
+        // Update read status in database
+        if (socket.userType === "admin") {
+          await ChatMessage.update(
+            { read_at: new Date() },
+            {
+              where: {
+                session_id,
+                sender_type: "buyer",
+                read_at: null,
+              },
+            }
+          );
+        } else if (socket.userType === "buyer") {
+          await ChatMessage.update(
+            { read_at: new Date() },
+            {
+              where: {
+                session_id,
+                sender_type: "admin",
+                read_at: null,
+              },
+            }
+          );
+        }
+
+        // Broadcast read status
+        io.emit("messages_marked_read", { session_id });
+      } catch (error) {
+        console.error("Mark read error:", error);
+      }
+    }
+  );
+
+  // Existing order functionality
   tOrdersController
     .getOrdersForSocket()
     .then((orders) => {
@@ -83,7 +271,6 @@ io.on("connection", (socket) => {
       console.error("Error fetching initial orders:", error);
     });
 
-  // Emit pembaruan orders langsung (perbaiki event listenernya)
   socket.on("newOrder", (order) => {
     if (order) {
       io.emit("ordersUpdate", order); // Emit update ke semua klien
@@ -91,10 +278,33 @@ io.on("connection", (socket) => {
       console.log("No order data received");
     }
   });
-
-  // Mendengarkan perbaruan data
+  // Handle disconnect
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
+
+    // Remove from admin sockets
+    for (let [userId, socketId] of adminSockets.entries()) {
+      if (socketId === socket.id) {
+        adminSockets.delete(userId);
+        break;
+      }
+    }
+
+    // Remove from buyer sockets and notify admin
+    for (let [orderCode, socketId] of buyerSockets.entries()) {
+      if (socketId === socket.id) {
+        buyerSockets.delete(orderCode);
+
+        // Notify admin that buyer is offline
+        adminSockets.forEach((adminSocketId) => {
+          io.to(adminSocketId).emit("buyer_online", {
+            orderCode,
+            online: false,
+          });
+        });
+        break;
+      }
+    }
   });
 });
 
@@ -111,7 +321,8 @@ sequelize
       if (fs.existsSync(envPath)) {
         // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
         // const backendUrl = `https://1fd7-140-0-53-148.ngrok-free.app`; // ngrok
-        const backendUrl = `http://localhost:5000`;
+        // const backendUrl = `http://localhost:5000`;
+        const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
         // const backendUrl = `http://140.0.53.148:5000`;
         // const backendUrl = `https://mighty-wings-vanish.loca.lt`;
         // const backendUrl = `https://estimated-else-horse-fairly.trycloudflare.com`;
