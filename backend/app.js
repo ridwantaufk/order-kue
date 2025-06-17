@@ -110,7 +110,9 @@ io.on("connection", (socket) => {
   // Buyer join chat
   socket.on("buyer_join", async ({ orderCode }) => {
     try {
+      console.log("orderCode", orderCode);
       buyerSockets.set(orderCode, socket.id);
+      console.log("buyerSockets", buyerSockets);
       socket.orderCode = orderCode;
       socket.userType = "buyer";
 
@@ -167,6 +169,7 @@ io.on("connection", (socket) => {
         }
       });
 
+      console.log("messageData.sender_type", messageData.sender_type);
       // Broadcast to buyer socket
       if (messageData.sender_type === "admin") {
         // Find buyer socket by session
@@ -174,7 +177,10 @@ io.on("connection", (socket) => {
         const session = await ChatSession.findOne({
           where: { session_id: messageData.session_id },
         });
-
+        console.log(
+          "buyerSockets.has(session.order_code",
+          buyerSockets.has(session.order_code)
+        );
         if (session && buyerSockets.has(session.order_code)) {
           const buyerSocketId = buyerSockets.get(session.order_code);
           io.to(buyerSocketId).emit("new_message", messageData);
@@ -321,9 +327,9 @@ sequelize
       if (fs.existsSync(envPath)) {
         // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
         // const backendUrl = `https://1fd7-140-0-53-148.ngrok-free.app`; // ngrok
-        // const backendUrl = `http://localhost:5000`;
-        const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
-        // const backendUrl = `http://140.0.53.148:5000`;
+        const backendUrl = `http://localhost:5000`;
+        // const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
+        // const backendUrl = `http://140.0.70.135:5000`;
         // const backendUrl = `https://mighty-wings-vanish.loca.lt`;
         // const backendUrl = `https://estimated-else-horse-fairly.trycloudflare.com`;
         console.log("ada backend url : ", backendUrl);
