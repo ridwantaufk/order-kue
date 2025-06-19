@@ -107,7 +107,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Buyer join chat
   socket.on("buyer_join", async ({ orderCode }) => {
     try {
       console.log("orderCode", orderCode);
@@ -118,7 +117,6 @@ io.on("connection", (socket) => {
 
       console.log(`Buyer with order ${orderCode} joined chat`);
 
-      // Find or create chat session
       const ChatSession = require("./models/chatSessionModel");
       const ChatMessage = require("./models/chatMessageModel");
 
@@ -127,17 +125,14 @@ io.on("connection", (socket) => {
       });
 
       if (!session) {
-        // Create new session if not exists
         session = await ChatSession.create({
           order_code: orderCode,
           status: "active",
         });
       }
 
-      // Send session data to buyer
       socket.emit("chat_session", session);
 
-      // Send messages to buyer
       const messages = await ChatMessage.findAll({
         where: { session_id: session.session_id },
         order: [["created_at", "ASC"]],
@@ -145,7 +140,6 @@ io.on("connection", (socket) => {
 
       socket.emit("chat_messages", messages);
 
-      // Notify admin that buyer is online
       adminSockets.forEach((adminSocketId) => {
         io.to(adminSocketId).emit("buyer_online", {
           orderCode,
