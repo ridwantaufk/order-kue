@@ -41,7 +41,6 @@ import {
   Textarea,
 } from '@chakra-ui/react';
 
-// Custom components
 import Banner from 'views/admin/marketplace/components/Banner';
 import Antrian from 'views/admin/marketplace/components/Antrian';
 import Item from 'components/card/Item';
@@ -122,7 +121,6 @@ export default function Marketplace() {
     return phoneRegex.test(phone);
   };
 
-  // Ambil lokasi dari device
   const getLocation = () => {
     if (!navigator.geolocation) {
       setLocationError('Geolocation tidak didukung di perangkat ini.');
@@ -148,7 +146,6 @@ export default function Marketplace() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Menggunakan useClipboard untuk setiap item yang ingin disalin
   const { onCopy: onCopyOrderID, hasCopied: hasCopiedOrderID } = useClipboard(
     paymentInfo?.orderID,
   );
@@ -159,12 +156,10 @@ export default function Marketplace() {
     paymentInfo?.amount.toLocaleString('id-ID'),
   );
 
-  // State untuk mengatur visibilitas dan status "Disalin!"
   const [showCopiedOrderID, setShowCopiedOrderID] = useState(false);
   const [showCopiedVANumber, setShowCopiedVANumber] = useState(false);
   const [showCopiedAmount, setShowCopiedAmount] = useState(false);
 
-  // State untuk menyembunyikan informasi saat tombol salin ditekan
   const [hideOrderID, setHideOrderID] = useState(false);
   const [hideVANumber, setHideVANumber] = useState(false);
   const [hideAmount, setHideAmount] = useState(false);
@@ -210,6 +205,11 @@ export default function Marketplace() {
   const [terlaris, setTerlaris] = useState(false);
   const activeColor = useColorModeValue('blue.600', 'blue.300');
 
+  // console.log(
+  //   'process.env.REACT_APP_BACKEND_URL : ',
+  //   process.env.REACT_APP_BACKEND_URL,
+  // );
+
   // Fungsi untuk menangani klik pada kategori "Makanan"
   const handleCategoryClick = (category) => {
     if (terlaris) {
@@ -225,7 +225,6 @@ export default function Marketplace() {
           );
           console.log('response.data : ', response.data);
 
-          // Sort data
           const sortedData = response.data.sort((a, b) =>
             a.product_name.localeCompare(b.product_name),
           );
@@ -242,16 +241,15 @@ export default function Marketplace() {
     }
     setActiveCategory(category);
     if (category === 'makanan') {
-      setSearchKeyword(category); // Set kata kunci pencarian menjadi 'brownies' ketika klik kategori Makanan
+      setSearchKeyword(category);
     } else if (category === 'minuman') {
-      setSearchKeyword(category); // Kosongkan kata kunci pencarian untuk "Minuman"
+      setSearchKeyword(category);
     } else if (category === 'semua') {
-      setSearchKeyword(''); // Kosongkan kata kunci untuk "Semua Menu" agar semua produk tampil
+      setSearchKeyword('');
     }
   };
 
   useEffect(() => {
-    // Cleanup ketika komponen dilepas (unmount) -- fungsi ini ketika user pindah halaman beda file
     return () => {
       if (toastId.current) {
         toast.close(toastId.current);
@@ -302,7 +300,6 @@ export default function Marketplace() {
   }, []);
 
   useEffect(() => {
-    // Hitung total quantity dan total price
     const totalQuantity = Object.values(selectedQuantity).reduce(
       (acc, cur) => acc + cur,
       0,
@@ -329,7 +326,6 @@ export default function Marketplace() {
 
     if (totQuantity > 0) {
       if (toastId.current) {
-        // Update toast jika sudah ada
         toast.update(toastId.current, {
           render: () => (
             <Box
@@ -368,7 +364,7 @@ export default function Marketplace() {
               <div
                 style={{
                   marginTop: '10px',
-                  color: '#a5a6f2', // Menyesuaikan warna teks dengan background
+                  color: '#a5a6f2',
                   fontSize: '12px',
                 }}
               >
@@ -378,7 +374,7 @@ export default function Marketplace() {
           ),
           status: 'info',
           duration: null,
-          isClosable: true, // Masih aktifkan close
+          isClosable: true,
           position: 'bottom',
           variant: 'subtle',
           containerStyle: {
@@ -388,7 +384,6 @@ export default function Marketplace() {
           },
         });
       } else {
-        // Tampilkan toast baru jika belum ada
         toastId.current = toast({
           render: () => (
             <Box
@@ -409,7 +404,7 @@ export default function Marketplace() {
                 top="8px"
                 right="8px"
                 onClick={(e) => {
-                  e.stopPropagation(); // Mencegah propagasi event klik ke Box
+                  e.stopPropagation();
                   // setSelectedQuantity({});
                   // setSelectedTotalPrice({});
                   toast.close(toastId.current);
@@ -427,7 +422,7 @@ export default function Marketplace() {
               <div
                 style={{
                   marginTop: '10px',
-                  color: '#a5a6f2', // Menyesuaikan warna teks dengan background
+                  color: '#a5a6f2',
                   fontSize: '12px',
                 }}
               >
@@ -437,7 +432,7 @@ export default function Marketplace() {
           ),
           status: 'info',
           duration: null,
-          isClosable: true, // Masih aktifkan close
+          isClosable: true,
           position: 'bottom',
           variant: 'subtle',
           onCloseComplete: () => {
@@ -454,13 +449,11 @@ export default function Marketplace() {
         });
       }
     } else if (totQuantity === 0 && toastId.current) {
-      // Tutup toast jika quantity == 0
       toast.close(toastId.current);
       toastId.current = null;
     }
   }, [totQuantity, totPrice]);
 
-  // Fungsi untuk menangani klik pada toast
   const handleToastClick = () => {
     setPaymentDetails({
       itemQuantity: selectedQuantity,
@@ -475,7 +468,6 @@ export default function Marketplace() {
     setDeleteInput(false);
   };
 
-  // Fungsi untuk menutup modal
   const closeModal = () => {
     setDeleteInput(true);
     setIsModalOpen(false);
@@ -503,22 +495,18 @@ export default function Marketplace() {
     return formatter.format(value);
   };
 
-  // Fungsi untuk menangani perubahan quantity
   const handleQuantityChange = (id, newQuantity) => {
     setSelectedQuantity((prevData) => {
       const updatedData = { ...prevData };
       updatedData[id] = newQuantity;
-      // return;
       return updatedData;
     });
   };
 
-  // Fungsi untuk menangani perubahan totalPrice
   const handleTotalPriceChange = (id, newTotalPrice) => {
     setSelectedTotalPrice((prevData) => {
       const updatedData = { ...prevData };
       updatedData[id] = newTotalPrice;
-      // return;
       return updatedData;
     });
   };
@@ -545,20 +533,17 @@ export default function Marketplace() {
 
   const handlePaymentBCA = async () => {
     try {
-      // Reset semua error state
       setIsNameInvalid(false);
       setIsPhoneInvalid(false);
       setIsAddressInvalid(false);
 
       let hasError = false;
 
-      // Validasi nama
       if (!customerName.trim()) {
         setIsNameInvalid(true);
         hasError = true;
       }
 
-      // Validasi nomor telepon
       if (!phoneNumber.trim()) {
         setIsPhoneInvalid(true);
         hasError = true;
@@ -577,13 +562,11 @@ export default function Marketplace() {
         return;
       }
 
-      // Validasi alamat
       if (!manualAddress.trim()) {
         setIsAddressInvalid(true);
         hasError = true;
       }
 
-      // Jika ada error, tampilkan toast umum
       if (hasError) {
         toast({
           title: 'Form Tidak Lengkap',
@@ -598,7 +581,6 @@ export default function Marketplace() {
 
       setDisabled(true);
 
-      // Format data sesuai dengan yang diharapkan backend
       const requestData = {
         customerInfo: {
           name: customerName.trim(),
@@ -649,7 +631,6 @@ export default function Marketplace() {
       console.error('Payment error:', error);
       setDisabled(false);
 
-      // Handle error response
       const errorMessage =
         error?.response?.data?.message || 'Gagal membuat Virtual Account';
       toast({
@@ -678,11 +659,8 @@ export default function Marketplace() {
         gap="20px"
         marginTop="80px"
       >
-        {/* Layout dengan dua kolom */}
         <Flex direction={['column', 'row']} gap="20px">
-          {/* Kolom kiri */}
           <Box flex="2">
-            {/* Skeleton untuk header */}
             <Skeleton
               height="300px"
               width="100%"
@@ -690,7 +668,6 @@ export default function Marketplace() {
               highlightColor={skeletonColor}
             />
 
-            {/* Skeleton untuk menu */}
             <Flex direction={['column', 'row']} gap="15px" marginTop="20px">
               <Skeleton
                 height="calc(40vh - 100px)"
@@ -713,9 +690,7 @@ export default function Marketplace() {
             </Flex>
           </Box>
 
-          {/* Kolom kanan */}
           <Box flex="1">
-            {/* Skeleton untuk konten kanan */}
             <Skeleton
               height="calc(85vh - 100px)"
               width="100%"
@@ -725,7 +700,6 @@ export default function Marketplace() {
           </Box>
         </Flex>
 
-        {/* Skeleton untuk tabel */}
         <Box marginTop="20px">
           <Skeleton
             height="40px"
@@ -747,7 +721,6 @@ export default function Marketplace() {
           />
         </Box>
 
-        {/* Skeleton untuk tombol */}
         <Box marginTop="20px">
           <Skeleton
             height="50px"
@@ -779,7 +752,7 @@ export default function Marketplace() {
             }}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
-            overflowY="auto" // Mengaktifkan scroll vertikal jika konten melebihi tinggi
+            overflowY="auto"
             height="calc(85vh - 100px)"
           >
             <Box overflowX="auto" overflowY="auto">
@@ -795,7 +768,6 @@ export default function Marketplace() {
                 <Tbody>
                   {Object.entries(paymentDetails.itemQuantity).map(
                     ([key, value]) => {
-                      // Konversi key ke number untuk mencocokkan dengan product_id
                       const matchedProduct = products.find(
                         (product) => product.product_id === Number(key),
                       );
@@ -856,7 +828,6 @@ export default function Marketplace() {
         </ModalContent>
       </Modal>
 
-      {/* proses pembayaran */}
       <Modal
         isOpen={isPaymentModalOpen}
         onClose={closePaymentModal}
@@ -887,7 +858,6 @@ export default function Marketplace() {
             onTouchMove={(e) => e.stopPropagation()}
           >
             <VStack spacing={6} align="stretch">
-              {/* Judul Section */}
               {!disabled && (
                 <>
                   <Box textAlign="center" mb={4}>
@@ -906,7 +876,6 @@ export default function Marketplace() {
                 </>
               )}
 
-              {/* Input Nama */}
               <Box
                 p={4}
                 borderWidth="1px"
@@ -920,7 +889,6 @@ export default function Marketplace() {
                     : 'Masukkan Informasi Pemesan'}
                 </Text>
 
-                {/* Nama Pemesan */}
                 <FormControl
                   id="customer-name"
                   isRequired
@@ -953,7 +921,6 @@ export default function Marketplace() {
                   )}
                 </FormControl>
 
-                {/* Lokasi Otomatis */}
                 <FormControl mb={4}>
                   <FormLabel color={nameTextColor}>Lokasi (otomatis)</FormLabel>
                   <Button onClick={() => setIsMapOpen(true)}>
@@ -997,7 +964,6 @@ export default function Marketplace() {
                   />
                 </FormControl>
 
-                {/* Alamat Manual */}
                 <FormControl isRequired mb={4}>
                   <FormLabel color={nameTextColor}>
                     Alamat Lengkap / Detail / Patokan
@@ -1017,7 +983,6 @@ export default function Marketplace() {
                   />
                 </FormControl>
 
-                {/* Nomor WA / HP */}
                 <FormControl isRequired isInvalid={isPhoneInvalid} mb={4}>
                   <FormLabel color={nameTextColor}>
                     Nomor HP / WhatsApp
@@ -1028,12 +993,10 @@ export default function Marketplace() {
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => {
-                      // Hanya allow angka dan beberapa karakter khusus
                       const value = e.target.value.replace(/[^0-9+]/g, '');
                       if (value.length <= 12) {
-                        // Batasi panjang nomor
                         setPhoneNumber(value);
-                        setIsPhoneInvalid(false); // Reset error saat user mengetik
+                        setIsPhoneInvalid(false);
                       }
                     }}
                     onFocus={() => setIsPhoneInvalid(false)}
@@ -1056,7 +1019,6 @@ export default function Marketplace() {
                 </FormControl>
               </Box>
 
-              {/* Tombol Metode Pembayaran */}
               {!disabled && (
                 <ButtonGroup
                   spacing={4}
@@ -1067,11 +1029,11 @@ export default function Marketplace() {
                     onClick={handlePaymentBCA}
                     colorScheme="blue"
                     width="100%"
-                    size={{ base: 'md', sm: 'lg' }} // Menyesuaikan ukuran tombol
-                    fontSize={{ base: 'sm', sm: 'md' }} // Menyesuaikan ukuran font
+                    size={{ base: 'md', sm: 'lg' }}
+                    fontSize={{ base: 'sm', sm: 'md' }}
                     boxShadow="md"
-                    whiteSpace="normal" // Mengizinkan teks untuk membungkus jika perlu
-                    wordBreak="break-word" // Memastikan kata-kata terpisah jika terlalu panjang
+                    whiteSpace="normal"
+                    wordBreak="break-word"
                   >
                     Bayar dengan Bank BCA
                   </Button>
@@ -1079,18 +1041,17 @@ export default function Marketplace() {
                     onClick={handlePaymentDANA}
                     colorScheme="orange"
                     width="100%"
-                    size={{ base: 'md', sm: 'lg' }} // Menyesuaikan ukuran tombol
-                    fontSize={{ base: 'sm', sm: 'md' }} // Menyesuaikan ukuran font
+                    size={{ base: 'md', sm: 'lg' }}
+                    fontSize={{ base: 'sm', sm: 'md' }}
                     boxShadow="md"
-                    whiteSpace="normal" // Mengizinkan teks untuk membungkus jika perlu
-                    wordBreak="break-word" // Memastikan kata-kata terpisah jika terlalu panjang
+                    whiteSpace="normal"
+                    wordBreak="break-word"
                   >
                     Bayar dengan DANA
                   </Button>
                 </ButtonGroup>
               )}
 
-              {/* Tampilan Informasi Pembayaran */}
               {paymentInfo !== null && (
                 <Box
                   p={4}
@@ -1105,7 +1066,6 @@ export default function Marketplace() {
                     Informasi Virtual Account Anda
                   </Text>
 
-                  {/* Order ID */}
                   <Flex justifyContent="space-between" mb={1} align="center">
                     <Text>Order ID:</Text>
                     <Flex align="center">
@@ -1137,7 +1097,6 @@ export default function Marketplace() {
                     </Flex>
                   </Flex>
                   <Divider my={3} borderColor={separatorLine} />
-                  {/* VA Number */}
                   <Flex justifyContent="space-between" mb={1} align="center">
                     <Text>VA Number:</Text>
                     <Flex align="center">
@@ -1171,7 +1130,6 @@ export default function Marketplace() {
                     </Flex>
                   </Flex>
                   <Divider my={3} borderColor={separatorLine} />
-                  {/* Amount */}
                   <Flex justifyContent="space-between" mb={1} align="center">
                     <Text>Jumlah:</Text>
                     <Flex align="center">
@@ -1205,22 +1163,21 @@ export default function Marketplace() {
                     </Flex>
                   </Flex>
                   <Divider my={3} borderColor={separatorLine} />
-                  {/* QR Code */}
                   <Box
                     flexShrink={0}
                     display="flex"
-                    flexDirection="column" // Teks "Pindai" di bawah QR Code
-                    alignItems="center" // Pusatkan QR Code dan teks di tengah
+                    flexDirection="column"
+                    alignItems="center"
                     justifyContent="center"
                     width={{ base: '100%', md: 'auto' }}
                   >
                     <QRCodeCanvas
-                      value={paymentInfo.vaNumber} // Data untuk kode QR
-                      size={qrCodeSize} // Ukuran QR Code responsif
-                      bgColor="#ffffff" // Warna background
-                      fgColor="#000000" // Warna depan
-                      level="H" // Tingkat koreksi kesalahan (L, M, Q, H)
-                      includeMargin={true} // Tambahkan margin
+                      value={paymentInfo.vaNumber}
+                      size={qrCodeSize}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="H"
+                      includeMargin={true}
                     />
                     <Text
                       mt={2}
@@ -1232,7 +1189,6 @@ export default function Marketplace() {
                     </Text>
                   </Box>
 
-                  {/* Print Button */}
                   <Button
                     onClick={handlePrint}
                     leftIcon={<DownloadIcon />}
@@ -1241,20 +1197,20 @@ export default function Marketplace() {
                     width="100%"
                     mt={4}
                     variant="outline"
-                    borderColor="green.400" // Outline default
+                    borderColor="green.400"
                     _hover={{
-                      background: 'green.300', // Warna hijau saat hover
-                      borderColor: 'transparent', // Hilangkan outline saat hover
+                      background: 'green.300',
+                      borderColor: 'transparent',
                       boxShadow: 'md',
                       color: 'white',
                     }}
                     _active={{
-                      background: 'green.400', // Warna lebih gelap saat klik
-                      borderColor: 'transparent', // Hilangkan outline saat klik
+                      background: 'green.400',
+                      borderColor: 'transparent',
                       boxShadow: 'inner',
                     }}
                     _focus={{
-                      outline: 'none', // Hilangkan outline biru saat fokus
+                      outline: 'none',
                       boxShadow: 'none',
                     }}
                     transition="all 0.2s ease-in-out"
@@ -1433,14 +1389,10 @@ export default function Marketplace() {
               </Flex>
             </Flex>
 
-            <SimpleGrid
-              columns={{ base: 2, md: 3 }} // 2 columns on mobile (base), 3 on medium screens and above
-              gap="20px" // Space between items
-            >
+            <SimpleGrid columns={{ base: 2, md: 3 }} gap="20px">
               {products.map((product) => {
                 const productName = product.product_name.toLowerCase();
 
-                // Logika untuk menyembunyikan produk
                 const isHidden =
                   searchKeyword &&
                   product.category.toLowerCase() !==
