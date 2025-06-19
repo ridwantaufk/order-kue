@@ -192,11 +192,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle typing indicators
   socket.on("typing", async ({ session_id, typing, user_id, order_code }) => {
     try {
       if (socket.userType === "admin") {
-        // Admin typing - send to buyer
         const ChatSession = require("./models/chatSessionModel");
         const session = await ChatSession.findOne({
           where: { session_id },
@@ -207,7 +205,6 @@ io.on("connection", (socket) => {
           io.to(buyerSocketId).emit("admin_typing", { typing });
         }
       } else if (socket.userType === "buyer") {
-        // Buyer typing - send to all admins
         adminSockets.forEach((adminSocketId) => {
           io.to(adminSocketId).emit("user_typing", {
             session_id,
@@ -221,14 +218,12 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Mark messages as read
   socket.on(
     "mark_messages_read",
     async ({ session_id, user_id, order_code }) => {
       try {
         const ChatMessage = require("./models/chatMessageModel");
 
-        // Update read status in database
         if (socket.userType === "admin") {
           await ChatMessage.update(
             { read_at: new Date() },
