@@ -143,6 +143,38 @@ exports.createPayment = async (req, res) => {
     // Commit transaksi
     await transaction.commit();
 
+    // Inisialisasi Snap
+    const midtransClient = require("midtrans-client");
+    const snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: process.env.MIDTRANS_SERVER_KEY,
+    });
+
+    // Buat Snap Token Midtrans
+    const snapParams = {
+      transaction_details: {
+        order_id: orderID,
+        gross_amount: amount,
+      },
+      customer_details: {
+        first_name: customerInfo.name,
+        email: `guest${Date.now()}@mailinator.com`, // fallback email
+        phone: customerInfo.phone,
+        billing_address: {
+          address: customerInfo.address,
+        },
+      },
+    };
+
+    let snapToken;
+    try {
+      const transaction = await snap.createTransaction(snapParams);
+      snapToken = transaction.token;
+    } catch (snapErr) {
+      console.error("Gagal generate token Midtrans:", snapErr.message);
+      // Di sini bisa kirim token kosong atau tetap lanjut
+    }
+
     // Notifikasi update order
     if (typeof tOrdersController?.notifyOrderUpdate === "function") {
       tOrdersController.notifyOrderUpdate();

@@ -109,10 +109,13 @@ export default function Marketplace() {
 
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [isLocationInvalid, setIsLocationInvalid] = useState(false);
   const [locationCoords, setLocationCoords] = useState({ lat: '', lng: '' });
   const [locationError, setLocationError] = useState('');
   const [manualAddress, setManualAddress] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [isPhoneInvalid, setIsPhoneInvalid] = useState(false);
   const [isAddressInvalid, setIsAddressInvalid] = useState(false);
 
@@ -562,9 +565,47 @@ export default function Marketplace() {
         return;
       }
 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email.trim() || !emailRegex.test(email.trim())) {
+        setIsEmailInvalid(true);
+        hasError = true;
+        toast({
+          title: 'Format Email Salah',
+          description: 'Masukkan email yang valid (contoh: nama@example.com)',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+        return;
+      }
+
+      if (!selectedLocation) {
+        setIsLocationInvalid(true);
+        hasError = true;
+        toast({
+          title: 'Lokasi Belum Dipilih',
+          description: 'Silakan ambil lokasi dari Maps terlebih dahulu.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+        return;
+      }
+
       if (!manualAddress.trim()) {
         setIsAddressInvalid(true);
         hasError = true;
+        toast({
+          title: 'Alamat Belum Diisi',
+          description: 'Mohon masukkan alamat lengkap pengiriman.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+        return;
       }
 
       if (hasError) {
@@ -592,6 +633,7 @@ export default function Marketplace() {
                 longitude: selectedLocation.lng,
               }
             : null,
+          email: email.trim(),
         },
         paymentDetails: paymentDetails,
         orderMetadata: {
@@ -643,8 +685,6 @@ export default function Marketplace() {
       });
     }
   };
-
-  const handlePaymentDANA = () => {};
 
   const payment = () => {
     console.log('test : ');
@@ -960,11 +1000,14 @@ export default function Marketplace() {
                   <LocationPicker
                     isOpen={isMapOpen}
                     onClose={() => setIsMapOpen(false)}
-                    onSave={(pos) => setSelectedLocation(pos)}
+                    onSave={(pos) => {
+                      setSelectedLocation(pos);
+                      setIsLocationInvalid(false);
+                    }}
                   />
                 </FormControl>
 
-                <FormControl isRequired mb={4}>
+                <FormControl isRequired isInvalid={isAddressInvalid} mb={4}>
                   <FormLabel color={nameTextColor}>
                     Alamat Lengkap / Detail / Patokan
                   </FormLabel>
@@ -972,7 +1015,10 @@ export default function Marketplace() {
                     placeholder="Masukkan alamat lengkap pengiriman"
                     focusBorderColor="blue.400"
                     value={manualAddress}
-                    onChange={(e) => setManualAddress(e.target.value)}
+                    onChange={(e) => {
+                      setManualAddress(e.target.value);
+                      setIsAddressInvalid(false); // reset error saat ngetik ulang
+                    }}
                     disabled={disabled}
                     background={
                       disabled
@@ -981,6 +1027,11 @@ export default function Marketplace() {
                     }
                     textColor={disabled ? nameTextColorDisabled : nameTextColor}
                   />
+                  {isAddressInvalid && (
+                    <Text color="red.500" fontSize="sm" mt={1}>
+                      Alamat lengkap harus diisi.
+                    </Text>
+                  )}
                 </FormControl>
 
                 <FormControl isRequired isInvalid={isPhoneInvalid} mb={4}>
@@ -1017,6 +1068,37 @@ export default function Marketplace() {
                     Contoh: 08123456789 atau +6281234567890
                   </Text>
                 </FormControl>
+
+                <FormControl isRequired isInvalid={isEmailInvalid} mb={4}>
+                  <FormLabel color={nameTextColor}>Email</FormLabel>
+                  <Input
+                    placeholder="example@mail.com"
+                    focusBorderColor="blue.400"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      setEmail(value);
+                      setIsEmailInvalid(false);
+                    }}
+                    onFocus={() => setIsEmailInvalid(false)}
+                    disabled={disabled}
+                    background={
+                      disabled
+                        ? nameBackgroundColorDisabled
+                        : nameBackgroundColor
+                    }
+                    textColor={disabled ? nameTextColorDisabled : nameTextColor}
+                  />
+                  {isEmailInvalid && (
+                    <Text color="red.500" fontSize="sm">
+                      Email harus diisi dengan format yang benar.
+                    </Text>
+                  )}
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    Contoh: nama@example.com
+                  </Text>
+                </FormControl>
               </Box>
 
               {!disabled && (
@@ -1035,19 +1117,7 @@ export default function Marketplace() {
                     whiteSpace="normal"
                     wordBreak="break-word"
                   >
-                    Bayar dengan Bank BCA
-                  </Button>
-                  <Button
-                    onClick={handlePaymentDANA}
-                    colorScheme="orange"
-                    width="100%"
-                    size={{ base: 'md', sm: 'lg' }}
-                    fontSize={{ base: 'sm', sm: 'md' }}
-                    boxShadow="md"
-                    whiteSpace="normal"
-                    wordBreak="break-word"
-                  >
-                    Bayar dengan DANA
+                    Pilih Metode Pembayaran
                   </Button>
                 </ButtonGroup>
               )}
