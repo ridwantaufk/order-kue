@@ -16,10 +16,10 @@ const fs = require("fs");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Ganti dengan URL frontend jika di produksi demi keamanan
+    origin: "*",
     methods: ["GET", "POST"],
   },
-  transports: ["websocket", "polling"], // Gunakan fallback polling
+  transports: ["websocket", "polling"],
 });
 
 // Middleware
