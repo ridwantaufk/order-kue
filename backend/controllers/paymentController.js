@@ -154,28 +154,10 @@ exports.createPaymentToken = async (req, res) => {
         country_code: "IDN",
       },
     },
-    enabled_payments: [
-      "credit_card",
-      "mandiri_clickpay",
-      "cimb_clicks",
-      "bca_klikbca",
-      "bca_klikpay",
-      "bri_epay",
-      "echannel",
-      "permata_va",
-      "bca_va",
-      "bni_va",
-      "other_va",
-      "gopay",
-      "indomaret",
-      "danamon_online",
-      "akulaku",
-    ],
-    // Custom expiry untuk auto-cancel order yang tidak dibayar
     custom_expiry: {
       start_time: new Date().toISOString(),
       unit: "minute",
-      duration: 60, // 60 menit untuk melakukan pembayaran
+      duration: 60,
     },
   };
 
