@@ -39,7 +39,11 @@ import {
   useBreakpointValue,
   Divider,
   Textarea,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from '@chakra-ui/react';
+import io from 'socket.io-client';
 
 import Banner from 'views/admin/marketplace/components/Banner';
 import Antrian from 'views/admin/marketplace/components/Antrian';
@@ -85,6 +89,7 @@ export default function Marketplace() {
   const nameBackgroundColor = useColorModeValue('white', 'gray.700');
   const nameBackgroundColorDisabled = useColorModeValue('#cccc', 'gray.600');
   const qrCodeSize = useBreakpointValue({ base: 150, md: 250, lg: 300 });
+  const [socket, setSocket] = useState(null);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -534,19 +539,58 @@ export default function Marketplace() {
     openPrintWindow(paymentInfo);
   };
 
-  const handlePaymentBCA = async () => {
+  const MIDTRANS_SNAP_URL = 'https://app.sandbox.midtrans.com/snap/snap.js';
+  const MIDTRANS_CLIENT_KEY = 'Mid-client-DgVz86kwk0nSxw26';
+
+  // Initialize Socket.IO
+  useEffect(() => {
+    const newSocket = io(process.env.REACT_APP_BACKEND_URL);
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, []);
+
+  // Load Midtrans Snap Script
+  useEffect(() => {
+    if (window.snap) return;
+
+    const script = document.createElement('script');
+    script.src = MIDTRANS_SNAP_URL;
+    script.setAttribute('data-client-key', MIDTRANS_CLIENT_KEY);
+    script.async = true;
+    script.onload = () => {
+      console.log('Midtrans Snap script loaded successfully');
+    };
+    script.onerror = () => {
+      console.error('Failed to load Midtrans Snap script');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  const handlePaymentMethod = async () => {
     try {
+      // Reset validasi
       setIsNameInvalid(false);
       setIsPhoneInvalid(false);
+      setIsEmailInvalid(false);
       setIsAddressInvalid(false);
+      setIsLocationInvalid(false);
 
       let hasError = false;
 
+      // Validasi nama
       if (!customerName.trim()) {
         setIsNameInvalid(true);
         hasError = true;
       }
 
+      // Validasi nomor HP
       if (!phoneNumber.trim()) {
         setIsPhoneInvalid(true);
         hasError = true;
@@ -565,8 +609,9 @@ export default function Marketplace() {
         return;
       }
 
+      // Validasi email (opsional)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email.trim() || !emailRegex.test(email.trim())) {
+      if (email !== '' && (!email.trim() || !emailRegex.test(email.trim()))) {
         setIsEmailInvalid(true);
         hasError = true;
         toast({
@@ -580,6 +625,7 @@ export default function Marketplace() {
         return;
       }
 
+      // Validasi lokasi
       if (!selectedLocation) {
         setIsLocationInvalid(true);
         hasError = true;
@@ -594,6 +640,7 @@ export default function Marketplace() {
         return;
       }
 
+      // Validasi alamat
       if (!manualAddress.trim()) {
         setIsAddressInvalid(true);
         hasError = true;
@@ -622,8 +669,12 @@ export default function Marketplace() {
 
       setDisabled(true);
 
+      // Siapkan data untuk backend (HANYA untuk membuat token)
       const requestData = {
         customerInfo: {
+          order_code: `ORDER-${Date.now()}-${Math.floor(
+            1000 + Math.random() * 9000,
+          )}`,
           name: customerName.trim(),
           phone: phoneNumber.trim(),
           address: manualAddress.trim(),
@@ -642,39 +693,143 @@ export default function Marketplace() {
         },
       };
 
-      console.log('Sending payment data:', requestData);
+      console.log('Creating payment token only:', requestData);
 
+      // STEP 1: Buat token Midtrans tanpa menyimpan ke database
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/payments/create-token`,
         requestData,
       );
-      // console.log('Payment response:', response.data.data);
 
-      setPaymentInfo(response.data.data);
-      const orderCodePrev = localStorage.getItem('order_code');
-      const orderIdNow = response.data.data.orderID;
+      console.log('Token response:', response.data);
 
-      if (orderCodePrev && orderCodePrev !== 'null' && orderCodePrev !== '') {
-        localStorage.setItem('order_code', `${orderCodePrev},${orderIdNow}`);
-      } else {
-        localStorage.setItem('order_code', orderIdNow);
+      const { token } = response.data;
+
+      if (!token) {
+        throw new Error('No payment token received from server');
       }
 
-      toast({
-        title: 'Pembayaran Berhasil Dibuat',
-        description:
-          'Virtual Account telah dibuat. Silakan lakukan pembayaran.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-        position: 'top-right',
+      // Cek apakah Midtrans Snap sudah tersedia
+      if (!window.snap) {
+        throw new Error('Midtrans Snap not loaded. Please refresh the page.');
+      }
+
+      // STEP 2: Tampilkan Midtrans Snap untuk pilih pembayaran
+      window.snap.pay(token, {
+        onSuccess: async (result) => {
+          console.log('Pembayaran sukses:', result);
+
+          try {
+            // STEP 3: Simpan ke database setelah pembayaran berhasil
+            await saveOrderToDatabase(requestData, result, 'success');
+
+            toast({
+              title: 'Pembayaran Berhasil',
+              description: 'Terima kasih! Pesanan Anda sedang diproses.',
+              status: 'success',
+              duration: 5000,
+              isClosable: true,
+              position: 'top-right',
+            });
+
+            // Reset form
+            resetForm();
+          } catch (saveError) {
+            console.error('Error saving successful payment:', saveError);
+            toast({
+              title: 'Pembayaran Berhasil, Data Tersimpan Gagal',
+              description:
+                'Pembayaran berhasil tapi gagal menyimpan data. Hubungi admin.',
+              status: 'warning',
+              duration: 8000,
+              isClosable: true,
+              position: 'top-right',
+            });
+          }
+
+          setDisabled(false);
+        },
+
+        onPending: async (result) => {
+          console.log('Menunggu pembayaran:', result);
+
+          try {
+            // STEP 3: Simpan ke database dengan status pending
+            await saveOrderToDatabase(requestData, result, 'pending');
+
+            toast({
+              title: 'Menunggu Pembayaran',
+              description:
+                'Pesanan tersimpan. Silakan selesaikan pembayaran Anda.',
+              status: 'info',
+              duration: 5000,
+              isClosable: true,
+              position: 'top-right',
+            });
+          } catch (saveError) {
+            console.error('Error saving pending payment:', saveError);
+            toast({
+              title: 'Gagal Menyimpan Pesanan',
+              description: 'Silakan coba lagi atau hubungi admin.',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+              position: 'top-right',
+            });
+          }
+
+          setDisabled(false);
+        },
+
+        onError: (result) => {
+          console.log('Terjadi kesalahan pembayaran:', result);
+          setDisabled(false);
+
+          toast({
+            title: 'Pembayaran Gagal',
+            description: 'Terjadi kesalahan saat memproses pembayaran.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+            position: 'top-right',
+          });
+        },
+
+        onClose: () => {
+          console.log('User menutup popup sebelum bayar');
+          setDisabled(false);
+
+          toast({
+            title: 'Pembayaran Dibatalkan',
+            description: 'Anda dapat melanjutkan pembayaran kapan saja.',
+            status: 'warning',
+            duration: 3000,
+            isClosable: true,
+            position: 'top-right',
+          });
+        },
       });
     } catch (error) {
       console.error('Payment error:', error);
       setDisabled(false);
 
-      const errorMessage =
-        error?.response?.data?.message || 'Gagal membuat Virtual Account';
+      let errorMessage = 'Gagal membuat pembayaran';
+
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      if (
+        errorMessage.includes('Payment gateway error') ||
+        errorMessage.includes('unauthorized') ||
+        errorMessage.includes('server key')
+      ) {
+        errorMessage =
+          'Konfigurasi pembayaran bermasalah. Silakan hubungi admin.';
+      }
+
       toast({
         title: 'Error Pembayaran',
         description: errorMessage,
@@ -686,9 +841,85 @@ export default function Marketplace() {
     }
   };
 
-  const payment = () => {
-    console.log('test : ');
+  // Fungsi helper untuk menyimpan ke database setelah pembayaran
+  const saveOrderToDatabase = async (
+    orderData,
+    paymentResult,
+    paymentStatus,
+  ) => {
+    const saveData = {
+      ...orderData,
+      paymentResult: paymentResult,
+      paymentStatus: paymentStatus,
+    };
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/api/payments/save-order`,
+      saveData,
+    );
+
+    if (response.data.success) {
+      // Emit socket untuk update real-time
+      if (socket) {
+        socket.emit('payment_success', {
+          order_code: orderData.customerInfo.order_code,
+          payment_result: paymentResult,
+          status: paymentStatus,
+        });
+      }
+
+      // Simpan order code untuk tracking
+      const orderCodePrev = localStorage.getItem('order_code');
+      const orderCodeNow = orderData.customerInfo.order_code;
+
+      if (orderCodePrev && orderCodePrev !== 'null' && orderCodePrev !== '') {
+        localStorage.setItem('order_code', `${orderCodePrev},${orderCodeNow}`);
+      } else {
+        localStorage.setItem('order_code', orderCodeNow);
+      }
+    }
+
+    return response.data;
   };
+
+  // Fungsi helper untuk reset form
+  const resetForm = () => {
+    setCustomerName('');
+    setPhoneNumber('');
+    setEmail('');
+    setManualAddress('');
+    setSelectedLocation(null);
+    setSelectedQuantity({});
+    setSelectedTotalPrice({});
+    setTotQuantity(0);
+    setTotPrice(0);
+    setPaymentDetails({
+      itemQuantity: {},
+      itemPrice: {},
+      quantity: 0,
+      price: 0,
+    });
+  };
+
+  // Listen to socket events
+  useEffect(() => {
+    if (socket) {
+      socket.on('order_status_updated', (data) => {
+        toast({
+          title: 'Status Pesanan Diperbarui',
+          description: `Pesanan ${data.order_code} - ${data.status}`,
+          status: 'info',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+      });
+
+      return () => {
+        socket.off('order_status_updated');
+      };
+    }
+  }, [socket, toast]);
 
   if (loading) {
     return (
@@ -929,6 +1160,17 @@ export default function Marketplace() {
                     : 'Masukkan Informasi Pemesan'}
                 </Text>
 
+                <Alert status="warning" mb={4} borderRadius="md">
+                  <AlertIcon />
+                  <AlertDescription fontSize="sm">
+                    Kolom yang ditandai dengan tanda bintang (
+                    <Text as="span" color="red.500">
+                      *
+                    </Text>
+                    ) wajib diisi.
+                  </AlertDescription>
+                </Alert>
+
                 <FormControl
                   id="customer-name"
                   isRequired
@@ -1069,7 +1311,7 @@ export default function Marketplace() {
                   </Text>
                 </FormControl>
 
-                <FormControl isRequired isInvalid={isEmailInvalid} mb={4}>
+                <FormControl isInvalid={isEmailInvalid} mb={4}>
                   <FormLabel color={nameTextColor}>Email</FormLabel>
                   <Input
                     placeholder="example@mail.com"
@@ -1108,7 +1350,7 @@ export default function Marketplace() {
                   direction={{ base: 'column', sm: 'row' }}
                 >
                   <Button
-                    onClick={handlePaymentBCA}
+                    onClick={handlePaymentMethod}
                     colorScheme="blue"
                     width="100%"
                     size={{ base: 'md', sm: 'lg' }}
@@ -1117,7 +1359,7 @@ export default function Marketplace() {
                     whiteSpace="normal"
                     wordBreak="break-word"
                   >
-                    Pilih Metode Pembayaran
+                    {disabled ? 'Memproses...' : 'Pilih Metode Pembayaran'}
                   </Button>
                 </ButtonGroup>
               )}
