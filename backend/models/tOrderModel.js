@@ -1,4 +1,4 @@
-// models/orderModel.js
+// models/tOrderModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -14,12 +14,12 @@ const Order = sequelize.define(
     order_code: {
       type: DataTypes.TEXT,
       allowNull: false,
+      unique: true,
     },
     customer_name: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
-    // Kolom baru yang ditambahkan
     customer_phone: {
       type: DataTypes.STRING(20),
       allowNull: false,
@@ -28,6 +28,10 @@ const Order = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    customer_email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
     location_latitude: {
       type: DataTypes.DECIMAL(10, 8),
       allowNull: true,
@@ -35,6 +39,16 @@ const Order = sequelize.define(
     location_longitude: {
       type: DataTypes.DECIMAL(11, 8),
       allowNull: true,
+    },
+    payment_type: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: "e.g: bank_transfer, qris, gopay, shopeepay, etc",
+    },
+    va_number: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: "Virtual Account number or payment reference",
     },
     order_date: {
       type: DataTypes.DATE,
@@ -62,8 +76,25 @@ const Order = sequelize.define(
   },
   {
     tableName: "t_orders",
-    timestamps: false,
+    timestamps: false, // Since we're handling timestamps manually
+    indexes: [
+      {
+        unique: true,
+        fields: ["order_code"],
+      },
+      {
+        fields: ["status"],
+      },
+      {
+        fields: ["order_date"],
+      },
+    ],
   }
 );
+
+// Add hooks for updated_at
+Order.addHook("beforeUpdate", (order) => {
+  order.updated_at = new Date();
+});
 
 module.exports = Order;

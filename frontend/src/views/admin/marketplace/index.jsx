@@ -150,7 +150,7 @@ export default function Marketplace() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { onCopy: onCopyOrderID, hasCopied: hasCopiedOrderID } = useClipboard(
-    paymentInfo?.orderID,
+    paymentInfo?.orderId,
   );
   const { onCopy: onCopyVANumber, hasCopied: hasCopiedVANumber } = useClipboard(
     paymentInfo?.vaNumber,
@@ -534,19 +534,24 @@ export default function Marketplace() {
     openPrintWindow(paymentInfo);
   };
 
-  const handlePaymentBCA = async () => {
+  const handlePaymentMethod = async () => {
     try {
+      // Reset error states
       setIsNameInvalid(false);
       setIsPhoneInvalid(false);
       setIsAddressInvalid(false);
+      setIsEmailInvalid(false);
+      setIsLocationInvalid(false);
 
       let hasError = false;
 
+      // Validate customer name
       if (!customerName.trim()) {
         setIsNameInvalid(true);
         hasError = true;
       }
 
+      // Validate phone number
       if (!phoneNumber.trim()) {
         setIsPhoneInvalid(true);
         hasError = true;
@@ -565,10 +570,10 @@ export default function Marketplace() {
         return;
       }
 
+      // Validate email (optional but must be valid if provided)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email.trim() || !emailRegex.test(email.trim())) {
+      if (email && email.trim() && !emailRegex.test(email.trim())) {
         setIsEmailInvalid(true);
-        hasError = true;
         toast({
           title: 'Format Email Salah',
           description: 'Masukkan email yang valid (contoh: nama@example.com)',
@@ -580,6 +585,7 @@ export default function Marketplace() {
         return;
       }
 
+      // Validate location
       if (!selectedLocation) {
         setIsLocationInvalid(true);
         hasError = true;
@@ -594,6 +600,7 @@ export default function Marketplace() {
         return;
       }
 
+      // Validate address
       if (!manualAddress.trim()) {
         setIsAddressInvalid(true);
         hasError = true;
@@ -608,6 +615,7 @@ export default function Marketplace() {
         return;
       }
 
+      // Check if any validation errors
       if (hasError) {
         toast({
           title: 'Form Tidak Lengkap',
@@ -620,10 +628,31 @@ export default function Marketplace() {
         return;
       }
 
+      // Validate payment details
+      if (
+        !paymentDetails ||
+        !paymentDetails.price ||
+        paymentDetails.price <= 0
+      ) {
+        toast({
+          title: 'Data Pembayaran Tidak Valid',
+          description: 'Pastikan ada item yang dipilih untuk dibeli.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+        return;
+      }
+
       setDisabled(true);
 
+      // Prepare request data
       const requestData = {
         customerInfo: {
+          order_code: `ORDER-${Date.now()}-${Math.floor(
+            1000 + Math.random() * 9000,
+          )}`,
           name: customerName.trim(),
           phone: phoneNumber.trim(),
           address: manualAddress.trim(),
@@ -633,7 +662,7 @@ export default function Marketplace() {
                 longitude: selectedLocation.lng,
               }
             : null,
-          email: email.trim(),
+          customer_email: email ? email.trim() : null,
         },
         paymentDetails: paymentDetails,
         orderMetadata: {
@@ -642,39 +671,108 @@ export default function Marketplace() {
         },
       };
 
-      console.log('Sending payment data:', requestData);
+      console.log('Initiating payment with data:', requestData);
 
+      // Call initiate payment endpoint
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/payments/create`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/payments/initiate`,
         requestData,
       );
-      // console.log('Payment response:', response.data.data);
 
-      setPaymentInfo(response.data.data);
-      const orderCodePrev = localStorage.getItem('order_code');
-      const orderIdNow = response.data.data.orderID;
+      const { snapToken, orderId, redirectUrl } = response.data;
 
-      if (orderCodePrev && orderCodePrev !== 'null' && orderCodePrev !== '') {
-        localStorage.setItem('order_code', `${orderCodePrev},${orderIdNow}`);
-      } else {
-        localStorage.setItem('order_code', orderIdNow);
+      if (!snapToken) {
+        throw new Error('Failed to get payment token');
       }
 
-      toast({
-        title: 'Pembayaran Berhasil Dibuat',
-        description:
-          'Virtual Account telah dibuat. Silakan lakukan pembayaran.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-        position: 'top-right',
+      // Store order info for tracking
+      const orderInfo = {
+        orderId: orderId,
+        orderCode: requestData.customerInfo.order_code,
+        customerName: requestData.customerInfo.name,
+        totalAmount: requestData.paymentDetails.price,
+        timestamp: new Date().toISOString(),
+      };
+
+      localStorage.setItem('currentOrder', JSON.stringify(orderInfo));
+
+      // Open Midtrans payment popup
+      window.snap.pay(snapToken, {
+        onSuccess: function (result) {
+          console.log('Payment success:', result);
+
+          // Clear disabled state
+          setDisabled(false);
+
+          toast({
+            title: 'Pembayaran Berhasil!',
+            description: `Pesanan ${orderId} sedang diproses. Terima kasih!`,
+            status: 'success',
+            duration: 7000,
+            isClosable: true,
+            position: 'top-right',
+          });
+
+          // You might want to redirect to order tracking page
+          // navigate('/orders/' + orderId);
+        },
+
+        onPending: function (result) {
+          console.log('Payment pending:', result);
+
+          setDisabled(false);
+
+          toast({
+            title: 'Menunggu Pembayaran',
+            description: `Pesanan ${orderId} menunggu pembayaran. Segera selesaikan untuk memproses pesanan.`,
+            status: 'warning',
+            duration: 7000,
+            isClosable: true,
+            position: 'top-right',
+          });
+        },
+
+        onError: function (result) {
+          console.log('Payment error:', result);
+
+          setDisabled(false);
+
+          toast({
+            title: 'Pembayaran Gagal',
+            description:
+              'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+            position: 'top-right',
+          });
+        },
+
+        onClose: function () {
+          console.log('Payment popup closed');
+
+          setDisabled(false);
+
+          toast({
+            title: 'Pembayaran Dibatalkan',
+            description: 'Anda dapat melanjutkan pembayaran kapan saja.',
+            status: 'info',
+            duration: 5000,
+            isClosable: true,
+            position: 'top-right',
+          });
+        },
       });
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('Payment initiation error:', error);
+
       setDisabled(false);
 
       const errorMessage =
-        error?.response?.data?.message || 'Gagal membuat Virtual Account';
+        error?.response?.data?.message ||
+        error?.message ||
+        'Gagal memulai proses pembayaran';
+
       toast({
         title: 'Error Pembayaran',
         description: errorMessage,
@@ -684,10 +782,6 @@ export default function Marketplace() {
         position: 'top-right',
       });
     }
-  };
-
-  const payment = () => {
-    console.log('test : ');
   };
 
   if (loading) {
@@ -1069,7 +1163,7 @@ export default function Marketplace() {
                   </Text>
                 </FormControl>
 
-                <FormControl isRequired isInvalid={isEmailInvalid} mb={4}>
+                <FormControl isInvalid={isEmailInvalid} mb={4}>
                   <FormLabel color={nameTextColor}>Email</FormLabel>
                   <Input
                     placeholder="example@mail.com"
@@ -1108,7 +1202,7 @@ export default function Marketplace() {
                   direction={{ base: 'column', sm: 'row' }}
                 >
                   <Button
-                    onClick={handlePaymentBCA}
+                    onClick={handlePaymentMethod}
                     colorScheme="blue"
                     width="100%"
                     size={{ base: 'md', sm: 'lg' }}
