@@ -24,7 +24,7 @@ export const useMarketplace = () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-        // { headers: { 'ngrok-skip-browser-warning': 'true' } },
+        { headers: { 'ngrok-skip-browser-warning': 'true' } },
       );
 
       const sortedData = response.data.sort((a, b) =>
