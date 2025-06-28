@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   MessageCircle,
   Send,
@@ -8,7 +8,6 @@ import {
   CheckCheck,
   Minimize2,
   Users,
-  Clock,
   Search,
   Filter,
 } from 'lucide-react';
@@ -20,12 +19,10 @@ const ChatAdmin = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState({});
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [selectedImage, setSelectedImage] = useState(null);
   const [socket, setSocket] = useState(null);
-  const [user, setUser] = useState(null);
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const [showSessionList, setShowSessionList] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,145 +31,187 @@ const ChatAdmin = () => {
 
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const typingTimeoutRef = useRef(null);
+  const typingTimeoutRef = useRef({});
 
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('user_id');
   const backendUrl =
     process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
-  // Update user status
-  const updateUserStatus = async () => {
-    if (!token || !userId) return;
-
-    try {
-      await fetch(`${backendUrl}/api/users/${userId}/status`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ last_active: new Date() }),
-      });
-    } catch (error) {
-      console.error('Failed to update user status:', error);
-    }
-  };
-
-  // Keep user active
-  useEffect(() => {
-    updateUserStatus();
-    const interval = setInterval(updateUserStatus, 30000);
-    return () => clearInterval(interval);
+  // Optimized scroll to bottom
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
+
+  // Update total unread count
+  const updateTotalUnreadCount = useCallback((sessionsData) => {
+    const total = sessionsData.reduce(
+      (sum, session) => sum + (session.unread_count || 0),
+      0,
+    );
+    setTotalUnreadCount(total);
+  }, []);
+
+  // Handle typing with proper cleanup
+  const handleTyping = useCallback(
+    (typing) => {
+      if (socket && activeSession) {
+        socket.emit('typing', {
+          session_id: activeSession.session_id,
+          user_id: userId,
+          typing,
+        });
+
+        if (typing) {
+          // Clear existing timeout for this session
+          if (typingTimeoutRef.current[activeSession.session_id]) {
+            clearTimeout(typingTimeoutRef.current[activeSession.session_id]);
+          }
+
+          // Set new timeout
+          typingTimeoutRef.current[activeSession.session_id] = setTimeout(
+            () => {
+              socket.emit('typing', {
+                session_id: activeSession.session_id,
+                user_id: userId,
+                typing: false,
+              });
+              delete typingTimeoutRef.current[activeSession.session_id];
+            },
+            1000,
+          );
+        } else {
+          // Clear timeout immediately when stop typing
+          if (typingTimeoutRef.current[activeSession.session_id]) {
+            clearTimeout(typingTimeoutRef.current[activeSession.session_id]);
+            delete typingTimeoutRef.current[activeSession.session_id];
+          }
+        }
+      }
+    },
+    [socket, activeSession, userId],
+  );
 
   // Socket connection and event handlers
   useEffect(() => {
     if (!token || !userId) return;
 
-    console.log('Admin connecting to socket...');
-    const socketConnection = io(backendUrl);
+    const socketConnection = io(backendUrl, {
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+    });
     setSocket(socketConnection);
 
-    // Join as admin
     socketConnection.emit('admin_join', { userId, token });
 
-    // Listen for chat sessions
+    // Chat sessions
     socketConnection.on('chat_sessions', (data) => {
-      console.log('Chat sessions received:', data);
       setSessions(data);
       updateTotalUnreadCount(data);
     });
 
-    // Listen for messages when session is active
+    // Chat messages
     socketConnection.on('chat_messages', (data) => {
-      console.log('Chat messages received:', data);
-      if (data.session_id === activeSession?.session_id) {
-        setMessages(data.messages || data);
+      if (typeof data === 'object' && !Array.isArray(data)) {
+        // Handle grouped messages by session
+        Object.entries(data).forEach(([sessionId, msgs]) => {
+          if (
+            activeSession &&
+            activeSession.session_id === parseInt(sessionId)
+          ) {
+            setMessages(msgs);
+          }
+        });
+      } else if (Array.isArray(data)) {
+        setMessages(data);
       }
     });
 
-    // Listen for new messages
+    // New messages
     socketConnection.on('new_message', (message) => {
-      console.log('New message received:', message);
-
-      // Add to messages if it's for the active session
+      // Update messages if for active session
       if (message.session_id === activeSession?.session_id) {
         setMessages((prev) => {
-          // Cek apakah pesan sudah ada berdasarkan message_id
-          const messageExists = prev.some(
+          const exists = prev.some(
             (msg) => msg.message_id === message.message_id,
           );
-
-          if (messageExists) {
-            console.log(
-              'Message already exists, skipping:',
-              message.message_id,
-            );
-            return prev; // Jangan tambahkan jika sudah ada
-          }
-
-          return [...prev, message];
+          return exists ? prev : [...prev, message];
         });
       }
 
-      // Update sessions list
+      // Update sessions
       setSessions((prev) => {
-        const updatedSessions = prev.map((session) =>
-          session.session_id === message.session_id
-            ? {
-                ...session,
-                last_message: message,
-                unread_count:
-                  message.sender_type === 'buyer'
-                    ? (session.unread_count || 0) + 1
-                    : session.unread_count,
-                updated_at: message.created_at,
-              }
-            : session,
-        );
-        updateTotalUnreadCount(updatedSessions);
-        return updatedSessions;
+        const updated = prev.map((session) => {
+          if (session.session_id === message.session_id) {
+            return {
+              ...session,
+              last_message: message,
+              unread_count:
+                message.sender_type === 'buyer' &&
+                (!activeSession ||
+                  activeSession.session_id !== message.session_id)
+                  ? (session.unread_count || 0) + 1
+                  : session.unread_count,
+              updated_at: message.created_at,
+            };
+          }
+          return session;
+        });
+        updateTotalUnreadCount(updated);
+        return updated;
       });
     });
 
-    // Listen for typing indicators
+    // Typing indicators with proper cleanup
     socketConnection.on('user_typing', ({ session_id, user_id, typing }) => {
-      console.log('User typing:', { session_id, user_id, typing });
       if (session_id === activeSession?.session_id) {
-        setTypingUsers((prev) => ({
-          ...prev,
-          [user_id]: typing,
-        }));
+        setTypingUsers((prev) => {
+          const updated = { ...prev };
+          if (typing) {
+            updated[user_id] = true;
+            // Auto-clear typing after 3 seconds
+            setTimeout(() => {
+              setTypingUsers((current) => {
+                const newState = { ...current };
+                delete newState[user_id];
+                return newState;
+              });
+            }, 3000);
+          } else {
+            delete updated[user_id];
+          }
+          return updated;
+        });
       }
     });
 
-    // Listen for buyer online status
-    socketConnection.on('buyer_online', ({ orderCode, online }) => {
-      console.log('Buyer online status:', { orderCode, online });
+    // Buyer online status
+    socketConnection.on('buyer_online', ({ orderCodes, orderCode, online }) => {
+      const codes = orderCodes || [orderCode];
       setOnlineUsers((prev) => {
         const updated = new Set(prev);
-        if (online) {
-          updated.add(orderCode);
-        } else {
-          updated.delete(orderCode);
-        }
+        codes.forEach((code) => {
+          if (online) {
+            updated.add(code);
+          } else {
+            updated.delete(code);
+          }
+        });
         return updated;
       });
 
-      // Update session online status
+      // Update sessions
       setSessions((prev) =>
         prev.map((session) =>
-          session.order_code === orderCode
+          codes.includes(session.order_code)
             ? { ...session, buyer_online: online }
             : session,
         ),
       );
     });
 
-    // Listen for messages marked as read
+    // Messages marked as read
     socketConnection.on('messages_marked_read', ({ session_id }) => {
-      if (activeSession && activeSession.session_id === session_id) {
+      if (activeSession?.session_id === session_id) {
         setMessages((prev) =>
           prev.map((msg) => ({
             ...msg,
@@ -182,47 +221,29 @@ const ChatAdmin = () => {
       }
     });
 
-    // Cleanup
     return () => {
-      console.log('Disconnecting admin socket');
+      // Clear all typing timeouts
+      Object.values(typingTimeoutRef.current).forEach((timeout) =>
+        clearTimeout(timeout),
+      );
       socketConnection.disconnect();
     };
-  }, [token, userId, backendUrl, activeSession]);
+  }, [token, userId, backendUrl, activeSession, updateTotalUnreadCount]);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll and mark as read
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  // Mark messages as read when session becomes active
   useEffect(() => {
-    if (activeSession && socket) {
-      markMessagesAsRead();
-    }
-  }, [activeSession, socket]);
-
-  // Update total unread count
-  const updateTotalUnreadCount = (sessionsData) => {
-    const total = sessionsData.reduce(
-      (sum, session) => sum + (session.unread_count || 0),
-      0,
-    );
-    setTotalUnreadCount(total);
-  };
-
-  // Mark messages as read
-  const markMessagesAsRead = () => {
-    if (socket && activeSession) {
-      console.log(
-        'Marking messages as read for session:',
-        activeSession.session_id,
-      );
+    if (activeSession && socket && isOpen) {
+      // Mark messages as read
       socket.emit('mark_messages_read', {
         session_id: activeSession.session_id,
         user_id: userId,
       });
 
-      // Update local session unread count
+      // Update local unread count
       setSessions((prev) =>
         prev.map((session) =>
           session.session_id === activeSession.session_id
@@ -231,21 +252,19 @@ const ChatAdmin = () => {
         ),
       );
     }
-  };
+  }, [activeSession, socket, isOpen, userId]);
 
   // Select session
   const selectSession = async (session) => {
     setLoading(true);
     setActiveSession(session);
+    setTypingUsers({}); // Clear typing indicators
 
     try {
-      // Fetch messages for this session
       const response = await fetch(
         `${backendUrl}/api/chat/sessions/${session.order_code}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
 
@@ -271,8 +290,6 @@ const ChatAdmin = () => {
       message: newMessage,
     };
 
-    console.log('Sending admin message:', messageData);
-
     try {
       const response = await fetch(`${backendUrl}/api/chat/messages`, {
         method: 'POST',
@@ -285,39 +302,32 @@ const ChatAdmin = () => {
 
       if (response.ok) {
         const newMsg = await response.json();
-        console.log('Admin message sent successfully:', newMsg);
-
-        // Add message to local state
         setMessages((prev) => [...prev, newMsg]);
         setNewMessage('');
 
-        // Emit via socket to broadcast to buyer
+        // Stop typing immediately
+        handleTyping(false);
+
         if (socket) {
           socket.emit('send_message', newMsg);
         }
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to send admin message:', errorText);
       }
     } catch (error) {
-      console.error('Failed to send admin message:', error);
+      console.error('Failed to send message:', error);
     }
   };
 
-  // Handle file upload
+  // File upload with compression
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-    if (!file || !activeSession) return;
-
-    if (!file.type.startsWith('image/')) {
-      alert('Hanya file gambar yang diizinkan.');
+    if (!file || !activeSession || !file.type.startsWith('image/')) {
+      if (!file.type.startsWith('image/'))
+        alert('Hanya file gambar yang diizinkan.');
       return;
     }
 
-    let processedFile = file;
-    if (file.size > 1024 * 1024) {
-      processedFile = await resizeImage(file);
-    }
+    const processedFile =
+      file.size > 1024 * 1024 ? await resizeImage(file) : file;
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -343,10 +353,7 @@ const ChatAdmin = () => {
         if (response.ok) {
           const newMsg = await response.json();
           setMessages((prev) => [...prev, newMsg]);
-
-          if (socket) {
-            socket.emit('send_message', newMsg);
-          }
+          socket?.emit('send_message', newMsg);
         }
       } catch (error) {
         console.error('Failed to send file:', error);
@@ -355,7 +362,7 @@ const ChatAdmin = () => {
     reader.readAsDataURL(processedFile);
   };
 
-  // Resize image
+  // Image resize utility
   const resizeImage = (file) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -372,17 +379,14 @@ const ChatAdmin = () => {
             height = (height * maxWidth) / width;
             width = maxWidth;
           }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
+        } else if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
         }
 
         canvas.width = width;
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
-
         canvas.toBlob(resolve, 'image/jpeg', 0.8);
       };
 
@@ -390,35 +394,7 @@ const ChatAdmin = () => {
     });
   };
 
-  // Handle typing
-  const handleTyping = (typing) => {
-    if (socket && activeSession) {
-      socket.emit('typing', {
-        session_id: activeSession.session_id,
-        user_id: userId,
-        typing,
-      });
-
-      if (typing) {
-        clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = setTimeout(() => {
-          setIsTyping(false);
-          socket.emit('typing', {
-            session_id: activeSession.session_id,
-            user_id: userId,
-            typing: false,
-          });
-        }, 3000);
-      }
-    }
-  };
-
-  // Scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Get message status
+  // Message status
   const getMessageStatus = (message) => {
     if (message.sender_type === 'buyer') return null;
 
@@ -435,7 +411,7 @@ const ChatAdmin = () => {
     );
   };
 
-  // Format time
+  // Time formatting
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString('id-ID', {
       hour: '2-digit',
@@ -443,31 +419,19 @@ const ChatAdmin = () => {
     });
   };
 
-  // Format date
-  const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
   // Filter sessions
   const filteredSessions = sessions.filter((session) => {
     const matchesSearch = session.order_code
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesFilter =
       filterStatus === 'all' ||
       (filterStatus === 'unread' && session.unread_count > 0) ||
       (filterStatus === 'online' && session.buyer_online);
-
     return matchesSearch && matchesFilter;
   });
 
-  if (!token || !userId) {
-    return null;
-  }
+  if (!token || !userId) return null;
 
   return (
     <>
@@ -507,7 +471,6 @@ const ChatAdmin = () => {
                   </button>
                 </div>
 
-                {/* Search and Filter */}
                 <div className="space-y-2">
                   <div className="relative">
                     <Search className="w-3 h-3 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -746,20 +709,12 @@ const ChatAdmin = () => {
                         value={newMessage}
                         onChange={(e) => {
                           setNewMessage(e.target.value);
-                          if (!isTyping) {
-                            setIsTyping(true);
-                            handleTyping(true);
-                          }
+                          handleTyping(true);
                         }}
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleSendMessage();
-                          }
+                          if (e.key === 'Enter') handleSendMessage();
                         }}
-                        onBlur={() => {
-                          setIsTyping(false);
-                          handleTyping(false);
-                        }}
+                        onBlur={() => handleTyping(false)}
                         placeholder="Ketik pesan..."
                         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
@@ -774,7 +729,6 @@ const ChatAdmin = () => {
                   </div>
                 </>
               ) : (
-                /* No Session Selected */
                 <div className="flex-1 flex items-center justify-center bg-gray-50">
                   <div className="text-center text-gray-500">
                     {!showSessionList && (
