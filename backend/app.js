@@ -51,6 +51,12 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const tUtilsProductRoutes = require("./routes/tUtilsProductRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const { Op } = require("sequelize");
+const ChatSession = require("./models/chatSessionModel");
+const ChatMessage = require("./models/chatMessageModel");
+const requestLogger = require("./middlewares/requestLogger");
+
+app.use(requestLogger);
 
 app.use("/api/configurations", configurationsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -86,10 +92,6 @@ io.on("connection", (socket) => {
 
       console.log(`Admin ${userId} joined chat`);
 
-      // Send all chat sessions to admin
-      const ChatSession = require("./models/chatSessionModel");
-      const ChatMessage = require("./models/chatMessageModel");
-
       const sessions = await ChatSession.findAll({
         include: [
           {
@@ -110,44 +112,77 @@ io.on("connection", (socket) => {
   socket.on("buyer_join", async ({ orderCode }) => {
     try {
       console.log("orderCode", orderCode);
-      buyerSockets.set(orderCode, socket.id);
-      console.log("buyerSockets", buyerSockets);
-      socket.orderCode = orderCode;
+
+      const orderCodes = orderCode
+        .split(",")
+        .map((code) => code.trim())
+        .filter((code) => code.length > 0);
+
+      // Simpan semua kode ke buyerSockets
+      orderCodes.forEach((code) => {
+        buyerSockets.set(code, socket.id);
+      });
+
+      console.log("buyerSockets : ", buyerSockets);
+      socket.orderCode = orderCodes.join(",");
       socket.userType = "buyer";
 
-      console.log(`Buyer with order ${orderCode} joined chat`);
+      console.log(`Buyer with order ${orderCodes.join(", ")} joined chat`);
 
-      const ChatSession = require("./models/chatSessionModel");
-      const ChatMessage = require("./models/chatMessageModel");
-
-      let session = await ChatSession.findOne({
-        where: { order_code: orderCode },
+      const sessions = await ChatSession.findAll({
+        where: {
+          order_code: {
+            [Op.in]: orderCodes,
+          },
+        },
       });
 
-      if (!session) {
-        session = await ChatSession.create({
-          order_code: orderCode,
-          status: "active",
+      if (sessions.length === 1) {
+        let session = sessions[0];
+
+        socket.emit("chat_session", session);
+
+        const messages = await ChatMessage.findAll({
+          where: { session_id: session.session_id },
+          order: [["created_at", "ASC"]],
         });
+
+        socket.emit("chat_messages", messages);
+
+        adminSockets.forEach((adminSocketId) => {
+          io.to(adminSocketId).emit("buyer_online", {
+            orderCode: orderCodes[0],
+            online: true,
+          });
+        });
+      } else if (sessions.length > 1) {
+        console.warn(
+          `Terdapat banyak session untuk order_codes: ${orderCodes.join(", ")}`
+        );
+
+        const allMessages = await ChatMessage.findAll({
+          where: {
+            session_id: {
+              [Op.in]: sessions.map((s) => s.session_id),
+            },
+          },
+          order: [["created_at", "ASC"]],
+        });
+
+        socket.emit("chat_sessions", sessions);
+        socket.emit("chat_messages", allMessages);
+
+        adminSockets.forEach((adminSocketId) => {
+          io.to(adminSocketId).emit("buyer_online", {
+            orderCodes,
+            online: true,
+          });
+        });
+      } else {
+        console.log("Tidak ada session yang ditemukan.");
       }
-
-      socket.emit("chat_session", session);
-
-      const messages = await ChatMessage.findAll({
-        where: { session_id: session.session_id },
-        order: [["created_at", "ASC"]],
-      });
-
-      socket.emit("chat_messages", messages);
-
-      adminSockets.forEach((adminSocketId) => {
-        io.to(adminSocketId).emit("buyer_online", {
-          orderCode,
-          online: true,
-        });
-      });
     } catch (error) {
-      console.error("Buyer join error:", error);
+      console.error("Buyer join error :", error);
     }
   });
 
@@ -166,8 +201,6 @@ io.on("connection", (socket) => {
       console.log("messageData.sender_type", messageData.sender_type);
       // Broadcast to buyer socket
       if (messageData.sender_type === "admin") {
-        // Find buyer socket by session
-        const ChatSession = require("./models/chatSessionModel");
         const session = await ChatSession.findOne({
           where: { session_id: messageData.session_id },
         });
@@ -195,7 +228,6 @@ io.on("connection", (socket) => {
   socket.on("typing", async ({ session_id, typing, user_id, order_code }) => {
     try {
       if (socket.userType === "admin") {
-        const ChatSession = require("./models/chatSessionModel");
         const session = await ChatSession.findOne({
           where: { session_id },
         });
@@ -222,8 +254,6 @@ io.on("connection", (socket) => {
     "mark_messages_read",
     async ({ session_id, user_id, order_code }) => {
       try {
-        const ChatMessage = require("./models/chatMessageModel");
-
         if (socket.userType === "admin") {
           await ChatMessage.update(
             { read_at: new Date() },
@@ -256,6 +286,35 @@ io.on("connection", (socket) => {
     }
   );
 
+  socket.on("order_status_changed", async ({ orderId, newStatus }) => {
+    if (newStatus === "Diterima") {
+      console.log(
+        `Order ${orderId} status Diterima. Mulai countdown 10 menit.`
+      );
+
+      // Jalankan timer 10 menit
+      setTimeout(async () => {
+        try {
+          const deleted = await ChatSession.destroy({
+            where: { order_id: orderId },
+          });
+
+          if (deleted) {
+            console.log(
+              `Chat session untuk order ${orderId} berhasil dihapus setelah 10 menit.`
+            );
+          } else {
+            console.log(
+              `Tidak ditemukan chat session untuk order ${orderId} saat penghapusan.`
+            );
+          }
+        } catch (err) {
+          console.error("Gagal menghapus chat session:", err);
+        }
+      }, 1 * 60 * 1000); // 1 menit
+    }
+  });
+
   // Existing order functionality
   tOrdersController
     .getOrdersForSocket()
@@ -277,26 +336,31 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
 
-    // Remove from admin sockets
-    for (let [userId, socketId] of adminSockets.entries()) {
-      if (socketId === socket.id) {
-        adminSockets.delete(userId);
-        break;
-      }
-    }
+    if (socket.userType === "buyer" && socket.orderCode) {
+      const orderCodes = socket.orderCode
+        .split(",")
+        .map((code) => code.trim())
+        .filter((code) => code.length > 0);
 
-    // Remove from buyer sockets and notify admin
-    for (let [orderCode, socketId] of buyerSockets.entries()) {
-      if (socketId === socket.id) {
-        buyerSockets.delete(orderCode);
+      orderCodes.forEach((code) => {
+        buyerSockets.delete(code);
 
-        // Notify admin that buyer is offline
+        // Notify admin bahwa buyer offline
         adminSockets.forEach((adminSocketId) => {
           io.to(adminSocketId).emit("buyer_online", {
-            orderCode,
+            orderCode: code,
             online: false,
           });
         });
+      });
+
+      console.log(`Buyer with order ${orderCodes.join(", ")} disconnected`);
+    }
+
+    // Remove from adminSockets
+    for (let [userId, socketId] of adminSockets.entries()) {
+      if (socketId === socket.id) {
+        adminSockets.delete(userId);
         break;
       }
     }
@@ -312,24 +376,53 @@ sequelize
     console.log("Database disinkronkan");
     server.listen(PORT, () => {
       console.log(`Server berjalan pada port ${PORT}`);
-      const envPath = path.join(__dirname, "../frontend/.env");
-      if (fs.existsSync(envPath)) {
-        // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-        // const backendUrl = `https://1fd7-140-0-53-148.ngrok-free.app`; // ngrok
-        const backendUrl = `http://localhost:5000`;
-        // const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
-        // const backendUrl = `http://140.0.70.135:5000`;
-        // const backendUrl = `https://mighty-wings-vanish.loca.lt`;
-        // const backendUrl = `https://estimated-else-horse-fairly.trycloudflare.com`;
-        console.log("ada backend url : ", backendUrl);
-        fs.writeFileSync(envPath, `REACT_APP_BACKEND_URL=${backendUrl}\n`);
+
+      // === SETUP URL BACKEND ===
+      // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
+      const backendUrl = `https://4ca8-114-10-145-104.ngrok-free.app`; // ngrok
+      // const backendUrl = `http://localhost:5000`;
+      // const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
+      // const backendUrl = `http://140.0.67.211:5000`; // IP Public Router Rumah
+      // const backendUrl = `http://172.20.10.4:5000`; // IPv4 iphone hotspot
+      // const backendUrl = `https://mighty-wings-vanish.loca.lt`;
+      // const backendUrl = `https://estimated-else-horse-fairly.trycloudflare.com`;
+
+      console.log("ada backend url : ", backendUrl);
+
+      // === FUNGSI UPDATE .ENV ===
+      function updateEnvVariable(envPath, key, value) {
+        if (!fs.existsSync(envPath)) return;
+
+        let envContent = fs.readFileSync(envPath, "utf8");
+        const regex = new RegExp(`^${key}=.*$`, "m");
+
+        if (regex.test(envContent)) {
+          envContent = envContent.replace(regex, `${key}=${value}`);
+        } else {
+          envContent += `\n${key}=${value}\n`;
+        }
+
+        fs.writeFileSync(envPath, envContent);
+      }
+
+      // === UPDATE FRONTEND .env ===
+      const frontendEnvPath = path.join(__dirname, "../frontend/.env");
+      if (fs.existsSync(frontendEnvPath)) {
+        updateEnvVariable(frontendEnvPath, "REACT_APP_BACKEND_URL", backendUrl);
         console.log(
-          "URL Backend terupdate di frontend .env (berarti ini pake ngrok backend-nya)"
+          "URL Backend terupdate di frontend .env (REACT_APP_BACKEND_URL)"
         );
       } else {
-        console.log(
-          ".env file ga ada di frontend directory (berarti ini pake railway backend-nya)"
-        );
+        console.log(".env file tidak ditemukan di frontend/");
+      }
+
+      // === UPDATE BACKEND .env ===
+      const backendEnvPath = path.join(__dirname, "../backend/.env");
+      if (fs.existsSync(backendEnvPath)) {
+        updateEnvVariable(backendEnvPath, "BACKEND_URL", backendUrl);
+        console.log("URL Backend terupdate di backend .env (BACKEND_URL)");
+      } else {
+        console.log(".env file tidak ditemukan di backend/");
       }
     });
   })
