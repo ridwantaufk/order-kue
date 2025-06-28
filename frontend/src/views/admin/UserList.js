@@ -30,10 +30,26 @@ const UserList = () => {
           ordersResponse,
           orderItemsResponse,
         ] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users`),
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/products`),
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders`),
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/products`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orderItems`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
         ]);
 
         setUsers(usersResponse.data);
