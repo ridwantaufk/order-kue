@@ -7,6 +7,7 @@ const ChatSession = require("../models/chatSessionModel");
 const ChatMessage = require("../models/chatMessageModel");
 const User = require("../models/userModel");
 const midtransClient = require("midtrans-client");
+const { default: axios } = require("axios");
 
 // Store temporary order data in memory
 const tempOrderData = new Map();
@@ -69,6 +70,19 @@ exports.initiatePayment = async (req, res) => {
   }
 
   try {
+    const response = await axios.get(
+      `${process.env.BACKEND_URL}/api/products`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      }
+    );
+
+    const products = response.data.sort((a, b) =>
+      a.product_name.localeCompare(b.product_name)
+    );
+
     const snap = new midtransClient.Snap({
       isProduction: false,
       serverKey: process.env.MIDTRANS_SERVER_KEY,
@@ -81,23 +95,39 @@ exports.initiatePayment = async (req, res) => {
       },
       customer_details: {
         first_name: customerInfo.name.trim(),
-        email: customerInfo.customer_email || "noreply@example.com",
+        email: customerInfo.customer_email || "an161016taufik@gmail.com",
         phone: customerInfo.phone.trim(),
       },
-      // Enable all payment methods
-      enabled_payments: [
-        "credit_card",
-        "bca_va",
-        "bni_va",
-        "bri_va",
-        "echannel",
-        "permata_va",
-        "other_va",
-        "gopay",
-        "shopeepay",
-        "qris",
-      ],
+      item_details: Object.entries(paymentDetails.itemQuantity).map(
+        ([product_id, quantity]) => {
+          const price = paymentDetails.itemPrice[product_id];
+          const productName =
+            products.find((p) => p.product_id === Number(product_id))
+              ?.product_name || `Produk ${product_id}`;
+          return {
+            id: product_id,
+            name: productName,
+            price: price,
+            quantity: quantity,
+          };
+        }
+      ),
+      // Enable some payment methods
+      // enabled_payments: [
+      //   "credit_card",
+      //   "bca_va",
+      //   "bni_va",
+      //   "bri_va",
+      //   "echannel",
+      //   "permata_va",
+      //   "other_va",
+      //   "gopay",
+      //   "shopeepay",
+      //   "qris",
+      // ],
     };
+
+    console.log("parameter : ", parameter);
 
     // Store order data temporarily with order_code as key
     tempOrderData.set(customerInfo.order_code, {
@@ -173,9 +203,16 @@ exports.handleMidtransWebhook = async (req, res) => {
       where: { order_code: orderCode },
     });
 
+    console.log("existingOrder : ", existingOrder);
+
+    console.log("tempOrderData : ", tempOrderData);
+
+    const tempData = tempOrderData.get(orderCode);
+
+    console.log("tempData : ", tempData);
+
     if (!existingOrder) {
       // Get temp data for new order
-      const tempData = tempOrderData.get(orderCode);
 
       if (!tempData) {
         console.error(`No temp data found for order: ${orderCode}`);
@@ -249,9 +286,6 @@ exports.handleMidtransWebhook = async (req, res) => {
         { transaction }
       );
 
-      // Clear temp data after successful order creation
-      tempOrderData.delete(orderCode);
-
       console.log(
         `Order ${orderCode} created successfully with status: ${newStatus}`
       );
@@ -272,6 +306,14 @@ exports.handleMidtransWebhook = async (req, res) => {
         newStatus === "Sedang diproses" &&
         existingOrder.status !== "Sedang diproses"
       ) {
+        const itemKeys = Object.keys(tempData.paymentDetails.itemQuantity);
+        await axios.put(`${process.env.BACKEND_URL}/api/products/0`, {
+          decreaseStock: true,
+          items: itemKeys.map((key) => ({
+            product_id: parseInt(key),
+            quantity: tempData.paymentDetails.itemQuantity[key],
+          })),
+        });
         const chatSession = await ChatSession.findOne({
           where: { order_code: orderCode },
         });
@@ -298,6 +340,8 @@ exports.handleMidtransWebhook = async (req, res) => {
       }
 
       console.log(`Order ${orderCode} updated to status: ${newStatus}`);
+
+      tempOrderData.delete(orderCode);
     }
 
     await transaction.commit();
