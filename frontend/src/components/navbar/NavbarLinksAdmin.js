@@ -244,7 +244,7 @@ export default function HeaderLinks(props) {
 
     const socket = io(process.env.REACT_APP_BACKEND_URL, {
       transports: ['websocket', 'polling'],
-      // extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
     socketRef.current = socket;
@@ -416,8 +416,16 @@ export default function HeaderLinks(props) {
     const fetchVisitorStats = async () => {
       try {
         const [statsResponse, dailyResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`),
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }),
         ]);
 
         setVisitorStats(statsResponse.data);
@@ -493,6 +501,7 @@ export default function HeaderLinks(props) {
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
+                'ngrok-skip-browser-warning': 'true',
               },
             },
           );
