@@ -68,12 +68,27 @@ export default function DailyTraffic(props) {
           await Promise.all([
             axios.get(
               `${process.env.REACT_APP_BACKEND_URL}/api/visitors/stats`,
+              {
+                headers: {
+                  'ngrok-skip-browser-warning': 'true',
+                },
+              },
             ),
             axios.get(
               `${process.env.REACT_APP_BACKEND_URL}/api/visitors/daily`,
+              {
+                headers: {
+                  'ngrok-skip-browser-warning': 'true',
+                },
+              },
             ),
             axios.get(
               `${process.env.REACT_APP_BACKEND_URL}/api/visitors/insights`,
+              {
+                headers: {
+                  'ngrok-skip-browser-warning': 'true',
+                },
+              },
             ),
           ]);
 
