@@ -125,53 +125,56 @@ export default function UserReports() {
       // Fetch dashboard summary
       const summaryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/summary`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
-
       // console.log('summaryResponse.data :', summaryResponse.data);
 
       // Fetch top selling products
       const productsResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/top-products`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
-
       // console.log('productsResponse.data :', productsResponse.data);
 
       // Fetch daily sales trend
       const trendResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/daily-trend`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
       // console.log('trendResponse.data :', trendResponse.data);
 
       // Fetch inventory status
       const inventoryResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/inventory-status`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
-
       // console.log('inventoryResponse.data :', inventoryResponse.data);
 
       // Fetch customer analysis
       const customerResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/customer-analysis`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
       // console.log('customerResponse.data :', customerResponse.data);
 
       // Fetch expense breakdown
       const expenseResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/expense-breakdown?period=${selectedPeriod}`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
-
       // console.log('expenseResponse.data :', expenseResponse.data);
 
       // Fetch sales by hour
       const salesHourResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/sales-by-hour`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
-
       // console.log('salesHourResponse.data :', salesHourResponse.data);
 
       // Fetch revenue forecast
       const forecastResponse = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/dashboard/revenue-forecast`,
+        { headers: { 'ngrok-skip-browser-warning': true } },
       );
       // console.log('forecastResponse.data :', forecastResponse.data);
 
@@ -240,6 +243,8 @@ export default function UserReports() {
     currentData.total_orders,
     previousData.total_orders,
   );
+
+  // console.log('inventoryStatus :', inventoryStatus);
 
   // Critical stock items
   const criticalStock = inventoryStatus.filter(
