@@ -15,6 +15,7 @@ import {
 import axios from 'axios';
 // Custom components
 import Card from 'components/card/Card.js';
+import { Heart, Package, ShoppingCart } from 'lucide-react';
 // Assets
 import React, { useEffect, useRef, useState } from 'react';
 import { IoHeart, IoHeartOutline } from 'react-icons/io5';
@@ -51,11 +52,11 @@ export default function Item(props) {
     axios
       .get(
         `${process.env.REACT_APP_BACKEND_URL}/api/favorite/${id}`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // }
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
       )
       .then((response) => {
         // console.log('response util : ', response.data.favorite);
@@ -71,11 +72,11 @@ export default function Item(props) {
     axios
       .get(
         `${process.env.REACT_APP_BACKEND_URL}/api/orderItems`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // }
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
       )
       .then((response) => {
         let totalQuantity = 0;
@@ -156,8 +157,12 @@ export default function Item(props) {
 
   const onChangeValue = (e) => {
     const value = e.target.value;
+
+    const unitPrice = parseFloat(
+      price.replace(/[^\d,-]/g, '').replace(',', '.'),
+    );
     // Validasi hanya angka atau kosong
-    if (/^\d*$/.test(value)) {
+    if (/^\d*$/.test(value) && value <= stock) {
       setQuantity(value === '' ? null : parseInt(value));
       const newTotalPrice =
         value === ''
@@ -165,18 +170,22 @@ export default function Item(props) {
           : value * parseFloat(price.replace(/[^\d,-]/g, '').replace(',', '.'));
       if (onQuantityChange)
         onQuantityChange(id, value === '' ? 0 : parseInt(value));
-      if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice);
+      if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice, unitPrice);
     }
   };
 
   // Fungsi untuk menangani perubahan quantity
   const handleQuantityChange = (newQuantity) => {
+    const unitPrice = parseFloat(
+      price.replace(/[^\d,-]/g, '').replace(',', '.'),
+    );
+
     const newTotalPrice =
       newQuantity * parseFloat(price.replace(/[^\d,-]/g, '').replace(',', '.'));
     setQuantity(newQuantity);
 
     if (onQuantityChange) onQuantityChange(id, newQuantity);
-    if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice);
+    if (onTotalPriceChange) onTotalPriceChange(id, newTotalPrice, unitPrice);
   };
 
   // console.log('stock : ', stock);
@@ -250,13 +259,52 @@ export default function Item(props) {
             </Text>
 
             {/* Tambahan Informasi Rating dan Terlaris */}
-            <Flex align="center" mt="10px">
-              <Text color="red.400" fontSize="sm" fontWeight="500" mr="5px">
-                ❤️ {favoriteCount} like
-              </Text>
-              <Text color="secondaryGray.600" fontSize="sm" fontWeight="400">
-                Terjual: {bestSellerCount}
-              </Text>
+            <Flex
+              direction="row"
+              align="center"
+              wrap="wrap"
+              gap={{ base: '8px', md: '10px' }}
+              mt="10px"
+              justify="center"
+            >
+              {/* Like */}
+              <Flex align="center" gap="4px">
+                <Heart size={14} color="#F56565" />
+                <Text fontSize="xs" fontWeight="500">
+                  {favoriteCount} Like
+                </Text>
+              </Flex>
+
+              {/* Terjual */}
+              <Flex align="center" gap="4px">
+                <ShoppingCart size={14} color="#38A169" />
+                <Text fontSize="xs" fontWeight="500">
+                  Terjual: {bestSellerCount}
+                </Text>
+              </Flex>
+
+              {/* Stok */}
+              <Flex align="center" gap="4px">
+                <Package
+                  size={14}
+                  color={
+                    stock === 0 ? '#A0AEC0' : stock < 5 ? '#ED8936' : '#3182CE'
+                  }
+                />
+                <Text
+                  fontSize="xs"
+                  fontWeight="500"
+                  color={
+                    stock === 0
+                      ? 'gray.500'
+                      : stock < 5
+                      ? 'orange.400'
+                      : 'blue.500'
+                  }
+                >
+                  Stok: {stock === 0 ? 'Habis' : stock}
+                </Text>
+              </Flex>
             </Flex>
           </Flex>
 
@@ -318,7 +366,7 @@ export default function Item(props) {
               borderRadius="10px"
               px="16px"
               py="5px"
-              disabled={stock <= 0}
+              disabled={stock <= 0 || quantity >= stock}
               onClick={() => {
                 if (stock <= 0) return;
                 handleQuantityChange(quantity + 1);
