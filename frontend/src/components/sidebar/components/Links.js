@@ -35,7 +35,7 @@ export function SidebarLinks(props) {
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
-                // 'ngrok-skip-browser-warning': 'true',
+                'ngrok-skip-browser-warning': 'true',
               },
             },
           );
