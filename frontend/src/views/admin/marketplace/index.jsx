@@ -89,11 +89,13 @@ export default function Marketplace() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuantity, setSelectedQuantity] = useState({});
+  const [unitPrice, setUnitPrice] = useState({});
   const [selectedTotalPrice, setSelectedTotalPrice] = useState({});
   const [totQuantity, setTotQuantity] = useState(0);
   const [totPrice, setTotPrice] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [temporaryQuantity, setTemporaryQuantity] = useState({});
+  const [temporaryUnitPrice, setTemporaryUnitPrice] = useState({});
   const [temporaryPrice, setTemporaryPrice] = useState({});
   const [deleteInput, setDeleteInput] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState({
@@ -118,6 +120,9 @@ export default function Marketplace() {
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [isPhoneInvalid, setIsPhoneInvalid] = useState(false);
   const [isAddressInvalid, setIsAddressInvalid] = useState(false);
+
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
 
   const validatePhoneNumber = (phone) => {
     const phoneRegex = /^(\+62|62|0)[8][1-9][0-9]{6,9}$/;
@@ -149,54 +154,6 @@ export default function Marketplace() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { onCopy: onCopyOrderID, hasCopied: hasCopiedOrderID } = useClipboard(
-    paymentInfo?.orderId,
-  );
-  const { onCopy: onCopyVANumber, hasCopied: hasCopiedVANumber } = useClipboard(
-    paymentInfo?.vaNumber,
-  );
-  const { onCopy: onCopyAmount, hasCopied: hasCopiedAmount } = useClipboard(
-    paymentInfo?.amount.toLocaleString('id-ID'),
-  );
-
-  const [showCopiedOrderID, setShowCopiedOrderID] = useState(false);
-  const [showCopiedVANumber, setShowCopiedVANumber] = useState(false);
-  const [showCopiedAmount, setShowCopiedAmount] = useState(false);
-
-  const [hideOrderID, setHideOrderID] = useState(false);
-  const [hideVANumber, setHideVANumber] = useState(false);
-  const [hideAmount, setHideAmount] = useState(false);
-
-  const handleCopyOrderID = () => {
-    onCopyOrderID();
-    setShowCopiedOrderID(true);
-    setHideOrderID(true);
-    setTimeout(() => {
-      setShowCopiedOrderID(false);
-      setHideOrderID(false);
-    }, 700);
-  };
-
-  const handleCopyVANumber = () => {
-    onCopyVANumber();
-    setShowCopiedVANumber(true);
-    setHideVANumber(true);
-    setTimeout(() => {
-      setShowCopiedVANumber(false);
-      setHideVANumber(false);
-    }, 700);
-  };
-
-  const handleCopyAmount = () => {
-    onCopyAmount();
-    setShowCopiedAmount(true);
-    setHideAmount(true);
-    setTimeout(() => {
-      setShowCopiedAmount(false);
-      setHideAmount(false);
-    }, 700);
-  };
-
   const toast = useToast();
   const toastId = useRef(null);
   const deleteInputRef = useRef(deleteInput);
@@ -208,10 +165,10 @@ export default function Marketplace() {
   const [terlaris, setTerlaris] = useState(false);
   const activeColor = useColorModeValue('blue.600', 'blue.300');
 
-  // console.log(
-  //   'process.env.REACT_APP_BACKEND_URL : ',
-  //   process.env.REACT_APP_BACKEND_URL,
-  // );
+  console.log(
+    'process.env.REACT_APP_BACKEND_URL : ',
+    process.env.REACT_APP_BACKEND_URL,
+  );
 
   // Fungsi untuk menangani klik pada kategori "Makanan"
   const handleCategoryClick = (category) => {
@@ -220,11 +177,11 @@ export default function Marketplace() {
         try {
           const response = await axios.get(
             `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-            // {
-            //   headers: {
-            //     'ngrok-skip-browser-warning': 'true',
-            //   },
-            // },
+            {
+              headers: {
+                'ngrok-skip-browser-warning': 'true',
+              },
+            },
           );
           console.log('response.data : ', response.data);
 
@@ -260,6 +217,7 @@ export default function Marketplace() {
       }
       setSelectedQuantity({});
       setSelectedTotalPrice({});
+      setUnitPrice({});
     };
   }, []);
 
@@ -279,11 +237,11 @@ export default function Marketplace() {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-          // {
-          //   headers: {
-          //     'ngrok-skip-browser-warning': 'true',
-          //   },
-          // },
+          {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          },
         );
         console.log('response.data : ', response.data);
 
@@ -321,8 +279,9 @@ export default function Marketplace() {
     ) {
       setTemporaryQuantity(selectedQuantity);
       setTemporaryPrice(selectedTotalPrice);
+      setTemporaryUnitPrice(unitPrice);
     }
-  }, [selectedQuantity, selectedTotalPrice]);
+  }, [selectedQuantity, selectedTotalPrice, unitPrice]);
 
   useEffect(() => {
     // console.log('quantity : ', totQuantity, 'totalprice : ', totPrice);
@@ -442,6 +401,7 @@ export default function Marketplace() {
             if (deleteInputRef.current) {
               setSelectedQuantity({});
               setSelectedTotalPrice({});
+              setUnitPrice({});
             }
           },
           containerStyle: {
@@ -460,7 +420,7 @@ export default function Marketplace() {
   const handleToastClick = () => {
     setPaymentDetails({
       itemQuantity: selectedQuantity,
-      itemPrice: selectedTotalPrice,
+      itemPrice: unitPrice,
       quantity: totQuantity,
       price: totPrice,
     });
@@ -477,6 +437,7 @@ export default function Marketplace() {
     console.log('temporaryQuantity : ', temporaryQuantity);
     setSelectedQuantity(temporaryQuantity);
     setSelectedTotalPrice(temporaryPrice);
+    setUnitPrice(temporaryUnitPrice);
     setTotQuantity(
       Object.values(temporaryQuantity).reduce((acc, cur) => acc + cur, 0),
     );
@@ -506,10 +467,16 @@ export default function Marketplace() {
     });
   };
 
-  const handleTotalPriceChange = (id, newTotalPrice) => {
+  const handleTotalPriceChange = (id, newTotalPrice, unitPrice) => {
     setSelectedTotalPrice((prevData) => {
       const updatedData = { ...prevData };
       updatedData[id] = newTotalPrice;
+      return updatedData;
+    });
+
+    setUnitPrice((prevData) => {
+      const updatedData = { ...prevData };
+      updatedData[id] = unitPrice;
       return updatedData;
     });
   };
@@ -694,16 +661,28 @@ export default function Marketplace() {
         timestamp: new Date().toISOString(),
       };
 
+      const orderCodePrev = localStorage.getItem('order_code');
+      const orderIdNow = orderId;
+
+      if (orderCodePrev && orderCodePrev !== 'null' && orderCodePrev !== '') {
+        localStorage.setItem('order_code', `${orderCodePrev},${orderIdNow}`);
+      } else {
+        localStorage.setItem('order_code', orderIdNow);
+      }
+
       localStorage.setItem('currentOrder', JSON.stringify(orderInfo));
+
+      console.log('requestData : ', requestData);
 
       // Open Midtrans payment popup
       window.snap.pay(snapToken, {
-        onSuccess: function (result) {
+        onSuccess: async function (result) {
           console.log('Payment success:', result);
 
           // Clear disabled state
           setDisabled(false);
 
+          // Tampilkan notifikasi sukses
           toast({
             title: 'Pembayaran Berhasil!',
             description: `Pesanan ${orderId} sedang diproses. Terima kasih!`,
@@ -713,8 +692,48 @@ export default function Marketplace() {
             position: 'top-right',
           });
 
-          // You might want to redirect to order tracking page
-          // navigate('/orders/' + orderId);
+          // if (!requestData) {
+          //   toast({
+          //     title: 'Error',
+          //     description: 'Data pesanan tidak ditemukan',
+          //     status: 'error',
+          //     duration: 3000,
+          //     isClosable: true,
+          //   });
+          //   return;
+          // }
+
+          // try {
+          //   // Kurangi stok berdasarkan produk di order
+          //   await axios.put(
+          //     `${process.env.REACT_APP_BACKEND_URL}/api/products/0`,
+          //     {
+          //       decreaseStock: true,
+          //       items: Object.entries(
+          //         requestData.paymentDetails.itemQuantity,
+          //       ).map(([product_id, quantity]) => ({
+          //         product_id: parseInt(product_id),
+          //         quantity,
+          //       })),
+          //     },
+          //   );
+
+          //   console.log('Stok produk berhasil diperbarui.');
+          // } catch (error) {
+          //   console.error('Gagal update stok:', error);
+          //   toast({
+          //     title: 'Gagal Update Stok',
+          //     description:
+          //       'Stok tidak berhasil diperbarui. Silakan cek kembali.',
+          //     status: 'error',
+          //     duration: 5000,
+          //     isClosable: true,
+          //     position: 'top-right',
+          //   });
+          // }
+
+          // Redirect ke halaman daftar order
+          window.location.replace('/orderan');
         },
 
         onPending: function (result) {
@@ -722,16 +741,50 @@ export default function Marketplace() {
 
           setDisabled(false);
 
+          // Prepare invoice data
+          const invoiceInfo = {
+            orderId: orderId,
+            orderCode: requestData.customerInfo.order_code,
+            customerName: requestData.customerInfo.name,
+            customerPhone: requestData.customerInfo.phone,
+            customerEmail: requestData.customerInfo.customer_email,
+            customerAddress: requestData.customerInfo.address,
+            customerLocation: requestData.customerInfo.location,
+            totalAmount: requestData.paymentDetails.price,
+            items: Object.entries(requestData.paymentDetails.itemQuantity).map(
+              ([key, quantity]) => {
+                const product = products.find(
+                  (p) => p.product_id === Number(key),
+                );
+                const price = requestData.paymentDetails.itemPrice[key];
+                return {
+                  id: key,
+                  name: product ? product.product_name : `Product ${key}`,
+                  quantity: quantity,
+                  price: price,
+                  total: quantity * price,
+                };
+              },
+            ),
+            paymentMethod: result.payment_type || 'bank_transfer',
+            vaNumber: result.va_numbers ? result.va_numbers[0].va_number : null,
+            transactionId: result.transaction_id,
+            transactionTime: new Date().toLocaleString('id-ID'),
+            qrString: result.qr_string || null,
+          };
+
+          setInvoiceData(invoiceInfo);
+          setShowInvoice(true);
+
           toast({
             title: 'Menunggu Pembayaran',
-            description: `Pesanan ${orderId} menunggu pembayaran. Segera selesaikan untuk memproses pesanan.`,
+            description: `Pesanan ${orderId} menunggu pembayaran. Invoice telah disiapkan.`,
             status: 'warning',
             duration: 7000,
             isClosable: true,
             position: 'top-right',
           });
         },
-
         onError: function (result) {
           console.log('Payment error:', result);
 
@@ -1215,174 +1268,6 @@ export default function Marketplace() {
                   </Button>
                 </ButtonGroup>
               )}
-
-              {paymentInfo !== null && (
-                <Box
-                  p={4}
-                  borderWidth="1px"
-                  borderRadius="lg"
-                  boxShadow="sm"
-                  bg={backgroundColor}
-                  width="100%"
-                  margin="0 auto"
-                >
-                  <Text fontWeight="bold" mb={2}>
-                    Informasi Virtual Account Anda
-                  </Text>
-
-                  <Flex justifyContent="space-between" mb={1} align="center">
-                    <Text>Order ID:</Text>
-                    <Flex align="center">
-                      {!hideOrderID && (
-                        <>
-                          <Text fontWeight="medium">{paymentInfo.orderID}</Text>
-                          <IconButton
-                            aria-label="Salin Order ID"
-                            icon={<CopyIcon />}
-                            size="sm"
-                            ml={2}
-                            onClick={handleCopyOrderID}
-                            colorScheme="blue"
-                          />
-                        </>
-                      )}
-                      {showCopiedOrderID && (
-                        <Box
-                          as="span"
-                          fontSize="sm"
-                          color="green.500"
-                          ml={2}
-                          transition="opacity 0.5s ease-out"
-                          opacity={showCopiedOrderID ? 1 : 0}
-                        >
-                          Disalin!
-                        </Box>
-                      )}
-                    </Flex>
-                  </Flex>
-                  <Divider my={3} borderColor={separatorLine} />
-                  <Flex justifyContent="space-between" mb={1} align="center">
-                    <Text>VA Number:</Text>
-                    <Flex align="center">
-                      {!hideVANumber && (
-                        <>
-                          <Text fontWeight="medium">
-                            {paymentInfo.vaNumber}
-                          </Text>
-                          <IconButton
-                            aria-label="Salin VA Number"
-                            icon={<CopyIcon />}
-                            size="sm"
-                            ml={2}
-                            onClick={handleCopyVANumber}
-                            colorScheme="blue"
-                          />
-                        </>
-                      )}
-                      {showCopiedVANumber && (
-                        <Box
-                          as="span"
-                          fontSize="sm"
-                          color="green.500"
-                          ml={2}
-                          transition="opacity 0.5s ease-out"
-                          opacity={showCopiedVANumber ? 1 : 0}
-                        >
-                          Disalin!
-                        </Box>
-                      )}
-                    </Flex>
-                  </Flex>
-                  <Divider my={3} borderColor={separatorLine} />
-                  <Flex justifyContent="space-between" mb={1} align="center">
-                    <Text>Jumlah:</Text>
-                    <Flex align="center">
-                      {!hideAmount && (
-                        <>
-                          <Text fontWeight="medium">
-                            Rp{paymentInfo.amount.toLocaleString('id-ID')}
-                          </Text>
-                          <IconButton
-                            aria-label="Salin Jumlah"
-                            icon={<CopyIcon />}
-                            size="sm"
-                            ml={2}
-                            onClick={handleCopyAmount}
-                            colorScheme="blue"
-                          />
-                        </>
-                      )}
-                      {showCopiedAmount && (
-                        <Box
-                          as="span"
-                          fontSize="sm"
-                          color="green.500"
-                          ml={2}
-                          transition="opacity 0.5s ease-out"
-                          opacity={showCopiedAmount ? 1 : 0}
-                        >
-                          Disalin!
-                        </Box>
-                      )}
-                    </Flex>
-                  </Flex>
-                  <Divider my={3} borderColor={separatorLine} />
-                  <Box
-                    flexShrink={0}
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    width={{ base: '100%', md: 'auto' }}
-                  >
-                    <QRCodeCanvas
-                      value={paymentInfo.vaNumber}
-                      size={qrCodeSize}
-                      bgColor="#ffffff"
-                      fgColor="#000000"
-                      level="H"
-                      includeMargin={true}
-                    />
-                    <Text
-                      mt={2}
-                      fontSize="sm"
-                      color="gray.500"
-                      textAlign="center"
-                    >
-                      Pindai kode ini untuk membayar melalui Virtual Account
-                    </Text>
-                  </Box>
-
-                  <Button
-                    onClick={handlePrint}
-                    leftIcon={<DownloadIcon />}
-                    colorScheme="green"
-                    size="sm"
-                    width="100%"
-                    mt={4}
-                    variant="outline"
-                    borderColor="green.400"
-                    _hover={{
-                      background: 'green.300',
-                      borderColor: 'transparent',
-                      boxShadow: 'md',
-                      color: 'white',
-                    }}
-                    _active={{
-                      background: 'green.400',
-                      borderColor: 'transparent',
-                      boxShadow: 'inner',
-                    }}
-                    _focus={{
-                      outline: 'none',
-                      boxShadow: 'none',
-                    }}
-                    transition="all 0.2s ease-in-out"
-                  >
-                    Cetak Informasi
-                  </Button>
-                </Box>
-              )}
             </VStack>
           </ModalBody>
 
@@ -1434,6 +1319,372 @@ export default function Marketplace() {
               boxShadow="md"
             >
               Tidak
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={showInvoice}
+        onClose={() => {
+          setShowInvoice(false);
+          window.location.replace('/orderan');
+        }}
+        size="xl"
+        isCentered
+        closeOnOverlayClick={false}
+      >
+        <ModalOverlay backdropFilter="blur(8px)" />
+        <ModalContent
+          maxWidth={{ base: '95%', md: '768px', lg: '900px' }}
+          maxHeight="90vh"
+          overflowY="auto"
+        >
+          <ModalHeader textAlign="center" color={nameTextColor}>
+            <VStack spacing={2}>
+              <Heading size="lg">Invoice Pembayaran</Heading>
+              <Text fontSize="sm" color="gray.500">
+                Simpan atau cetak invoice ini sebagai bukti pemesanan
+              </Text>
+            </VStack>
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <div id="invoice-print-area">
+              {invoiceData && (
+                <VStack spacing={6} align="stretch">
+                  {/* Header Invoice */}
+                  <Box
+                    textAlign="center"
+                    pb={4}
+                    borderBottom="2px solid"
+                    borderColor={separatorLine}
+                  >
+                    <Heading size="md" color={nameTextColor}>
+                      INVOICE PEMESANAN
+                    </Heading>
+                    <Text fontSize="sm" color="gray.500" mt={2}>
+                      Tanggal: {invoiceData.transactionTime}
+                    </Text>
+                  </Box>
+
+                  {/* Customer Info */}
+                  <Box
+                    p={4}
+                    bg={backgroundColor}
+                    borderRadius="lg"
+                    borderWidth="1px"
+                  >
+                    <Heading size="sm" mb={3} color={nameTextColor}>
+                      Informasi Pemesan
+                    </Heading>
+                    <Grid
+                      templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                      gap={4}
+                    >
+                      <VStack align="start" spacing={2}>
+                        <Text>
+                          <strong>Nama:</strong> {invoiceData.customerName}
+                        </Text>
+                        <Text>
+                          <strong>No. HP:</strong> {invoiceData.customerPhone}
+                        </Text>
+                        {invoiceData.customerEmail && (
+                          <Text>
+                            <strong>Email:</strong> {invoiceData.customerEmail}
+                          </Text>
+                        )}
+                      </VStack>
+                      <VStack align="start" spacing={2}>
+                        <Text>
+                          <strong>Order ID:</strong> {invoiceData.orderId}
+                        </Text>
+                        <Text>
+                          <strong>Kode Pesanan:</strong> {invoiceData.orderCode}
+                        </Text>
+                        <Text>
+                          <strong>Status:</strong> Menunggu Pembayaran
+                        </Text>
+                      </VStack>
+                    </Grid>
+                    <Box mt={3}>
+                      <Text>
+                        <strong>Alamat:</strong>
+                      </Text>
+                      <Text fontSize="sm" color="gray.600" mt={1}>
+                        {invoiceData.customerAddress}
+                      </Text>
+                    </Box>
+                  </Box>
+
+                  {/* Order Items */}
+                  <Box
+                    p={4}
+                    bg={backgroundColor}
+                    borderRadius="lg"
+                    borderWidth="1px"
+                  >
+                    <Heading size="sm" mb={3} color={nameTextColor}>
+                      Rincian Pesanan
+                    </Heading>
+                    <Table variant="simple" size="sm">
+                      <Thead>
+                        <Tr>
+                          <Th>Item</Th>
+                          <Th isNumeric>Qty</Th>
+                          <Th isNumeric>Harga</Th>
+                          <Th isNumeric>Total</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {invoiceData.items.map((item, index) => (
+                          <Tr key={index}>
+                            <Td fontSize="sm">{item.name}</Td>
+                            <Td isNumeric fontSize="sm">
+                              {item.quantity}
+                            </Td>
+                            <Td isNumeric fontSize="sm">
+                              Rp {item.price.toLocaleString('id-ID')}
+                            </Td>
+                            <Td isNumeric fontSize="sm">
+                              Rp {item.total.toLocaleString('id-ID')}
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                      <Tfoot>
+                        <Tr borderTop="2px solid" borderColor={separatorLine}>
+                          <Th colSpan={3} textAlign="right">
+                            Total Pembayaran:
+                          </Th>
+                          <Th isNumeric fontSize="md" color="blue.600">
+                            Rp {invoiceData.totalAmount.toLocaleString('id-ID')}
+                          </Th>
+                        </Tr>
+                      </Tfoot>
+                    </Table>
+                  </Box>
+
+                  {/* Payment Info */}
+                  <Box
+                    p={4}
+                    bg={backgroundColor}
+                    borderRadius="lg"
+                    borderWidth="1px"
+                  >
+                    <Heading size="sm" mb={3} color={nameTextColor}>
+                      Informasi Pembayaran
+                    </Heading>
+                    <Grid
+                      templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                      gap={4}
+                    >
+                      <VStack align="start" spacing={3}>
+                        <Text>
+                          <strong>Metode Pembayaran:</strong>{' '}
+                          {invoiceData.paymentMethod.toUpperCase()}
+                        </Text>
+                        {invoiceData.vaNumber && (
+                          <Flex align="center" wrap="wrap">
+                            <Text mr={2}>
+                              <strong>VA Number:</strong> {invoiceData.vaNumber}
+                            </Text>
+                            <IconButton
+                              aria-label="Copy VA Number"
+                              icon={<CopyIcon />}
+                              size="xs"
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  invoiceData.vaNumber,
+                                );
+                                toast({
+                                  title: 'VA Number disalin!',
+                                  status: 'success',
+                                  duration: 2000,
+                                  isClosable: true,
+                                });
+                              }}
+                            />
+                          </Flex>
+                        )}
+                        <Text>
+                          <strong>Transaction ID:</strong>{' '}
+                          {invoiceData.transactionId}
+                        </Text>
+                      </VStack>
+
+                      {(invoiceData.qrString || invoiceData.vaNumber) && (
+                        <VStack align="center" spacing={2}>
+                          <QRCodeCanvas
+                            value={invoiceData.qrString || invoiceData.vaNumber}
+                            size={150}
+                            bgColor="#ffffff"
+                            fgColor="#000000"
+                            level="H"
+                            includeMargin={true}
+                          />
+                          <Text
+                            fontSize="xs"
+                            color="gray.500"
+                            textAlign="center"
+                          >
+                            Scan untuk pembayaran cepat
+                          </Text>
+                        </VStack>
+                      )}
+                    </Grid>
+                  </Box>
+
+                  {/* Instructions */}
+                  <Box
+                    p={4}
+                    bg="yellow.50"
+                    borderRadius="lg"
+                    borderWidth="1px"
+                    borderColor="yellow.200"
+                  >
+                    <Heading size="sm" mb={2} color="yellow.800">
+                      Petunjuk Pembayaran
+                    </Heading>
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="sm" color="yellow.700">
+                        1. Lakukan pembayaran sesuai nominal yang tertera
+                      </Text>
+                      <Text fontSize="sm" color="yellow.700">
+                        2. Gunakan VA Number atau scan QR Code untuk pembayaran
+                      </Text>
+                      <Text fontSize="sm" color="yellow.700">
+                        3. Simpan invoice ini sebagai bukti pemesanan
+                      </Text>
+                      <Text fontSize="sm" color="yellow.700">
+                        4. Pesanan akan diproses setelah pembayaran dikonfirmasi
+                      </Text>
+                    </VStack>
+                  </Box>
+                </VStack>
+              )}
+            </div>
+          </ModalBody>
+
+          <ModalFooter justifyContent="space-between" flexWrap="wrap" gap={2}>
+            <ButtonGroup spacing={2} width={{ base: '100%', sm: 'auto' }}>
+              <Button
+                onClick={() => {
+                  const printContent =
+                    document.getElementById('invoice-print-area');
+                  const printWindow = window.open(
+                    '',
+                    '',
+                    'width=800,height=600',
+                  );
+                  printWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>Invoice ${invoiceData?.orderId}</title>
+                        <style>
+                          body { font-family: Arial, sans-serif; margin: 20px; }
+                          .invoice-header { text-align: center; margin-bottom: 30px; }
+                          .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
+                          table { width: 100%; border-collapse: collapse; }
+                          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                          th { background-color: #f2f2f2; }
+                          .total-row { font-weight: bold; background-color: #f9f9f9; }
+                          @media print { body { margin: 0; } }
+                        </style>
+                      </head>
+                      <body>
+                        ${printContent.innerHTML}
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                  printWindow.focus();
+                  printWindow.print();
+                  printWindow.close();
+                }}
+                leftIcon={<DownloadIcon />}
+                colorScheme="green"
+                size="sm"
+                flex={{ base: '1', sm: 'none' }}
+              >
+                Print Invoice
+              </Button>
+
+              <Button
+                onClick={() => {
+                  // Copy invoice text
+                  const invoiceText = `
+                  INVOICE PEMESANAN
+                  Tanggal: ${invoiceData?.transactionTime}
+
+                  INFORMASI PEMESAN:
+                  Nama: ${invoiceData?.customerName}
+                  No. HP: ${invoiceData?.customerPhone}
+                  ${
+                    invoiceData?.customerEmail
+                      ? `Email: ${invoiceData.customerEmail}`
+                      : ''
+                  }
+                  Order ID: ${invoiceData?.orderId}
+                  Kode Pesanan: ${invoiceData?.orderCode}
+                  Alamat: ${invoiceData?.customerAddress}
+
+                  RINCIAN PESANAN:
+                  ${invoiceData?.items
+                    .map(
+                      (item) =>
+                        `${item.name} - ${
+                          item.quantity
+                        }x Rp ${item.price.toLocaleString(
+                          'id-ID',
+                        )} = Rp ${item.total.toLocaleString('id-ID')}`,
+                    )
+                    .join('\n')}
+
+                  TOTAL PEMBAYARAN: Rp ${invoiceData?.totalAmount.toLocaleString(
+                    'id-ID',
+                  )}
+
+                  INFORMASI PEMBAYARAN:
+                  Metode: ${invoiceData?.paymentMethod.toUpperCase()}
+                  ${
+                    invoiceData?.vaNumber
+                      ? `VA Number: ${invoiceData.vaNumber}`
+                      : ''
+                  }
+                  Transaction ID: ${invoiceData?.transactionId}
+                  `;
+
+                  navigator.clipboard.writeText(invoiceText);
+                  toast({
+                    title: 'Invoice disalin ke clipboard!',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }}
+                leftIcon={<CopyIcon />}
+                colorScheme="blue"
+                variant="outline"
+                size="sm"
+                flex={{ base: '1', sm: 'none' }}
+              >
+                Copy Invoice
+              </Button>
+            </ButtonGroup>
+
+            <Button
+              onClick={() => {
+                setShowInvoice(false);
+                window.location.replace('/orderan');
+              }}
+              colorScheme="gray"
+              size="sm"
+              width={{ base: '100%', sm: 'auto' }}
+              mt={{ base: 2, sm: 0 }}
+            >
+              Tutup & Lanjutkan
             </Button>
           </ModalFooter>
         </ModalContent>
