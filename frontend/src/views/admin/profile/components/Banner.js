@@ -96,7 +96,7 @@ export default function ModernUserProfile() {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              // 'ngrok-skip-browser-warning': 'true',
+              'ngrok-skip-browser-warning': 'true',
             },
           },
         );
@@ -323,7 +323,7 @@ export default function ModernUserProfile() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            // 'ngrok-skip-browser-warning': 'true',
+            'ngrok-skip-browser-warning': 'true',
             'Content-Type': 'application/json',
           },
         },
