@@ -42,11 +42,11 @@ export default function ViewTools({ onEdit }) {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/tools`,
-        // {
-        //   headers: {
-        //     'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
-        //   },
-        // },
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
+          },
+        },
       );
       const sortedTools = response.data.sort((a, b) =>
         a.tool_name.localeCompare(b.tool_name),

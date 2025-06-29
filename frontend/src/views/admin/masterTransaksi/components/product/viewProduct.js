@@ -116,11 +116,11 @@ export default function ViewProduct({ onEdit }) {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/products`,
-          // {
-          //   headers: {
-          //     'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
-          //   },
-          // },
+          {
+            headers: {
+              'ngrok-skip-browser-warning': 'true', // gara-gara baris nu kieu patut beak mikiran
+            },
+          },
         );
         const sortedProducts = response.data.sort((a, b) =>
           a.product_name.localeCompare(b.product_name),
