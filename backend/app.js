@@ -379,8 +379,8 @@ sequelize
 
       // === SETUP URL BACKEND ===
       // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-      const backendUrl = `https://4ca8-114-10-145-104.ngrok-free.app`; // ngrok
-      // const backendUrl = `http://localhost:5000`;
+      // const backendUrl = `https://4ca8-114-10-145-104.ngrok-free.app`; // ngrok
+      const backendUrl = `http://localhost:5000`;
       // const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
       // const backendUrl = `http://140.0.67.211:5000`; // IP Public Router Rumah
       // const backendUrl = `http://172.20.10.4:5000`; // IPv4 iphone hotspot
