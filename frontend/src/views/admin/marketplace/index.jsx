@@ -129,29 +129,6 @@ export default function Marketplace() {
     return phoneRegex.test(phone);
   };
 
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation tidak didukung di perangkat ini.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationCoords({
-          lat: position.coords.latitude.toString(),
-          lng: position.coords.longitude.toString(),
-        });
-        setLocationError('');
-      },
-      (error) => {
-        setLocationError(
-          'Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.',
-        );
-        console.error(error);
-      },
-    );
-  };
-
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const toast = useToast();
@@ -495,10 +472,6 @@ export default function Marketplace() {
 
   const handleNavigate = () => {
     window.location.replace('/orderan');
-  };
-
-  const handlePrint = () => {
-    openPrintWindow(paymentInfo);
   };
 
   const handlePaymentMethod = async () => {
