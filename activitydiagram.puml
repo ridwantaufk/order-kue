@@ -1,41 +1,107 @@
-@startuml
-title Activity Diagram – Alur Pemesanan & Pengelolaan Pesanan
+**Diagram 1: Alur Pembuatan Pesanan (Order)**
 
+```plantuml
+@startuml
 start
 
-:Customer mengisi form pemesanan;
-:Data disimpan ke TOrders;
+:Pelanggan memilih produk;
+:Pelanggan menambahkan ke keranjang;
+:Pelanggan menuju ke halaman checkout;
+:Pelanggan mengisi data diri dan alamat;
+:Pelanggan memilih metode pembayaran;
 
-:Menunggu pembayaran;
+if (Metode Pembayaran) then (Midtrans)
+    :Inisiasi pembayaran Midtrans;
+    :Pelanggan melakukan pembayaran di Midtrans;
+    :Midtrans mengirimkan notifikasi ke server;
+    :Server memvalidasi pembayaran;
+else (Tunai/Lainnya)
+    :Pembayaran selesai;
+endif
 
-if (Pembayaran dilakukan?) then (Ya)
-  :Validasi pembayaran;
-  :Ubah status menjadi 'Sedang diproses';
-  
-  if (Stok/Bahan tersedia?) then (Ya)
-    :Produksi/Penyiapan produk;
-    :Ubah status menjadi 'Sedang dikirim';
-    :Kirim produk ke alamat customer;
+:Server memproses pesanan;
+:Server mengirimkan konfirmasi pesanan ke pelanggan;
+:Pesanan disimpan ke database;
 
-    :Produk diterima customer;
-    :Status menjadi 'Diterima';
-    :Order diarsipkan;
-  else (Tidak)
-    :Tunda proses;
-    if (Stok tersedia kembali?) then (Ya)
-      :Lanjut ke proses produksi;
-    else (Tidak)
-      :Batalkan pesanan karena stok tidak tersedia;
-    endif
-  endif
+stop
+@enduml
+```
 
-else (Tidak)
-  if (Pembeli membatalkan?) then (Ya)
-    :Batalkan order oleh pembeli;
-  else (Tidak)
-    :Tunggu beberapa waktu;
-    :Admin batalkan secara manual via WA/chat;
-  endif
+**Diagram 2: Alur Pengelolaan Chat (Chat)**
+
+```plantuml
+@startuml
+start
+
+:Pelanggan memulai chat;
+:Pesan masuk ke server;
+:Server menyimpan pesan ke database;
+:Server mengirimkan pesan ke penjual;
+
+if (Penjual membalas) then
+    :Penjual membalas pesan;
+    :Pesan masuk ke server;
+    :Server menyimpan pesan ke database;
+    :Server mengirimkan pesan ke pelanggan;
+else
+    :Menunggu balasan penjual;
+endif
+
+stop
+@enduml
+```
+
+**Diagram 3: Alur Manajemen Master Data (Produk, Bahan Baku, dll.)**
+
+```plantuml
+@startuml
+start
+
+partition "Manajemen Master Data" {
+    :Admin menambahkan/memperbarui data produk;
+    :Admin menambahkan/memperbarui data bahan baku;
+    :Admin menambahkan/memperbarui data alat;
+    :Admin menambahkan/memperbarui data biaya;
+}
+
+:Data tersimpan di database;
+stop
+@enduml
+```
+
+
+**Diagram 4: Alur Pengambilan Data Dashboard**
+
+```plantuml
+@startuml
+start
+
+:Request data dashboard dari frontend;
+
+partition "Server" {
+    :Ambil data dari database (Penjualan, Pengeluaran, dll.);
+    :Proses dan agregasi data;
+}
+
+:Kirim data ke frontend;
+stop
+@enduml
+```
+
+**Diagram 5: Alur Autentikasi Pengguna**
+
+```plantuml
+@startuml
+start
+
+:Pengguna melakukan login;
+
+if (Kredensial valid) then
+    :Buat token JWT;
+    :Kirim token ke pengguna;
+    :Redirect ke halaman dashboard;
+else
+    :Tampilkan pesan error;
 endif
 
 stop
