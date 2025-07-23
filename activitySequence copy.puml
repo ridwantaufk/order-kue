@@ -1,0 +1,1046 @@
+@startuml Activity_Pembeli_LihatProduk
+title Activity Diagram - Pembeli Lihat Produk
+start
+:Pembeli mengakses sistem;
+:Sistem menampilkan halaman utama;
+:Pembeli memilih menu produk;
+:Sistem menampilkan daftar produk;
+:Pembeli melihat detail produk;
+if (Tertarik dengan produk?) then (ya)
+  :Pembeli melanjutkan ke pemesanan;
+else (tidak)
+  :Pembeli kembali ke daftar produk;
+endif
+stop
+@enduml
+
+@startuml Sequence_Pembeli_LihatProduk
+title Sequence Diagram - Pembeli Lihat Produk
+actor Pembeli
+participant "Sistem Web" as SW
+participant "Database Produk" as DB
+
+Pembeli -> SW: Mengakses halaman utama
+SW -> Pembeli: Tampilkan halaman utama
+Pembeli -> SW: Klik menu produk
+SW -> DB: Query daftar produk
+DB -> SW: Return data produk
+SW -> Pembeli: Tampilkan daftar produk
+Pembeli -> SW: Pilih produk untuk detail
+SW -> DB: Query detail produk
+DB -> SW: Return detail produk
+SW -> Pembeli: Tampilkan detail produk
+@enduml
+
+@startuml Activity_Pembeli_LakukanPemesanan
+title Activity Diagram - Pembeli Lakukan Pemesanan
+start
+:Pembeli pilih produk;
+:Pembeli tentukan jumlah;
+:Pembeli isi form pemesanan;
+if (Data valid?) then (ya)
+  :Sistem simpan pesanan;
+  :Sistem kirim konfirmasi;
+  :Pembeli terima konfirmasi;
+else (tidak)
+  :Tampilkan pesan error;
+  :Pembeli perbaiki data;
+endif
+stop
+@enduml
+
+@startuml Sequence_Pembeli_LakukanPemesanan
+title Sequence Diagram - Pembeli Lakukan Pemesanan
+actor Pembeli
+participant "Sistem Web" as SW
+participant "Database Pesanan" as DBP
+participant "Sistem Notifikasi" as SN
+
+Pembeli -> SW: Pilih produk dan jumlah
+Pembeli -> SW: Isi form pemesanan
+SW -> SW: Validasi data
+SW -> DBP: Simpan data pesanan
+DBP -> SW: Konfirmasi penyimpanan
+SW -> SN: Kirim notifikasi konfirmasi
+SN -> Pembeli: Kirim email/SMS konfirmasi
+SW -> Pembeli: Tampilkan halaman konfirmasi
+@enduml
+
+@startuml Activity_Pembeli_IsiIdentitas
+title Activity Diagram - Pembeli Isi Identitas & Alamat
+start
+:Pembeli akses form identitas;
+:Pembeli isi nama lengkap;
+:Pembeli isi nomor telepon;
+:Pembeli isi alamat lengkap;
+:Pembeli isi email;
+if (Semua field terisi?) then (ya)
+  if (Format data valid?) then (ya)
+    :Sistem simpan identitas;
+    :Tampilkan konfirmasi;
+  else (tidak)
+    :Tampilkan pesan error format;
+  endif
+else (tidak)
+  :Tampilkan pesan field kosong;
+endif
+stop
+@enduml
+
+@startuml Sequence_Pembeli_IsiIdentitas
+title Sequence Diagram - Pembeli Isi Identitas & Alamat
+actor Pembeli
+participant "Sistem Web" as SW
+participant "Validator" as V
+participant "Database Customer" as DBC
+
+Pembeli -> SW: Akses form identitas
+SW -> Pembeli: Tampilkan form identitas
+Pembeli -> SW: Submit data identitas
+SW -> V: Validasi format data
+V -> SW: Return hasil validasi
+alt Data valid
+  SW -> DBC: Simpan data customer
+  DBC -> SW: Konfirmasi penyimpanan
+  SW -> Pembeli: Tampilkan konfirmasi
+else Data tidak valid
+  SW -> Pembeli: Tampilkan pesan error
+end
+@enduml
+
+@startuml Activity_Pembeli_LihatDetailPesanan
+title Activity Diagram - Pembeli Lihat Detail Pesanan
+start
+:Pembeli masukkan kode pesanan;
+if (Kode pesanan valid?) then (ya)
+  :Sistem cari pesanan;
+  if (Pesanan ditemukan?) then (ya)
+    :Sistem tampilkan detail pesanan;
+    :Tampilkan status pesanan;
+    :Tampilkan rincian produk;
+    :Tampilkan total harga;
+  else (tidak)
+    :Tampilkan pesan pesanan tidak ditemukan;
+  endif
+else (tidak)
+  :Tampilkan pesan kode tidak valid;
+endif
+stop
+@enduml
+
+@startuml Sequence_Pembeli_LihatDetailPesanan
+title Sequence Diagram - Pembeli Lihat Detail Pesanan
+actor Pembeli
+participant "Sistem Web" as SW
+participant "Database Pesanan" as DBP
+
+Pembeli -> SW: Input kode pesanan
+SW -> SW: Validasi format kode
+SW -> DBP: Query pesanan berdasarkan kode
+DBP -> SW: Return data pesanan
+alt Pesanan ditemukan
+  SW -> Pembeli: Tampilkan detail pesanan lengkap
+else Pesanan tidak ditemukan
+  SW -> Pembeli: Tampilkan pesan error
+end
+@enduml
+
+@startuml Activity_Pembeli_CetakPesanan
+title Activity Diagram - Pembeli Cetak Pesanan
+start
+:Pembeli di halaman detail pesanan;
+:Pembeli klik tombol cetak;
+:Sistem generate format cetak;
+if (Data pesanan lengkap?) then (ya)
+  :Sistem buat file PDF;
+  :Tampilkan preview cetak;
+  if (Pembeli konfirmasi cetak?) then (ya)
+    :Download/print dokumen;
+  else (tidak)
+    :Kembali ke detail pesanan;
+  endif
+else (tidak)
+  :Tampilkan pesan data tidak lengkap;
+endif
+stop
+@enduml
+
+@startuml Sequence_Pembeli_CetakPesanan
+title Sequence Diagram - Pembeli Cetak Pesanan
+actor Pembeli
+participant "Sistem Web" as SW
+participant "PDF Generator" as PDF
+participant "Database Pesanan" as DBP
+
+Pembeli -> SW: Klik tombol cetak
+SW -> DBP: Ambil data pesanan lengkap
+DBP -> SW: Return data pesanan
+SW -> PDF: Generate dokumen PDF
+PDF -> SW: Return file PDF
+SW -> Pembeli: Tampilkan preview PDF
+Pembeli -> SW: Konfirmasi download
+SW -> Pembeli: Download file PDF
+@enduml
+
+@startuml Activity_Pembeli_TercatatTrafik
+title Activity Diagram - Pembeli Tercatat Trafik IP
+start
+:Pembeli mengakses website;
+:Sistem deteksi IP address;
+:Sistem catat waktu akses;
+:Sistem identifikasi browser/device;
+if (IP sudah pernah akses?) then (ya)
+  :Update counter kunjungan;
+  :Update waktu terakhir akses;
+else (tidak)
+  :Buat record baru pengunjung;
+  :Set counter = 1;
+endif
+:Sistem simpan log trafik;
+:Pembeli dapat menggunakan sistem;
+stop
+@enduml
+
+@startuml Sequence_Pembeli_TercatatTrafik
+title Sequence Diagram - Pembeli Tercatat Trafik IP
+actor Pembeli
+participant "Web Server" as WS
+participant "Traffic Logger" as TL
+participant "Database Log" as DBL
+
+Pembeli -> WS: HTTP Request ke website
+WS -> TL: Capture IP dan metadata
+TL -> TL: Identifikasi IP, browser, timestamp
+TL -> DBL: Check existing IP record
+DBL -> TL: Return IP record status
+alt IP sudah ada
+  TL -> DBL: Update counter dan timestamp
+else IP baru
+  TL -> DBL: Insert record baru
+end
+DBL -> TL: Konfirmasi logging
+WS -> Pembeli: Response halaman website
+@enduml
+
+@startuml Activity_Superuser_LoginDaftarLogout
+title Activity Diagram - Superuser Login/Daftar/Logout
+start
+if (Sudah punya akun?) then (ya)
+  :Input username/password;
+  if (Kredensial valid?) then (ya)
+    :Login berhasil;
+    :Akses dashboard superuser;
+    note right: User dapat logout kapan saja
+    :Melakukan aktivitas admin;
+    if (Ingin logout?) then (ya)
+      :Klik logout;
+      :Sesi berakhir;
+    endif
+  else (tidak)
+    :Tampilkan error login;
+  endif
+else (tidak)
+  :Daftar akun baru;
+  :Isi form registrasi;
+  if (Data valid?) then (ya)
+    :Akun dibuat;
+    :Login otomatis;
+  else (tidak)
+    :Perbaiki data registrasi;
+  endif
+endif
+stop
+@enduml
+
+@startuml Sequence_Superuser_LoginDaftarLogout
+title Sequence Diagram - Superuser Login/Daftar/Logout
+actor Superuser
+participant "Auth System" as AS
+participant "Session Manager" as SM
+participant "Database User" as DBU
+
+alt Login
+  Superuser -> AS: Input credentials
+  AS -> DBU: Verify credentials
+  DBU -> AS: Return auth result
+  AS -> SM: Create session
+  SM -> AS: Return session token
+  AS -> Superuser: Login success + redirect
+else Register
+  Superuser -> AS: Submit registration data
+  AS -> DBU: Create new user account
+  DBU -> AS: Confirm account creation
+  AS -> SM: Auto create session
+  AS -> Superuser: Registration success + login
+else Logout
+  Superuser -> AS: Request logout
+  AS -> SM: Destroy session
+  SM -> AS: Confirm session destroyed
+  AS -> Superuser: Redirect to login page
+end
+@enduml
+
+@startuml Activity_Superuser_KelolaOrderan
+title Activity Diagram - Superuser Kelola Orderan
+start
+:Superuser akses menu orderan;
+:Sistem tampilkan daftar orderan;
+if (Pilih aksi?) then (lihat detail)
+  :Buka detail orderan;
+  :Tampilkan info lengkap;
+elseif (ubah status)
+  :Pilih orderan;
+  :Ubah status orderan;
+  :Simpan perubahan;
+elseif (hapus orderan)
+  :Pilih orderan untuk dihapus;
+  if (Konfirmasi hapus?) then (ya)
+    :Hapus orderan dari sistem;
+  else (tidak)
+    :Batal hapus;
+  endif
+elseif (tambah orderan manual)
+  :Isi form orderan baru;
+  :Simpan orderan;
+endif
+stop
+@enduml
+
+@startuml Sequence_Superuser_KelolaOrderan
+title Sequence Diagram - Superuser Kelola Orderan
+actor Superuser
+participant "Admin Panel" as AP
+participant "Order Service" as OS
+participant "Database Pesanan" as DBP
+
+Superuser -> AP: Akses menu kelola orderan
+AP -> OS: Request daftar orderan
+OS -> DBP: Query all orders
+DBP -> OS: Return orders data
+OS -> AP: Return formatted data
+AP -> Superuser: Tampilkan daftar orderan
+
+alt Lihat Detail
+  Superuser -> AP: Pilih orderan untuk detail
+  AP -> OS: Request detail orderan
+  OS -> DBP: Query detail order
+  DBP -> OS: Return detail data
+  OS -> AP: Format detail data
+  AP -> Superuser: Tampilkan detail lengkap
+else Update Status
+  Superuser -> AP: Ubah status orderan
+  AP -> OS: Update order status
+  OS -> DBP: Update status in database
+  DBP -> OS: Confirm update
+  OS -> AP: Return success message
+  AP -> Superuser: Tampilkan konfirmasi update
+else Delete Order
+  Superuser -> AP: Request delete orderan
+  AP -> OS: Delete order request
+  OS -> DBP: Delete from database
+  DBP -> OS: Confirm deletion
+  OS -> AP: Return deletion status
+  AP -> Superuser: Tampilkan konfirmasi hapus
+end
+@enduml
+
+@startuml Activity_Superuser_LihatOrderanPembeli
+title Activity Diagram - Superuser Lihat Orderan Pembeli
+start
+:Superuser pilih menu orderan pembeli;
+:Sistem tampilkan daftar pembeli;
+if (Filter berdasarkan?) then (nama pembeli)
+  :Input nama pembeli;
+  :Sistem filter berdasarkan nama;
+elseif (periode waktu)
+  :Pilih tanggal mulai dan selesai;
+  :Sistem filter berdasarkan periode;
+elseif (status pesanan)
+  :Pilih status tertentu;
+  :Sistem filter berdasarkan status;
+endif
+:Sistem tampilkan hasil orderan;
+if (Lihat detail orderan?) then (ya)
+  :Klik orderan tertentu;
+  :Tampilkan detail lengkap;
+  :Tampilkan info pembeli;
+  :Tampilkan detail produk;
+else (tidak)
+  :Tetap di daftar orderan;
+endif
+stop
+@enduml
+
+@startuml Sequence_Superuser_LihatOrderanPembeli
+title Sequence Diagram - Superuser Lihat Orderan Pembeli
+actor Superuser
+participant "Admin Panel" as AP
+participant "Order Service" as OS
+participant "Database Pesanan" as DBP
+participant "Database Customer" as DBC
+
+Superuser -> AP: Akses menu orderan pembeli
+AP -> OS: Request daftar orderan dengan info pembeli
+OS -> DBP: Query orders
+OS -> DBC: Query customer info
+DBP -> OS: Return orders data
+DBC -> OS: Return customer data
+OS -> OS: Join order dan customer data
+OS -> AP: Return combined data
+AP -> Superuser: Tampilkan daftar orderan pembeli
+
+alt Filter Data
+  Superuser -> AP: Apply filter (nama/periode/status)
+  AP -> OS: Request filtered data
+  OS -> DBP: Query dengan filter
+  DBP -> OS: Return filtered results
+  OS -> AP: Format filtered data
+  AP -> Superuser: Update tampilan dengan filter
+end
+
+alt Lihat Detail
+  Superuser -> AP: Pilih orderan untuk detail
+  AP -> OS: Request detail orderan + customer
+  OS -> DBP: Query detail order
+  OS -> DBC: Query detail customer
+  DBP -> OS: Return order details
+  DBC -> OS: Return customer details
+  OS -> AP: Combine dan format data
+  AP -> Superuser: Tampilkan detail lengkap
+end
+@enduml
+
+@startuml Activity_Superuser_EditProfil
+title Activity Diagram - Superuser Edit Profil
+start
+:Superuser akses menu profil;
+:Sistem tampilkan data profil saat ini;
+:Superuser pilih field yang akan diedit;
+if (Edit field apa?) then (nama)
+  :Ubah nama lengkap;
+elseif (email)
+  :Ubah alamat email;
+  if (Email sudah digunakan?) then (ya)
+    :Tampilkan pesan error email duplikat;
+    stop
+  endif
+elseif (password)
+  :Input password lama;
+  if (Password lama benar?) then (ya)
+    :Input password baru;
+    :Konfirmasi password baru;
+    if (Password baru cocok?) then (ya)
+      :Update password;
+    else (tidak)
+      :Tampilkan error konfirmasi;
+    endif
+  else (tidak)
+    :Tampilkan error password lama;
+  endif
+elseif (foto profil)
+  :Upload foto baru;
+  if (Format file valid?) then (ya)
+    :Simpan foto profil;
+  else (tidak)
+    :Tampilkan error format;
+  endif
+endif
+:Simpan perubahan ke database;
+:Tampilkan konfirmasi perubahan;
+stop
+@enduml
+
+@startuml Sequence_Superuser_EditProfil
+title Sequence Diagram - Superuser Edit Profil
+actor Superuser
+participant "Profile Manager" as PM
+participant "Validator" as V
+participant "File Handler" as FH
+participant "Database User" as DBU
+
+Superuser -> PM: Akses halaman edit profil
+PM -> DBU: Get current profile data
+DBU -> PM: Return profile data
+PM -> Superuser: Tampilkan form edit profil
+
+Superuser -> PM: Submit profile changes
+PM -> V: Validate new data
+V -> PM: Return validation result
+
+alt Data valid
+  alt Update password
+    PM -> V: Verify old password
+    V -> DBU: Check old password
+    DBU -> V: Return password verification
+    V -> PM: Confirm old password
+    PM -> DBU: Update new password hash
+  else Update photo
+    PM -> FH: Process uploaded file
+    FH -> PM: Return file path
+    PM -> DBU: Update photo path
+  else Update other fields
+    PM -> DBU: Update profile fields
+  end
+  DBU -> PM: Confirm update
+  PM -> Superuser: Show success message
+else Data tidak valid
+  PM -> Superuser: Show validation errors
+end
+@enduml
+
+@startuml Activity_Superuser_MasteringProduk
+title Activity Diagram - Superuser Mastering Produk
+start
+:Superuser akses menu mastering produk;
+:Sistem tampilkan daftar produk;
+if (Pilih aksi?) then (tambah produk)
+  :Isi form produk baru;
+  :Input nama produk;
+  :Input deskripsi;
+  :Input harga;
+  :Upload foto produk;
+  if (Data lengkap dan valid?) then (ya)
+    :Simpan produk baru;
+    :Tampilkan konfirmasi;
+  else (tidak)
+    :Tampilkan pesan error;
+  endif
+elseif (edit produk)
+  :Pilih produk untuk diedit;
+  :Ubah data yang diperlukan;
+  :Simpan perubahan;
+elseif (hapus produk)
+  :Pilih produk untuk dihapus;
+  if (Konfirmasi hapus?) then (ya)
+    if (Produk memiliki orderan aktif?) then (ya)
+      :Tampilkan peringatan;
+      :Nonaktifkan produk saja;
+    else (tidak)
+      :Hapus produk dari sistem;
+    endif
+  else (tidak)
+    :Batal hapus;
+  endif
+elseif (aktifkan/nonaktifkan)
+  :Toggle status produk;
+  :Update status di database;
+endif
+stop
+@enduml
+
+@startuml Sequence_Superuser_MasteringProduk
+title Sequence Diagram - Superuser Mastering Produk
+actor Superuser
+participant "Product Manager" as PM
+participant "File Handler" as FH
+participant "Database Produk" as DBP
+participant "Database Pesanan" as DBO
+
+Superuser -> PM: Akses menu mastering produk
+PM -> DBP: Get all products
+DBP -> PM: Return products data
+PM -> Superuser: Tampilkan daftar produk
+
+alt Tambah Produk
+  Superuser -> PM: Input data produk baru
+  PM -> FH: Process uploaded images
+  FH -> PM: Return image paths
+  PM -> DBP: Insert new product
+  DBP -> PM: Confirm insertion
+  PM -> Superuser: Show success message
+else Edit Produk
+  Superuser -> PM: Select product to edit
+  PM -> DBP: Get product details
+  DBP -> PM: Return product data
+  PM -> Superuser: Show edit form
+  Superuser -> PM: Submit changes
+  PM -> DBP: Update product
+  DBP -> PM: Confirm update
+  PM -> Superuser: Show update success
+else Hapus Produk
+  Superuser -> PM: Request delete product
+  PM -> DBO: Check active orders for product
+  DBO -> PM: Return order status
+  alt Has active orders
+    PM -> DBP: Deactivate product instead
+    PM -> Superuser: Show deactivation message
+  else No active orders
+    PM -> DBP: Delete product
+    DBP -> PM: Confirm deletion
+    PM -> Superuser: Show deletion success
+  end
+else Toggle Status
+  Superuser -> PM: Toggle product status
+  PM -> DBP: Update product status
+  DBP -> PM: Confirm status change
+  PM -> Superuser: Show status change
+end
+@enduml
+
+@startuml Activity_Superuser_AksesDashboardLaporan
+title Activity Diagram - Superuser Akses Dashboard Laporan
+start
+:Superuser login ke sistem;
+:Sistem tampilkan dashboard utama;
+:Dashboard load data statistik;
+if (Pilih jenis laporan?) then (laporan penjualan)
+  :Tampilkan grafik penjualan;
+  :Tampilkan total revenue;
+  :Tampilkan produk terlaris;
+elseif (laporan pembeli)
+  :Tampilkan jumlah pembeli baru;
+  :Tampilkan pembeli berulang;
+  :Tampilkan demografi pembeli;
+elseif (laporan produk)
+  :Tampilkan performa setiap produk;
+  :Tampilkan stok produk;
+  :Tampilkan rating produk;
+elseif (laporan trafik)
+  :Tampilkan visitor statistics;
+  :Tampilkan page views;
+  :Tampilkan sumber trafik;
+endif
+if (Export laporan?) then (ya)
+  :Pilih format export (PDF/Excel);
+  :Generate file laporan;
+  :Download file;
+else (tidak)
+  :Tetap lihat di dashboard;
+endif
+stop
+@enduml
+
+@startuml Sequence_Superuser_AksesDashboardLaporan
+title Sequence Diagram - Superuser Akses Dashboard Laporan
+actor Superuser
+participant "Dashboard" as D
+participant "Report Service" as RS
+participant "Export Service" as ES
+participant "Database Analytics" as DBA
+
+Superuser -> D: Akses dashboard
+D -> RS: Request dashboard data
+RS -> DBA: Query sales data
+RS -> DBA: Query customer data
+RS -> DBA: Query product data
+RS -> DBA: Query traffic data
+DBA -> RS: Return aggregated data
+RS -> D: Format dashboard widgets
+D -> Superuser: Tampilkan dashboard dengan laporan
+
+alt Filter Laporan
+  Superuser -> D: Select report type/period
+  D -> RS: Request filtered data
+  RS -> DBA: Query dengan filter
+  DBA -> RS: Return filtered results
+  RS -> D: Format filtered report
+  D -> Superuser: Update dashboard view
+end
+
+alt Export Laporan
+  Superuser -> D: Request export
+  D -> ES: Generate export file
+  ES -> RS: Get report data
+  RS -> DBA: Query detailed data
+  DBA -> RS: Return export data
+  RS -> ES: Format data for export
+  ES -> D: Return file download link
+  D -> Superuser: Provide download
+end
+@enduml
+
+@startuml Activity_Admin_Penjualan
+title Activity Diagram - Admin Penjualan
+start
+:Admin akses menu penjualan;
+:Sistem tampilkan form penjualan;
+if (Jenis penjualan?) then (penjualan langsung)
+  :Pilih produk dari katalog;
+  :Input jumlah produk;
+  :Hitung total harga;
+  :Input data pembeli (opsional);
+  :Proses pembayaran;
+  if (Pembayaran berhasil?) then (ya)
+    :Generate struk penjualan;
+    :Update stok produk;
+    :Catat transaksi;
+  else (tidak)
+    :Tampilkan error pembayaran;
+  endif
+elseif (konfirmasi orderan online)
+  :Pilih orderan yang akan dikonfirmasi;
+  :Verifikasi ketersediaan produk;
+  :Update status menjadi "dikonfirmasi";
+  :Kirim notifikasi ke pembeli;
+endif
+stop
+@enduml
+
+@startuml Sequence_Admin_Penjualan
+title Sequence Diagram - Admin Penjualan
+actor Admin
+participant "POS System" as POS
+participant "Payment Gateway" as PG
+participant "Database Produk" as DBP
+participant "Database Transaksi" as DBT
+participant "Notification Service" as NS
+
+Admin -> POS: Akses menu penjualan
+POS -> DBP: Get available products
+DBP -> POS: Return product catalog
+POS -> Admin: Tampilkan form penjualan
+
+alt Penjualan Langsung
+  Admin -> POS: Select products dan quantity
+  POS -> DBP: Check stock availability
+  DBP -> POS: Confirm stock status
+  POS -> POS: Calculate total price
+  POS -> Admin: Show transaction summary
+  Admin -> POS: Process payment
+  POS -> PG: Process payment request
+  PG -> POS: Return payment result
+  alt Payment Success
+    POS -> DBT: Record transaction
+    POS -> DBP: Update stock levels
+    DBT -> POS: Confirm transaction saved
+    DBP -> POS: Confirm stock updated
+    POS -> Admin: Generate receipt
+  else Payment Failed
+    POS -> Admin: Show payment error
+  end
+else Konfirmasi Orderan Online
+  Admin -> POS: Select online order
+  POS -> DBP: Verify product availability
+  DBP -> POS: Return availability status
+  POS -> DBT: Update order status
+  DBT -> POS: Confirm status update
+  POS -> NS: Send confirmation to customer
+  NS -> POS: Confirm notification sent
+  POS -> Admin: Show confirmation success
+end
+@enduml
+
+@startuml Activity_Admin_Stok
+title Activity Diagram - Admin Stok
+start
+:Admin akses menu stok;
+:Sistem tampilkan daftar produk dan stok;
+if (Pilih aksi stok?) then (tambah stok)
+  :Pilih produk;
+  :Input jumlah stok masuk;
+  :Input keterangan (supplier, dll);
+  :Simpan penambahan stok;
+  :Update jumlah stok produk;
+elseif (kurangi stok)
+  :Pilih produk;
+  :Input jumlah stok keluar;
+  :Input alasan pengurangan;
+  if (Stok mencukupi?) then (ya)
+    :Kurangi stok produk;
+    :Catat riwayat pengurangan;
+  else (tidak)
+    :Tampilkan peringatan stok tidak cukup;
+  endif
+elseif (adjustment stok)
+  :Pilih produk untuk adjustment;
+  :Input stok aktual hasil perhitungan fisik;
+  :Hitung selisih stok;
+  if (Ada selisih?) then (ya)
+    :Input alasan adjustment;
+    :Update stok sesuai fisik;
+    :Catat adjustment;
+  else (tidak)
+    :Stok sudah sesuai;
+  endif
+elseif (lihat riwayat stok)
+  :Pilih produk;
+  :Tampilkan history pergerakan stok;
+  :Tampilkan tanggal, jenis transaksi, jumlah;
+endif
+stop
+@enduml
+
+@startuml Sequence_Admin_Stok
+title Sequence Diagram - Admin Stok
+actor Admin
+participant "Stock Manager" as SM
+participant "Database Produk" as DBP
+participant "Database Stock Log" as DSL
+
+Admin -> SM: Akses menu kelola stok
+SM -> DBP: Get products with current stock
+DBP -> SM: Return products dan stock data
+SM -> Admin: Tampilkan daftar produk dan stok
+
+alt Tambah Stok
+  Admin -> SM: Input stock addition
+  SM -> DBP: Update product stock (+)
+  SM -> DSL: Log stock addition
+  DBP -> SM: Confirm stock update
+  DSL -> SM: Confirm log saved
+  SM -> Admin: Show addition success
+else Kurangi Stok
+  Admin -> SM: Input stock reduction
+  SM -> DBP: Check current stock level
+  DBP -> SM: Return current stock
+  alt Sufficient stock
+    SM -> DBP: Update product stock (-)
+    SM -> DSL: Log stock reduction
+    DBP -> SM: Confirm stock update
+    DSL -> SM: Confirm log saved
+    SM -> Admin: Show reduction success
+  else Insufficient stock
+    SM -> Admin: Show insufficient stock error
+  end
+else Stock Adjustment
+  Admin -> SM: Input physical stock count
+  SM -> DBP: Get current system stock
+  DBP -> SM: Return system stock
+  SM -> SM: Calculate difference
+  alt Has difference
+    SM -> DBP: Update to physical count
+    SM -> DSL: Log stock adjustment
+    DBP -> SM: Confirm adjustment
+    DSL -> SM: Confirm log saved
+    SM -> Admin: Show adjustment success
+  else No difference
+    SM -> Admin: Show "stock already accurate"
+  end
+else Lihat Riwayat
+  Admin -> SM: Request stock history
+  SM -> DSL: Query stock movements
+  DSL -> SM: Return movement history
+  SM -> Admin: Display stock history
+end
+@enduml
+
+@startuml Activity_Admin_Pengeluaran
+title Activity Diagram - Admin Pengeluaran
+start
+:Admin akses menu pengeluaran;
+:Sistem tampilkan form pengeluaran;
+if (Jenis pengeluaran?) then (beli bahan baku)
+  :Input nama supplier;
+  :Input jenis bahan baku;
+  :Input jumlah dan harga;
+  :Input tanggal pembelian;
+elseif (operasional)
+  :Pilih kategori operasional;
+  :Input deskripsi pengeluaran;
+  :Input nominal pengeluaran;
+  :Input tanggal pengeluaran;
+elseif (maintenance)
+  :Input jenis maintenance;
+  :Input vendor/pekerja;
+  :Input biaya maintenance;
+elseif (lain-lain)
+  :Input kategori custom;
+  :Input deskripsi detail;
+  :Input nominal;
+endif
+:Upload bukti pengeluaran (struk/nota);
+if (Data lengkap?) then (ya)
+  :Simpan data pengeluaran;
+  :Update laporan keuangan;
+  :Tampilkan konfirmasi;
+else (tidak)
+  :Tampilkan field yang belum diisi;
+endif
+stop
+@enduml
+
+@startuml Sequence_Admin_Pengeluaran
+title Sequence Diagram - Admin Pengeluaran
+actor Admin
+participant "Expense Manager" as EM
+participant "File Handler" as FH
+participant "Database Pengeluaran" as DBE
+participant "Report Service" as RS
+
+Admin -> EM: Akses menu pengeluaran
+EM -> Admin: Tampilkan form pengeluaran
+
+Admin -> EM: Input data pengeluaran
+EM -> FH: Upload bukti pengeluaran
+FH -> EM: Return file path
+EM -> EM: Validate expense data
+alt Data valid
+  EM -> DBE: Save expense record
+  DBE -> EM: Confirm expense saved
+  EM -> RS: Update financial reports
+  RS -> EM: Confirm report updated
+  EM -> Admin: Show success message
+else Data tidak valid
+  EM -> Admin: Show validation errors
+end
+@enduml
+
+@startuml Activity_Admin_InvoicePendapatan
+title Activity Diagram - Admin Invoice Pendapatan
+start
+:Admin akses menu invoice pendapatan;
+:Sistem tampilkan daftar transaksi;
+if (Filter berdasarkan?) then (periode)
+  :Pilih tanggal mulai dan selesai;
+  :Sistem filter transaksi sesuai periode;
+elseif (jenis penjualan)
+  :Pilih online/offline;
+  :Filter berdasarkan channel;
+elseif (status pembayaran)
+  :Pilih lunas/belum lunas;
+  :Filter berdasarkan status;
+endif
+:Sistem tampilkan daftar invoice;
+if (Aksi terhadap invoice?) then (generate invoice)
+  :Pilih transaksi;
+  :Generate PDF invoice;
+  :Tampilkan preview;
+  if (Invoice benar?) then (ya)
+    :Simpan dan kirim ke pembeli;
+  else (tidak)
+    :Edit data invoice;
+  endif
+elseif (update status bayar)
+  :Pilih invoice;
+  :Update status pembayaran;
+  :Catat tanggal pembayaran;
+elseif (kirim ulang invoice)
+  :Pilih invoice;
+  :Kirim ulang ke email pembeli;
+endif
+stop
+@enduml
+
+@startuml Sequence_Admin_InvoicePendapatan
+title Sequence Diagram - Admin Invoice Pendapatan
+actor Admin
+participant "Invoice Manager" as IM
+participant "PDF Generator" as PDF
+participant "Email Service" as ES
+participant "Database Transaksi" as DBT
+
+Admin -> IM: Akses menu invoice pendapatan
+IM -> DBT: Get transaction list
+DBT -> IM: Return transactions data
+IM -> Admin: Tampilkan daftar transaksi
+
+alt Generate Invoice
+  Admin -> IM: Select transaction for invoice
+  IM -> DBT: Get detailed transaction data
+  DBT -> IM: Return transaction details
+  IM -> PDF: Generate invoice PDF
+  PDF -> IM: Return PDF file
+  IM -> Admin: Show invoice preview
+  Admin -> IM: Confirm invoice
+  IM -> ES: Send invoice to customer
+  ES -> IM: Confirm email sent
+  IM -> DBT: Update invoice status
+  DBT -> IM: Confirm status update
+  IM -> Admin: Show generation success
+else Update Payment Status
+  Admin -> IM: Update payment status
+  IM -> DBT: Update payment record
+  DBT -> IM: Confirm payment update
+  IM -> Admin: Show update success
+else Resend Invoice
+  Admin -> IM: Request resend invoice
+  IM -> DBT: Get invoice data
+  DBT -> IM: Return invoice info
+  IM -> ES: Resend invoice email
+  ES -> IM: Confirm resend
+  IM -> Admin: Show resend success
+end
+@enduml
+
+@startuml Activity_Admin_AnalisisPelanggan
+title Activity Diagram - Admin Analisis Pelanggan
+start
+:Admin akses menu analisis pelanggan;
+:Sistem load data pelanggan;
+if (Jenis analisis?) then (demografi)
+  :Tampilkan chart usia pelanggan;
+  :Tampilkan distribusi gender;
+  :Tampilkan lokasi geografis;
+elseif (behavior pembelian)
+  :Analisis frekuensi pembelian;
+  :Tampilkan average order value;
+  :Identifikasi pelanggan loyal;
+  :Tampilkan produk favorit per segment;
+elseif (retention analysis)
+  :Hitung customer retention rate;
+  :Identifikasi churn customers;
+  :Analisis lifetime value;
+elseif (segmentasi pelanggan)
+  :Kelompokkan berdasarkan spending;
+  :Segmentasi berdasarkan frequency;
+  :Buat customer personas;
+endif
+if (Export analisis?) then (ya)
+  :Generate laporan analisis;
+  :Export ke PDF/Excel;
+  :Download file laporan;
+else (tidak)
+  :Tetap lihat di dashboard;
+endif
+if (Buat campaign?) then (ya)
+  :Pilih segment target;
+  :Buat strategi marketing;
+  :Setup campaign parameters;
+else (tidak)
+  :Selesai analisis;
+endif
+stop
+@enduml
+
+@startuml Sequence_Admin_AnalisisPelanggan
+title Sequence Diagram - Admin Analisis Pelanggan
+actor Admin
+participant "Analytics Engine" as AE
+participant "Data Warehouse" as DW
+participant "Report Generator" as RG
+participant "Campaign Manager" as CM
+
+Admin -> AE: Akses menu analisis pelanggan
+AE -> DW: Query customer data
+AE -> DW: Query transaction history
+AE -> DW: Query product preferences
+DW -> AE: Return aggregated customer data
+AE -> AE: Process analytics algorithms
+AE -> Admin: Tampilkan dashboard analisis
+
+alt Demographic Analysis
+  Admin -> AE: Request demographic breakdown
+  AE -> DW: Query demographic data
+  DW -> AE: Return demographic stats
+  AE -> Admin: Show demographic charts
+else Behavior Analysis
+  Admin -> AE: Request behavior analysis
+  AE -> DW: Query purchase patterns
+  DW -> AE: Return behavior data
+  AE -> AE: Calculate metrics (AOV, frequency, etc)
+  AE -> Admin: Show behavior insights
+else Segmentation
+  Admin -> AE: Request customer segmentation
+  AE -> DW: Query comprehensive customer data
+  DW -> AE: Return full customer dataset
+  AE -> AE: Apply segmentation algorithms
+  AE -> Admin: Show customer segments
+end
+
+alt Export Report
+  Admin -> AE: Request export
+  AE -> RG: Generate comprehensive report
+  RG -> DW: Get detailed data for export
+  DW -> RG: Return export data
+  RG -> AE: Return formatted report
+  AE -> Admin: Provide download link
+end
+
+alt Create Campaign
+  Admin -> AE: Select target segment
+  AE -> CM: Initialize campaign setup
+  CM -> DW: Get segment customer list
+  DW -> CM: Return target customers
+  CM -> Admin: Show campaign creation form
+end
+@enduml
