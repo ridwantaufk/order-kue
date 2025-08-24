@@ -52,6 +52,8 @@ import LocationPicker from 'components/location/maps';
 
 import axios from 'axios';
 import { CopyIcon, DownloadIcon } from '@chakra-ui/icons';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 import { openPrintWindow } from './print/print';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -511,7 +513,7 @@ export default function Marketplace() {
       }
 
       // Validate email (optional but must be valid if provided)
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[\^\s@]+@[\^\s@]+\.[\^\s@]+$/;
       if (email && email.trim() && !emailRegex.test(email.trim())) {
         setIsEmailInvalid(true);
         toast({
@@ -806,6 +808,94 @@ export default function Marketplace() {
         duration: 5000,
         isClosable: true,
         position: 'top-right',
+      });
+    }
+  };
+
+  const handlePrintAndDownload = async () => {
+    const printContent = document.getElementById('invoice-print-area');
+    if (!printContent) {
+      toast({
+        title: 'Error',
+        description: 'Invoice content not found.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const loadingToast = toast({
+      title: 'Processing Invoice',
+      description: 'Generating PDF and preparing for print...',
+      status: 'info',
+      duration: null,
+      isClosable: false,
+    });
+
+    try {
+      // 1. Generate and Download PDF
+      // const canvas = await html2canvas(printContent, {
+      //   scale: 2,
+      //   useCORS: true,
+      //   logging: false,
+      // });
+      // const imgData = canvas.toDataURL('image/png');
+      // const pdf = new jsPDF({
+      //   orientation: 'portrait',
+      //   unit: 'mm',
+      //   format: 'a4',
+      // });
+      // const pdfWidth = pdf.internal.pageSize.getWidth();
+      // const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // pdf.save(`invoice-${invoiceData?.orderId}.pdf`);
+
+      // 2. Open Print Dialog
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(`
+          <html>
+          <head>
+              <title>Invoice ${invoiceData?.orderId}</title>
+              <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .invoice-header { text-align: center; margin-bottom: 30px; }
+              .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; }
+              .total-row { font-weight: bold; background-color: #f9f9f9; }
+              @media print { body { margin: 0; } }
+              </style>
+          </head>
+          <body>
+              ${printContent.innerHTML}
+          </body>
+          </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+
+      toast.update(loadingToast, {
+        title: 'Success',
+        description: 'PDF downloaded and print dialog opened.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Error during print/download:', error);
+      toast.update(loadingToast, {
+        title: 'Error',
+        description: 'Could not process the invoice.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
       });
     }
   };
@@ -1543,52 +1633,20 @@ export default function Marketplace() {
           <ModalFooter justifyContent="space-between" flexWrap="wrap" gap={2}>
             <ButtonGroup spacing={2} width={{ base: '100%', sm: 'auto' }}>
               <Button
-                onClick={() => {
-                  const printContent =
-                    document.getElementById('invoice-print-area');
-                  const printWindow = window.open(
-                    '',
-                    '',
-                    'width=800,height=600',
-                  );
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Invoice ${invoiceData?.orderId}</title>
-                        <style>
-                          body { font-family: Arial, sans-serif; margin: 20px; }
-                          .invoice-header { text-align: center; margin-bottom: 30px; }
-                          .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
-                          table { width: 100%; border-collapse: collapse; }
-                          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                          th { background-color: #f2f2f2; }
-                          .total-row { font-weight: bold; background-color: #f9f9f9; }
-                          @media print { body { margin: 0; } }
-                        </style>
-                      </head>
-                      <body>
-                        ${printContent.innerHTML}
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  printWindow.focus();
-                  printWindow.print();
-                  printWindow.close();
-                }}
+                onClick={handlePrintAndDownload}
                 leftIcon={<DownloadIcon />}
                 colorScheme="green"
                 size="sm"
                 flex={{ base: '1', sm: 'none' }}
               >
-                Print Invoice
+                Print & Download Invoice
               </Button>
 
               <Button
                 onClick={() => {
                   // Copy invoice text
                   const invoiceText = `
-                  INVOICE PEMESANAN
+                  INVOICE PEMBAYARAN
                   Tanggal: ${invoiceData?.transactionTime}
 
                   INFORMASI PEMESAN:

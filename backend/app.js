@@ -55,6 +55,7 @@ const { Op } = require("sequelize");
 const ChatSession = require("./models/chatSessionModel");
 const ChatMessage = require("./models/chatMessageModel");
 const requestLogger = require("./middlewares/requestLogger");
+const Order = require("./models/tOrderModel");
 
 app.use(requestLogger);
 
@@ -73,10 +74,11 @@ app.use("/api/favorite", tUtilsProductRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api", visitorRoutes);
 
-tOrdersController.listenForOrderUpdates(io);
-
 const adminSockets = new Map();
 const buyerSockets = new Map();
+
+// Aktifkan listener untuk update
+tOrdersController.listenForOrderUpdates(io);
 
 // Inisialisasi Socket.IO
 io.on("connection", (socket) => {
@@ -109,26 +111,42 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("buyer_join", async ({ orderCode }) => {
+  socket.on("buyer_join", async ({ customerPhone }) => {
     try {
-      console.log("orderCode", orderCode);
+      if (!customerPhone) {
+        console.error("Buyer join error: customerPhone is required.");
+        return;
+      }
 
-      const orderCodes = orderCode
-        .split(",")
-        .map((code) => code.trim())
-        .filter((code) => code.length > 0);
+      // Cari semua pesanan berdasarkan nomor telepon customer
+      const orders = await Order.findAll({
+        where: { customer_phone: customerPhone },
+      });
 
-      // Simpan semua kode ke buyerSockets
+      if (orders.length === 0) {
+        console.log(`No orders found for customer phone: ${customerPhone}`);
+        return;
+      }
+
+      const orderCodes = orders.map((order) => order.order_code);
+
+      // Simpan semua kode pesanan ke buyerSockets dengan socket.id yang sama
       orderCodes.forEach((code) => {
         buyerSockets.set(code, socket.id);
       });
 
       console.log("buyerSockets : ", buyerSockets);
-      socket.orderCode = orderCodes.join(",");
+      socket.orderCodes = orderCodes; // Simpan sebagai array untuk disconnect
+      socket.customerPhone = customerPhone;
       socket.userType = "buyer";
 
-      console.log(`Buyer with order ${orderCodes.join(", ")} joined chat`);
+      console.log(
+        `Buyer with phone ${customerPhone} and orders [${orderCodes.join(
+          ", "
+        )}] joined chat`
+      );
 
+      // Cari semua sesi chat yang relevan
       const sessions = await ChatSession.findAll({
         where: {
           order_code: {
@@ -137,52 +155,38 @@ io.on("connection", (socket) => {
         },
       });
 
-      if (sessions.length === 1) {
-        let session = sessions[0];
+      if (sessions.length > 0) {
+        const sessionIds = sessions.map((s) => s.session_id);
 
-        socket.emit("chat_session", session);
+        // Kirim semua sesi yang relevan ke buyer
+        socket.emit("chat_sessions", sessions);
 
-        const messages = await ChatMessage.findAll({
-          where: { session_id: session.session_id },
-          order: [["created_at", "ASC"]],
-        });
-
-        socket.emit("chat_messages", messages);
-
-        adminSockets.forEach((adminSocketId) => {
-          io.to(adminSocketId).emit("buyer_online", {
-            orderCode: orderCodes[0],
-            online: true,
-          });
-        });
-      } else if (sessions.length > 1) {
-        console.warn(
-          `Terdapat banyak session untuk order_codes: ${orderCodes.join(", ")}`
-        );
-
+        // Ambil semua pesan dari semua sesi yang relevan
         const allMessages = await ChatMessage.findAll({
           where: {
             session_id: {
-              [Op.in]: sessions.map((s) => s.session_id),
+              [Op.in]: sessionIds,
             },
           },
           order: [["created_at", "ASC"]],
         });
 
-        socket.emit("chat_sessions", sessions);
         socket.emit("chat_messages", allMessages);
 
-        adminSockets.forEach((adminSocketId) => {
-          io.to(adminSocketId).emit("buyer_online", {
-            orderCodes,
-            online: true,
+        // Beri tahu admin bahwa pesanan-pesanan ini online
+        orderCodes.forEach((code) => {
+          adminSockets.forEach((adminSocketId) => {
+            io.to(adminSocketId).emit("buyer_online", {
+              orderCode: code,
+              online: true,
+            });
           });
         });
       } else {
-        console.log("Tidak ada session yang ditemukan.");
+        console.log(`No chat sessions found for the orders.`);
       }
     } catch (error) {
-      console.error("Buyer join error :", error);
+      console.error("Buyer join error:", error);
     }
   });
 
@@ -336,11 +340,8 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
 
-    if (socket.userType === "buyer" && socket.orderCode) {
-      const orderCodes = socket.orderCode
-        .split(",")
-        .map((code) => code.trim())
-        .filter((code) => code.length > 0);
+    if (socket.userType === "buyer" && socket.orderCodes) {
+      const orderCodes = socket.orderCodes;
 
       orderCodes.forEach((code) => {
         buyerSockets.delete(code);
@@ -354,7 +355,11 @@ io.on("connection", (socket) => {
         });
       });
 
-      console.log(`Buyer with order ${orderCodes.join(", ")} disconnected`);
+      console.log(
+        `Buyer with phone ${socket.customerPhone} and orders [${orderCodes.join(
+          ", "
+        )}] disconnected`
+      );
     }
 
     // Remove from adminSockets
@@ -379,8 +384,8 @@ sequelize
 
       // === SETUP URL BACKEND ===
       // const backendUrl = `https://order-kue-production.up.railway.app`; // railway
-      // const backendUrl = `https://4ca8-114-10-145-104.ngrok-free.app`; // ngrok
-      const backendUrl = `http://localhost:5000`;
+      const backendUrl = `https://e5f7a41205bf.ngrok-free.app`; // ngrok
+      // const backendUrl = `http://localhost:5000`;
       // const backendUrl = `http://127.0.0.1:5000`; // sama seperti localhost, tapi versi IPv4
       // const backendUrl = `http://140.0.67.211:5000`; // IP Public Router Rumah
       // const backendUrl = `http://172.20.10.4:5000`; // IPv4 iphone hotspot

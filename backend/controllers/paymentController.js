@@ -9,94 +9,125 @@ const User = require("../models/userModel");
 const midtransClient = require("midtrans-client");
 const { default: axios } = require("axios");
 
-// Store temporary order data in memory
-const tempOrderData = new Map();
+// Helper function for input validation
+const validateInput = (customerInfo, paymentDetails) => {
+  if (!customerInfo || !paymentDetails?.price) {
+    return "Invalid request data";
+  }
+  if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
+    return "Customer name, phone, and address are required";
+  }
+  const phoneRegex = /^(\+62|62|0)[8][1-9][0-9]{6,9}$/;
+  if (!phoneRegex.test(customerInfo.phone)) {
+    return "Invalid Indonesian phone number format";
+  }
+  if (customerInfo.customer_email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerInfo.customer_email)) {
+      return "Invalid email format";
+    }
+  }
+  const { itemQuantity, itemPrice } = paymentDetails;
+  if (!itemQuantity || !itemPrice || Object.keys(itemQuantity).length === 0) {
+    return "At least one item must be ordered with quantity and price";
+  }
+  if (
+    Object.keys(itemQuantity).length !== Object.keys(itemPrice).length ||
+    !Object.keys(itemQuantity).every((key) =>
+      Object.keys(itemPrice).includes(key)
+    )
+  ) {
+    return "Mismatch between item quantity and price data";
+  }
+  return null;
+};
 
 exports.initiatePayment = async (req, res) => {
   const { customerInfo, paymentDetails, orderMetadata } = req.body;
 
-  // Validasi basic
-  if (!customerInfo || !paymentDetails?.price) {
-    return res.status(400).json({ message: "Invalid request data" });
+  // 1. Validate Input
+  const validationError = validateInput(customerInfo, paymentDetails);
+  if (validationError) {
+    return res.status(400).json({ message: validationError });
   }
 
-  // Validasi data customer
-  if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
-    return res.status(400).json({
-      message: "Customer name, phone, and address are required",
-    });
-  }
-
-  // Validasi format nomor telepon Indonesia
-  const phoneRegex = /^(\+62|62|0)[8][1-9][0-9]{6,9}$/;
-  if (!phoneRegex.test(customerInfo.phone)) {
-    return res.status(400).json({
-      message: "Invalid Indonesian phone number format",
-    });
-  }
-
-  // Validasi email jika ada
-  if (customerInfo.customer_email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(customerInfo.customer_email)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
-  }
-
-  // Validasi item data
-  const { itemQuantity, itemPrice } = paymentDetails;
-  if (!itemQuantity || !itemPrice) {
-    return res.status(400).json({
-      message: "Item quantity and price data are required",
-    });
-  }
-
-  const quantityKeys = Object.keys(itemQuantity);
-  const priceKeys = Object.keys(itemPrice);
-
-  if (quantityKeys.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "At least one item must be ordered" });
-  }
-
-  if (
-    quantityKeys.length !== priceKeys.length ||
-    !quantityKeys.every((key) => priceKeys.includes(key))
-  ) {
-    return res.status(400).json({
-      message: "Mismatch between item quantity and price data",
-    });
-  }
+  const transaction = await sequelize.transaction();
 
   try {
-    const response = await axios.get(
-      `${process.env.BACKEND_URL}/api/products`,
+    // 2. Create Order, Items, and Chat Session in DB FIRST
+    const newOrder = await Order.create(
       {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      }
+        order_code: customerInfo.order_code,
+        customer_name: customerInfo.name.trim(),
+        customer_phone: customerInfo.phone.trim(),
+        customer_address: customerInfo.address.trim(),
+        location_latitude: customerInfo.location?.latitude || null,
+        location_longitude: customerInfo.location?.longitude || null,
+        order_date: orderMetadata?.orderDate || new Date(),
+        device_info: orderMetadata?.deviceInfo || null,
+        status: "Menunggu",
+        email: customerInfo.customer_email || null,
+      },
+      { transaction }
     );
 
-    const products = response.data.sort((a, b) =>
-      a.product_name.localeCompare(b.product_name)
+    const itemKeys = Object.keys(paymentDetails.itemQuantity);
+    const orderItems = itemKeys.map((key) => ({
+      order_id: newOrder.order_id,
+      product_id: parseInt(key),
+      quantity: paymentDetails.itemQuantity[key],
+      price: paymentDetails.itemPrice[key],
+    }));
+    await OrderItem.bulkCreate(orderItems, { transaction });
+
+    const admin = await User.findOne({
+      where: { role: { [Op.iLike]: "admin" } },
+      transaction,
+    });
+
+    const newSession = await ChatSession.create(
+      {
+        order_id: newOrder.order_id,
+        order_code: newOrder.order_code,
+        created_by_device: orderMetadata?.deviceInfo,
+        assigned_admin_id: admin?.id || null,
+      },
+      { transaction }
     );
 
+    await ChatMessage.create(
+      {
+        session_id: newSession.session_id,
+        sender_type: "admin",
+        sender_id: admin?.id || 1, // Fallback to 1 if no admin found
+        message: `Pesanan ${newOrder.order_code} telah dibuat. Silakan selesaikan pembayaran untuk melanjutkan.`,
+      },
+      { transaction }
+    );
+
+    // 3. Prepare Midtrans Payment
     const snap = new midtransClient.Snap({
       isProduction: false,
       serverKey: process.env.MIDTRANS_SERVER_KEY,
     });
 
+    const productsResponse = await axios.get(
+      `${process.env.BACKEND_URL}/api/products`,
+      { headers: { "ngrok-skip-browser-warning": "true" } }
+    );
+    const products = productsResponse.data;
+
+    console.log("Creating Midtrans transaction with details:", products);
+
     const parameter = {
       transaction_details: {
-        order_id: customerInfo.order_code,
+        order_id: newOrder.order_code,
         gross_amount: paymentDetails.price,
       },
       customer_details: {
-        first_name: customerInfo.name.trim(),
-        email: customerInfo.customer_email || "an161016taufik@gmail.com",
-        phone: customerInfo.phone.trim(),
+        first_name: newOrder.customer_name,
+        email: newOrder.email || "an161016taufik@gmail.com",
+        phone: newOrder.customer_phone,
       },
       item_details: Object.entries(paymentDetails.itemQuantity).map(
         ([product_id, quantity]) => {
@@ -104,64 +135,30 @@ exports.initiatePayment = async (req, res) => {
           const productName =
             products.find((p) => p.product_id === Number(product_id))
               ?.product_name || `Produk ${product_id}`;
-          return {
-            id: product_id,
-            name: productName,
-            price: price,
-            quantity: quantity,
-          };
+          return { id: product_id, name: productName, price, quantity };
         }
       ),
-      // Enable some payment methods
-      // enabled_payments: [
-      //   "credit_card",
-      //   "bca_va",
-      //   "bni_va",
-      //   "bri_va",
-      //   "echannel",
-      //   "permata_va",
-      //   "other_va",
-      //   "gopay",
-      //   "shopeepay",
-      //   "qris",
-      // ],
     };
-
-    console.log("parameter : ", parameter);
-
-    // Store order data temporarily with order_code as key
-    tempOrderData.set(customerInfo.order_code, {
-      customerInfo: {
-        ...customerInfo,
-        name: customerInfo.name.trim(),
-        phone: customerInfo.phone.trim(),
-        address: customerInfo.address.trim(),
-      },
-      paymentDetails,
-      orderMetadata: {
-        orderDate: orderMetadata?.orderDate || new Date(),
-        deviceInfo: orderMetadata?.deviceInfo || null,
-      },
-    });
-
-    // Set timeout to clear temp data after 24 hours
-    setTimeout(() => {
-      tempOrderData.delete(customerInfo.order_code);
-    }, 24 * 60 * 60 * 1000);
 
     const snapResponse = await snap.createTransaction(parameter);
 
-    console.log(`Payment initiated for order: ${customerInfo.order_code}`);
+    // 4. If all successful, commit transaction and send response
+    await transaction.commit();
 
+    // Notify frontend about the new order
+    if (typeof tOrdersController?.notifyOrderUpdate === "function") {
+      tOrdersController.notifyOrderUpdate();
+    }
+
+    console.log(`Payment initiated for new order: ${newOrder.order_code}`);
     return res.json({
       snapToken: snapResponse.token,
-      orderId: customerInfo.order_code,
+      orderId: newOrder.order_code,
       redirectUrl: snapResponse.redirect_url,
     });
   } catch (error) {
-    console.error("Midtrans error:", error);
-    tempOrderData.delete(customerInfo.order_code);
-
+    await transaction.rollback();
+    console.error("Payment initiation error:", error);
     return res.status(500).json({
       message: "Failed to initiate payment",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -171,19 +168,23 @@ exports.initiatePayment = async (req, res) => {
 
 exports.handleMidtransWebhook = async (req, res) => {
   const notification = req.body;
-  const orderCode = notification.order_id;
-  const transactionStatus = notification.transaction_status;
-  const paymentType = notification.payment_type;
-  const vaNumber =
-    notification.va_numbers?.[0]?.va_number || notification.bill_key;
-  const fraudStatus = notification.fraud_status;
+  const {
+    order_id: orderCode,
+    transaction_status: transactionStatus,
+    payment_type: paymentType,
+    fraud_status: fraudStatus,
+    va_numbers,
+    bill_key,
+  } = notification;
+
+  const vaNumber = va_numbers?.[0]?.va_number || bill_key;
 
   console.log(
     `Webhook received for order: ${orderCode}, status: ${transactionStatus}`
   );
 
-  // Determine order status based on transaction status
-  let newStatus = "Menunggu";
+  // Determine order status
+  let newStatus;
   if (
     transactionStatus === "settlement" ||
     (transactionStatus === "capture" && fraudStatus === "accept")
@@ -193,189 +194,99 @@ exports.handleMidtransWebhook = async (req, res) => {
     newStatus = "Batal";
   } else if (transactionStatus === "pending") {
     newStatus = "Menunggu";
+  } else {
+    // For other statuses like 'deny', we can treat them as 'Batal' or just log them
+    console.log(`Unhandled transaction status: ${transactionStatus}`);
+    return res
+      .status(200)
+      .json({ message: "Webhook received, no action needed." });
   }
 
   const transaction = await sequelize.transaction();
-
   try {
-    // Check if order already exists
-    const existingOrder = await Order.findOne({
-      where: { order_code: orderCode },
-    });
+    const order = await Order.findOne({ where: { order_code: orderCode } });
 
-    console.log("existingOrder : ", existingOrder);
+    if (!order) {
+      console.error(`Webhook error: Order ${orderCode} not found in database.`);
+      await transaction.rollback();
+      // Return 200 so Midtrans doesn't retry a webhook for a non-existent order
+      return res
+        .status(200)
+        .json({ message: "Order not found, webhook ignored." });
+    }
 
-    console.log("tempOrderData : ", tempOrderData);
+    // Only update if the status is different
+    if (order.status === newStatus) {
+      await transaction.commit();
+      return res.status(200).json({ message: "Status already updated." });
+    }
 
-    const tempData = tempOrderData.get(orderCode);
+    // Update order status
+    await Order.update(
+      {
+        status: newStatus,
+        payment_type: paymentType,
+        va_number: vaNumber || order.va_number, // Keep old VA if new one isn't provided
+        updated_at: new Date(),
+      },
+      { where: { order_code: orderCode }, transaction }
+    );
 
-    console.log("tempData : ", tempData);
+    // Add a chat message for significant status updates
+    let chatMessage;
+    if (newStatus === "Sedang diproses") {
+      chatMessage = `Pembayaran telah diterima! Pesanan Anda sedang kami proses.`;
 
-    if (!existingOrder) {
-      // Get temp data for new order
-
-      if (!tempData) {
-        console.error(`No temp data found for order: ${orderCode}`);
-        await transaction.rollback();
-        return res.status(404).json({ message: "Order data not found" });
-      }
-
-      // Create new order
-      const newOrder = await Order.create(
-        {
-          order_code: orderCode,
-          customer_name: tempData.customerInfo.name,
-          customer_phone: tempData.customerInfo.phone,
-          customer_address: tempData.customerInfo.address,
-          location_latitude: tempData.customerInfo.location?.latitude || null,
-          location_longitude: tempData.customerInfo.location?.longitude || null,
-          order_date: tempData.orderMetadata.orderDate,
-          device_info: tempData.orderMetadata.deviceInfo,
-          status: newStatus,
-          email: tempData.customerInfo.customer_email || null,
-          payment_type: paymentType,
-          va_number: vaNumber || null,
-        },
-        { transaction }
-      );
-
-      // Create order items
-      const itemKeys = Object.keys(tempData.paymentDetails.itemQuantity);
-      const orderItems = itemKeys.map((key) => ({
-        order_id: newOrder.order_id,
-        product_id: parseInt(key),
-        quantity: tempData.paymentDetails.itemQuantity[key],
-        price: tempData.paymentDetails.itemPrice[key],
-      }));
-
-      await OrderItem.bulkCreate(orderItems, { transaction });
-
-      // Find admin for chat
-      const admin = await User.findOne({
-        where: { role: { [Op.iLike]: "admin" } },
+      // Decrease stock only when payment is confirmed
+      const orderItems = await OrderItem.findAll({
+        where: { order_id: order.order_id },
       });
-
-      // Create chat session
-      const newSession = await ChatSession.create(
-        {
-          order_id: newOrder.order_id,
-          order_code: newOrder.order_code,
-          created_by_device: tempData.orderMetadata.deviceInfo,
-          assigned_admin_id: admin?.id || null,
-        },
-        { transaction }
-      );
-
-      // Create initial chat message
-      const initialMessage =
-        newStatus === "Sedang diproses"
-          ? `Terima kasih! Pembayaran untuk pesanan ${orderCode} telah diterima dan sedang diproses.`
-          : `Pesanan ${orderCode} telah dibuat. Silakan lakukan pembayaran untuk melanjutkan.`;
-
-      await ChatMessage.create(
-        {
-          session_id: newSession.session_id,
-          sender_type: "admin",
-          sender_id: admin?.id || null,
-          message: initialMessage,
-          file_url: null,
-          file_type: null,
-          location_latitude: null,
-          location_longitude: null,
-        },
-        { transaction }
-      );
-
-      console.log(
-        `Order ${orderCode} created successfully with status: ${newStatus}`
-      );
-    } else {
-      // Update existing order status
-      await Order.update(
-        {
-          status: newStatus,
-          payment_type: paymentType,
-          va_number: vaNumber || existingOrder.va_number,
-          updated_at: new Date(),
-        },
-        { where: { order_code: orderCode }, transaction }
-      );
-
-      // Add chat message for status update if significant change
-      if (
-        newStatus === "Sedang diproses" &&
-        existingOrder.status !== "Sedang diproses"
-      ) {
-        const itemKeys = Object.keys(tempData.paymentDetails.itemQuantity);
+      if (orderItems.length > 0) {
         await axios.put(`${process.env.BACKEND_URL}/api/products/0`, {
           decreaseStock: true,
-          items: itemKeys.map((key) => ({
-            product_id: parseInt(key),
-            quantity: tempData.paymentDetails.itemQuantity[key],
+          items: orderItems.map((item) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
           })),
         });
-        const chatSession = await ChatSession.findOne({
-          where: { order_code: orderCode },
-        });
-
-        if (chatSession) {
-          const admin = await User.findOne({
-            where: { role: { [Op.iLike]: "admin" } },
-          });
-
-          await ChatMessage.create(
-            {
-              session_id: chatSession.session_id,
-              sender_type: "admin",
-              sender_id: admin?.id || null,
-              message: `Pembayaran telah diterima! Pesanan ${orderCode} sedang diproses.`,
-              file_url: null,
-              file_type: null,
-              location_latitude: null,
-              location_longitude: null,
-            },
-            { transaction }
-          );
-        }
       }
+    } else if (newStatus === "Batal") {
+      chatMessage = `Pesanan Anda telah dibatalkan.`;
+    }
 
-      console.log(`Order ${orderCode} updated to status: ${newStatus}`);
-
-      tempOrderData.delete(orderCode);
+    if (chatMessage) {
+      const chatSession = await ChatSession.findOne({
+        where: { order_code: orderCode },
+        transaction,
+      });
+      if (chatSession) {
+        const admin = await User.findOne({
+          where: { role: { [Op.iLike]: "admin" } },
+          transaction,
+        });
+        await ChatMessage.create(
+          {
+            session_id: chatSession.session_id,
+            sender_type: "admin",
+            sender_id: admin?.id || 1,
+            message: chatMessage,
+          },
+          { transaction }
+        );
+      }
     }
 
     await transaction.commit();
 
-    // Notify order update for real-time updates
     if (typeof tOrdersController?.notifyOrderUpdate === "function") {
       tOrdersController.notifyOrderUpdate();
     }
 
-    return res.status(200).json({
-      message: "Webhook processed successfully",
-      orderCode,
-      status: newStatus,
-    });
+    console.log(`Order ${orderCode} updated to status: ${newStatus}`);
+    return res.status(200).json({ message: "Webhook processed successfully" });
   } catch (error) {
     await transaction.rollback();
     console.error("Webhook processing error:", error);
-
-    return res.status(500).json({
-      message: "Webhook processing failed",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
-  }
-};
-
-// Helper function to clean up expired temp data (optional)
-exports.cleanupTempData = () => {
-  const now = Date.now();
-  for (const [orderCode, data] of tempOrderData.entries()) {
-    const orderTime = new Date(data.orderMetadata.orderDate).getTime();
-    // Remove data older than 24 hours
-    if (now - orderTime > 24 * 60 * 60 * 1000) {
-      tempOrderData.delete(orderCode);
-      console.log(`Cleaned up expired temp data for order: ${orderCode}`);
-    }
+    return res.status(500).json({ message: "Webhook processing failed" });
   }
 };

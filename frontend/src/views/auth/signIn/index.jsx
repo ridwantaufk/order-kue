@@ -88,7 +88,7 @@ function SignIn() {
 
       setTimeout(() => {
         setLoading(false);
-        window.location.href = '/orderan';
+        window.location.href = '/admin/data-tables';
       }, 1000);
     } catch (err) {
       setLoading(false);

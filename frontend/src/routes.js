@@ -50,7 +50,11 @@ const routes = [
         color="inherit"
       />
     ),
-    component: <Orderan />,
+    component: isAuthenticated() ? (
+      <Navigate to="/admin/default" />
+    ) : (
+      <Orderan />
+    ),
     secondary: true,
   },
   {
@@ -94,14 +98,22 @@ const routes = [
     layout: '/auth',
     path: '/sign-in',
     icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
-    component: <SignInCentered />,
+    component: isAuthenticated() ? (
+      <Navigate to="/admin/default" />
+    ) : (
+      <SignInCentered />
+    ),
   },
   {
     name: 'Daftar',
     layout: '/auth',
     path: '/sign-up',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <SignUpCentered />,
+    component: isAuthenticated() ? (
+      <Navigate to="/admin/default" />
+    ) : (
+      <SignUpCentered />
+    ),
   },
 ];
 
