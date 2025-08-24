@@ -2,6 +2,7 @@
 import { Portal, Box, useDisclosure } from '@chakra-ui/react';
 import ChatBuyer from 'components/chat/chatBuyer.js';
 import ChatSeller from 'components/chat/chatSeller.js';
+import ConfirmationButton from 'components/confirmation/ConfirmationButton.js';
 import Footer from 'components/footer/FooterAdmin.js';
 // Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
@@ -193,11 +194,24 @@ export default function Dashboard(props) {
               <Footer />
             </Box>
           </Box>
-          {orderCode &&
+          {console.log(
+            'orderCode INFO:',
+            !isAuthenticated() &&
+              orderCode &&
+              orderCode !== 'null' &&
+              orderCode !== 'undefined' &&
+              orderCode.trim() !== '',
+          )}
+          {/* {orderCode &&
             orderCode !== 'null' &&
             orderCode !== 'undefined' &&
             orderCode.trim() !== '' && <ChatBuyer />}
-          {isAuthenticated() && <ChatSeller />}
+          {isAuthenticated() && <ChatSeller />} */}
+          {!isAuthenticated() &&
+            orderCode &&
+            orderCode !== 'null' &&
+            orderCode !== 'undefined' &&
+            orderCode.trim() !== '' && <ConfirmationButton />}
         </SidebarContext.Provider>
       </Box>
     </Box>

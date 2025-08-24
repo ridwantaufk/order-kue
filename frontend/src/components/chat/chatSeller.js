@@ -9,7 +9,6 @@ import {
   Minimize2,
   Users,
   Search,
-  Filter,
 } from 'lucide-react';
 import io from 'socket.io-client';
 
@@ -38,12 +37,10 @@ const ChatAdmin = () => {
   const backendUrl =
     process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
-  // Optimized scroll to bottom
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Update total unread count
   const updateTotalUnreadCount = useCallback((sessionsData) => {
     const total = sessionsData.reduce(
       (sum, session) => sum + (session.unread_count || 0),
@@ -52,7 +49,6 @@ const ChatAdmin = () => {
     setTotalUnreadCount(total);
   }, []);
 
-  // Handle typing with proper cleanup
   const handleTyping = useCallback(
     (typing) => {
       if (socket && activeSession) {
@@ -63,12 +59,9 @@ const ChatAdmin = () => {
         });
 
         if (typing) {
-          // Clear existing timeout for this session
           if (typingTimeoutRef.current[activeSession.session_id]) {
             clearTimeout(typingTimeoutRef.current[activeSession.session_id]);
           }
-
-          // Set new timeout
           typingTimeoutRef.current[activeSession.session_id] = setTimeout(
             () => {
               socket.emit('typing', {
@@ -81,7 +74,6 @@ const ChatAdmin = () => {
             1000,
           );
         } else {
-          // Clear timeout immediately when stop typing
           if (typingTimeoutRef.current[activeSession.session_id]) {
             clearTimeout(typingTimeoutRef.current[activeSession.session_id]);
             delete typingTimeoutRef.current[activeSession.session_id];
@@ -92,7 +84,6 @@ const ChatAdmin = () => {
     [socket, activeSession, userId],
   );
 
-  // Socket connection and event handlers
   useEffect(() => {
     if (!token || !userId) return;
 
@@ -103,32 +94,36 @@ const ChatAdmin = () => {
 
     socketConnection.emit('admin_join', { userId, token });
 
-    // Chat sessions
-    socketConnection.on('chat_sessions', (data) => {
+    return () => {
+      Object.values(typingTimeoutRef.current).forEach(clearTimeout);
+      socketConnection.disconnect();
+    };
+  }, [token, userId, backendUrl]);
+
+  const handleNewChatSession = useCallback(
+    (session) => {
+      setSessions((prev) => {
+        if (prev.find((s) => s.session_id === session.session_id)) {
+          return prev;
+        }
+        const newSessions = [session, ...prev];
+        updateTotalUnreadCount(newSessions);
+        return newSessions;
+      });
+    },
+    [updateTotalUnreadCount],
+  );
+
+  const handleChatSessions = useCallback(
+    (data) => {
       setSessions(data);
       updateTotalUnreadCount(data);
-    });
+    },
+    [updateTotalUnreadCount],
+  );
 
-    // Chat messages
-    socketConnection.on('chat_messages', (data) => {
-      if (typeof data === 'object' && !Array.isArray(data)) {
-        // Handle grouped messages by session
-        Object.entries(data).forEach(([sessionId, msgs]) => {
-          if (
-            activeSession &&
-            activeSession.session_id === parseInt(sessionId)
-          ) {
-            setMessages(msgs);
-          }
-        });
-      } else if (Array.isArray(data)) {
-        setMessages(data);
-      }
-    });
-
-    // New messages
-    socketConnection.on('new_message', (message) => {
-      // Update messages if for active session
+  const handleNewMessage = useCallback(
+    (message) => {
       if (message.session_id === activeSession?.session_id) {
         setMessages((prev) => {
           const exists = prev.some(
@@ -137,8 +132,6 @@ const ChatAdmin = () => {
           return exists ? prev : [...prev, message];
         });
       }
-
-      // Update sessions
       setSessions((prev) => {
         const updated = prev.map((session) => {
           if (session.session_id === message.session_id) {
@@ -159,16 +152,17 @@ const ChatAdmin = () => {
         updateTotalUnreadCount(updated);
         return updated;
       });
-    });
+    },
+    [activeSession, updateTotalUnreadCount],
+  );
 
-    // Typing indicators with proper cleanup
-    socketConnection.on('user_typing', ({ session_id, user_id, typing }) => {
+  const handleUserTyping = useCallback(
+    ({ session_id, user_id, typing }) => {
       if (session_id === activeSession?.session_id) {
         setTypingUsers((prev) => {
           const updated = { ...prev };
           if (typing) {
             updated[user_id] = true;
-            // Auto-clear typing after 3 seconds
             setTimeout(() => {
               setTypingUsers((current) => {
                 const newState = { ...current };
@@ -182,35 +176,31 @@ const ChatAdmin = () => {
           return updated;
         });
       }
+    },
+    [activeSession],
+  );
+
+  const handleBuyerOnline = useCallback(({ buyer_phone_number, online }) => {
+    setOnlineUsers((prev) => {
+      const updated = new Set(prev);
+      if (online) {
+        updated.add(buyer_phone_number);
+      } else {
+        updated.delete(buyer_phone_number);
+      }
+      return updated;
     });
+    setSessions((prev) =>
+      prev.map((session) =>
+        session.buyer_phone_number === buyer_phone_number
+          ? { ...session, buyer_online: online }
+          : session,
+      ),
+    );
+  }, []);
 
-    // Buyer online status
-    socketConnection.on('buyer_online', ({ orderCodes, orderCode, online }) => {
-      const codes = orderCodes || [orderCode];
-      setOnlineUsers((prev) => {
-        const updated = new Set(prev);
-        codes.forEach((code) => {
-          if (online) {
-            updated.add(code);
-          } else {
-            updated.delete(code);
-          }
-        });
-        return updated;
-      });
-
-      // Update sessions
-      setSessions((prev) =>
-        prev.map((session) =>
-          codes.includes(session.order_code)
-            ? { ...session, buyer_online: online }
-            : session,
-        ),
-      );
-    });
-
-    // Messages marked as read
-    socketConnection.on('messages_marked_read', ({ session_id }) => {
+  const handleMessagesMarkedRead = useCallback(
+    ({ session_id }) => {
       if (activeSession?.session_id === session_id) {
         setMessages((prev) =>
           prev.map((msg) => ({
@@ -219,31 +209,49 @@ const ChatAdmin = () => {
           })),
         );
       }
-    });
+    },
+    [activeSession],
+  );
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('new_chat_session', handleNewChatSession);
+    socket.on('chat_sessions', handleChatSessions);
+    socket.on('new_message', handleNewMessage);
+    socket.on('user_typing', handleUserTyping);
+    socket.on('buyer_online', handleBuyerOnline);
+    socket.on('messages_marked_read', handleMessagesMarkedRead);
 
     return () => {
-      // Clear all typing timeouts
-      Object.values(typingTimeoutRef.current).forEach((timeout) =>
-        clearTimeout(timeout),
-      );
-      socketConnection.disconnect();
+      socket.off('new_chat_session', handleNewChatSession);
+      socket.off('chat_sessions', handleChatSessions);
+      socket.off('new_message', handleNewMessage);
+      socket.off('user_typing', handleUserTyping);
+      socket.off('buyer_online', handleBuyerOnline);
+      socket.off('messages_marked_read', handleMessagesMarkedRead);
     };
-  }, [token, userId, backendUrl, activeSession, updateTotalUnreadCount]);
+  }, [
+    socket,
+    handleNewChatSession,
+    handleChatSessions,
+    handleNewMessage,
+    handleUserTyping,
+    handleBuyerOnline,
+    handleMessagesMarkedRead,
+  ]);
 
-  // Auto-scroll and mark as read
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
   useEffect(() => {
     if (activeSession && socket && isOpen) {
-      // Mark messages as read
       socket.emit('mark_messages_read', {
         session_id: activeSession.session_id,
         user_id: userId,
       });
 
-      // Update local unread count
       setSessions((prev) =>
         prev.map((session) =>
           session.session_id === activeSession.session_id
@@ -254,15 +262,14 @@ const ChatAdmin = () => {
     }
   }, [activeSession, socket, isOpen, userId]);
 
-  // Select session
   const selectSession = async (session) => {
     setLoading(true);
     setActiveSession(session);
-    setTypingUsers({}); // Clear typing indicators
+    setTypingUsers({});
 
     try {
       const response = await fetch(
-        `${backendUrl}/api/chat/sessions/${session.order_code}`,
+        `${backendUrl}/api/chat/sessions/buyer/${session.buyer_phone_number}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -279,7 +286,6 @@ const ChatAdmin = () => {
     }
   };
 
-  // Send message
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeSession) return;
 
@@ -304,10 +310,7 @@ const ChatAdmin = () => {
         const newMsg = await response.json();
         setMessages((prev) => [...prev, newMsg]);
         setNewMessage('');
-
-        // Stop typing immediately
         handleTyping(false);
-
         if (socket) {
           socket.emit('send_message', newMsg);
         }
@@ -317,11 +320,41 @@ const ChatAdmin = () => {
     }
   };
 
-  // File upload with compression
+  const resizeImage = (file) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        const maxWidth = 800;
+        const maxHeight = 600;
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(resolve, 'image/jpeg', 0.8);
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file || !activeSession || !file.type.startsWith('image/')) {
-      if (!file.type.startsWith('image/'))
+      if (file && !file.type.startsWith('image/'))
         alert('Hanya file gambar yang diizinkan.');
       return;
     }
@@ -362,39 +395,6 @@ const ChatAdmin = () => {
     reader.readAsDataURL(processedFile);
   };
 
-  // Image resize utility
-  const resizeImage = (file) => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-
-      img.onload = () => {
-        const maxWidth = 800;
-        const maxHeight = 600;
-        let { width, height } = img;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else if (height > maxHeight) {
-          width = (width * maxHeight) / height;
-          height = maxHeight;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(resolve, 'image/jpeg', 0.8);
-      };
-
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  // Message status
   const getMessageStatus = (message) => {
     if (message.sender_type === 'buyer') return null;
 
@@ -403,7 +403,7 @@ const ChatAdmin = () => {
     }
 
     const buyerOnline =
-      activeSession && onlineUsers.has(activeSession.order_code);
+      activeSession && onlineUsers.has(activeSession.buyer_phone_number);
     return buyerOnline ? (
       <CheckCheck className="w-3 h-3 text-gray-400" />
     ) : (
@@ -411,7 +411,6 @@ const ChatAdmin = () => {
     );
   };
 
-  // Time formatting
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString('id-ID', {
       hour: '2-digit',
@@ -419,11 +418,12 @@ const ChatAdmin = () => {
     });
   };
 
-  // Filter sessions
   const filteredSessions = sessions.filter((session) => {
-    const matchesSearch = session.order_code
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      session.buyer_phone_number
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      session.order_code?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter =
       filterStatus === 'all' ||
       (filterStatus === 'unread' && session.unread_count > 0) ||
@@ -454,7 +454,6 @@ const ChatAdmin = () => {
           </button>
         ) : (
           <div className="bg-white rounded-lg shadow-2xl border border-gray-200 h-full flex">
-            {/* Sessions List */}
             <div
               className={`${
                 showSessionList ? 'w-48' : 'w-0'
@@ -476,7 +475,7 @@ const ChatAdmin = () => {
                     <Search className="w-3 h-3 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="Cari order..."
+                      placeholder="Cari no telp/order..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs text-gray-900 bg-white border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-300"
@@ -529,7 +528,7 @@ const ChatAdmin = () => {
                               {session.order_code || 'Unknown Order'}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {session.buyer_online ? 'Online' : 'Offline'}
+                              {session.buyer_phone_number}
                             </p>
                           </div>
                         </div>
@@ -558,11 +557,9 @@ const ChatAdmin = () => {
               </div>
             </div>
 
-            {/* Chat Area */}
             <div className="flex-1 flex flex-col">
               {activeSession ? (
                 <>
-                  {/* Chat Header */}
                   <div className="p-3 bg-green-500 text-white flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       {!showSessionList && (
@@ -588,7 +585,7 @@ const ChatAdmin = () => {
                           {activeSession.order_code}
                         </p>
                         <p className="text-xs opacity-75">
-                          {activeSession.buyer_online ? 'Online' : 'Offline'}
+                          {activeSession.buyer_phone_number}
                         </p>
                       </div>
                     </div>
@@ -600,7 +597,6 @@ const ChatAdmin = () => {
                     </button>
                   </div>
 
-                  {/* Messages Area */}
                   <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
                     {loading ? (
                       <div className="flex items-center justify-center h-full">
@@ -661,7 +657,6 @@ const ChatAdmin = () => {
                       ))
                     )}
 
-                    {/* Typing indicators */}
                     {Object.entries(typingUsers).some(
                       ([, typing]) => typing,
                     ) && (
@@ -688,7 +683,6 @@ const ChatAdmin = () => {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Message Input */}
                   <div className="p-3 border-t border-gray-200 bg-white">
                     <div className="flex items-center space-x-2">
                       <input
@@ -758,7 +752,6 @@ const ChatAdmin = () => {
         )}
       </div>
 
-      {/* Image Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"

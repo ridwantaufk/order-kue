@@ -11,6 +11,8 @@
     "@emotion/cache": "^11.12.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@react-three/drei": "^9.79.1",
+    "@react-three/fiber": "^9.2.0",
     "@tanstack/react-table": "^8.19.3",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
@@ -48,6 +50,9 @@
     "socket.io-client": "^4.8.1",
     "stylis": "^4.3.2",
     "stylis-plugin-rtl": "^2.0.2",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.154.0",
+    "three-stdlib": "^2.36.0",
     "web-vitals": "^4.2.2",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.5"

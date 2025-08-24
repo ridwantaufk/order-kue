@@ -6,6 +6,7 @@ import { ChakraProvider, useToast } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import NotFound from 'pages/NotFound';
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
@@ -100,6 +101,7 @@ export default function Main() {
           }
         />
         <Route path="/" element={<Navigate to="/orderan" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ChakraProvider>
   );

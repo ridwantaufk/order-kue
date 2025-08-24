@@ -35504,3 +35504,993 @@ Total Bandwidth So Far: 1009437 bytes
 Total Bandwidth So Far: 1009437 bytes
 [2025-07-23T04:08:15.366Z] GET /api/visitors/stats 304 - 238ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
 Total Bandwidth So Far: 1009437 bytes
+[2025-07-27T16:28:45.903Z] GET /favicon.ico 404 - 5ms - req: 0 bytes, res: 150 bytes, total: 150 bytes
+Total Bandwidth So Far: 1009587 bytes
+[2025-07-27T16:32:40.560Z] GET /api/products 200 - 200ms - req: 0 bytes, res: 3956 bytes, total: 3956 bytes
+Total Bandwidth So Far: 1013543 bytes
+[2025-07-27T16:32:40.625Z] GET /api/visitors/daily 200 - 203ms - req: 0 bytes, res: 225 bytes, total: 225 bytes
+Total Bandwidth So Far: 1013768 bytes
+[2025-07-27T16:32:40.706Z] GET /api/visitors/stats 200 - 291ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1013822 bytes
+[2025-07-27T16:32:41.135Z] GET /api/favorite/121 200 - 74ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1013861 bytes
+[2025-07-27T16:32:41.261Z] GET /api/favorite/132 200 - 166ms - req: 0 bytes, res: 40 bytes, total: 40 bytes
+Total Bandwidth So Far: 1013901 bytes
+[2025-07-27T16:32:41.315Z] GET /api/favorite/120 200 - 210ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1013940 bytes
+[2025-07-27T16:32:41.475Z] GET /api/orderItems 200 - 396ms - req: 0 bytes, res: 73794 bytes, total: 73794 bytes
+Total Bandwidth So Far: 1087734 bytes
+[2025-07-27T16:32:41.529Z] GET /api/favorite/123 200 - 152ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087773 bytes
+[2025-07-27T16:32:41.600Z] GET /api/favorite/124 200 - 89ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087812 bytes
+[2025-07-27T16:32:41.645Z] GET /api/favorite/122 200 - 131ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087851 bytes
+[2025-07-27T16:32:41.688Z] GET /api/favorite/128 200 - 172ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087890 bytes
+[2025-07-27T16:32:41.732Z] GET /api/favorite/129 200 - 359ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087929 bytes
+[2025-07-27T16:32:41.788Z] GET /api/favorite/125 200 - 18ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1087968 bytes
+[2025-07-27T16:32:41.837Z] GET /api/favorite/131 200 - 62ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1088007 bytes
+[2025-07-27T16:32:41.878Z] GET /api/favorite/130 200 - 101ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1088046 bytes
+[2025-07-27T16:32:41.906Z] GET /api/favorite/126 200 - 127ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1088085 bytes
+[2025-07-27T16:32:41.930Z] GET /api/favorite/127 200 - 150ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.094Z] GET /api/orderItems 304 - 133ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.144Z] GET /api/orderItems 304 - 20ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.198Z] GET /api/orderItems 304 - 17ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.243Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.290Z] GET /api/orderItems 304 - 17ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.332Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.371Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.412Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.468Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.510Z] GET /api/orderItems 304 - 13ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.553Z] GET /api/orderItems 304 - 13ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.602Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088124 bytes
+[2025-07-27T16:32:42.784Z] POST /api/visitors 201 - 792ms - req: 0 bytes, res: 191 bytes, total: 191 bytes
+Total Bandwidth So Far: 1088315 bytes
+[2025-07-27T16:33:10.545Z] GET /api/visitors/daily 304 - 129ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088315 bytes
+[2025-07-27T16:33:10.571Z] GET /api/visitors/stats 200 - 156ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:33:40.561Z] GET /api/visitors/daily 304 - 137ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:33:40.584Z] GET /api/visitors/stats 304 - 162ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:34:11.503Z] GET /api/visitors/daily 304 - 110ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:34:11.531Z] GET /api/visitors/stats 304 - 139ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:34:41.516Z] GET /api/visitors/daily 304 - 119ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:34:41.546Z] GET /api/visitors/stats 304 - 150ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:36:08.867Z] GET /api/visitors/daily 304 - 443ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:36:08.902Z] GET /api/visitors/stats 304 - 481ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:08.540Z] GET /api/visitors/daily 304 - 140ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:08.566Z] GET /api/visitors/stats 304 - 168ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:24.823Z] GET /api/visitors/daily 304 - 129ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:24.850Z] GET /api/visitors/stats 304 - 157ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:40.540Z] GET /api/visitors/daily 304 - 122ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:37:40.560Z] GET /api/visitors/stats 304 - 143ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:11.549Z] GET /api/visitors/daily 304 - 154ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:11.576Z] GET /api/visitors/stats 304 - 182ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:41.555Z] GET /api/visitors/daily 304 - 145ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:41.589Z] GET /api/visitors/stats 304 - 180ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:51.087Z] GET /api/products 304 - 5ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088369 bytes
+[2025-07-27T16:38:51.140Z] GET /api/visitors/daily 200 - 5ms - req: 0 bytes, res: 225 bytes, total: 225 bytes
+Total Bandwidth So Far: 1088594 bytes
+[2025-07-27T16:38:51.159Z] GET /api/visitors/stats 200 - 26ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.430Z] GET /api/favorite/121 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.453Z] GET /api/favorite/132 304 - 27ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.483Z] GET /api/favorite/129 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.503Z] GET /api/favorite/120 304 - 28ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.537Z] GET /api/orderItems 304 - 65ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.555Z] GET /api/favorite/123 304 - 79ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088648 bytes
+[2025-07-27T16:38:51.574Z] GET /api/favorite/124 200 - 97ms - req: 0 bytes, res: 39 bytes, total: 39 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.621Z] GET /api/favorite/122 304 - 26ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.649Z] GET /api/favorite/128 304 - 50ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.675Z] GET /api/favorite/125 304 - 68ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.701Z] GET /api/favorite/131 304 - 90ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.746Z] GET /api/favorite/130 304 - 128ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.763Z] GET /api/favorite/126 304 - 65ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.791Z] GET /api/favorite/127 304 - 9ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.817Z] GET /api/orderItems 304 - 32ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.869Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.908Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.941Z] GET /api/orderItems 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:51.983Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.009Z] GET /api/orderItems 304 - 9ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.040Z] GET /api/orderItems 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.066Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.091Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.119Z] GET /api/orderItems 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.162Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.190Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088687 bytes
+[2025-07-27T16:38:52.617Z] POST /api/visitors 201 - 656ms - req: 0 bytes, res: 248 bytes, total: 248 bytes
+Total Bandwidth So Far: 1088935 bytes
+[2025-07-27T16:40:08.562Z] GET /api/visitors/daily 304 - 126ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088935 bytes
+[2025-07-27T16:40:08.581Z] GET /api/visitors/stats 200 - 146ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1088989 bytes
+[2025-07-27T16:41:08.555Z] GET /api/visitors/daily 304 - 148ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088989 bytes
+[2025-07-27T16:41:08.591Z] GET /api/visitors/stats 304 - 185ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088989 bytes
+[2025-07-27T16:41:12.724Z] GET /api/products 304 - 3ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088989 bytes
+[2025-07-27T16:41:12.775Z] GET /api/visitors/daily 304 - 6ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1088989 bytes
+[2025-07-27T16:41:12.808Z] GET /api/visitors/stats 200 - 41ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.108Z] GET /api/favorite/121 304 - 14ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.134Z] GET /api/favorite/120 304 - 36ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.157Z] GET /api/favorite/132 304 - 53ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.177Z] GET /api/favorite/129 304 - 45ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.193Z] GET /api/favorite/123 304 - 38ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.219Z] GET /api/orderItems 304 - 120ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.247Z] GET /api/favorite/124 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.275Z] GET /api/favorite/122 304 - 37ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.308Z] GET /api/favorite/128 304 - 66ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.326Z] GET /api/favorite/125 304 - 82ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.343Z] GET /api/favorite/131 304 - 99ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.362Z] GET /api/favorite/130 304 - 117ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.385Z] GET /api/favorite/126 304 - 5ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.404Z] GET /api/favorite/127 304 - 22ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.437Z] GET /api/orderItems 304 - 54ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.473Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.521Z] GET /api/orderItems 304 - 18ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.564Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.595Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.630Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.667Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.704Z] GET /api/orderItems 304 - 14ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.740Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.784Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.819Z] GET /api/orderItems 304 - 13ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:13.849Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089043 bytes
+[2025-07-27T16:41:14.181Z] POST /api/visitors 201 - 633ms - req: 0 bytes, res: 248 bytes, total: 248 bytes
+Total Bandwidth So Far: 1089291 bytes
+[2025-07-27T16:42:09.025Z] GET /api/visitors/daily 304 - 485ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089291 bytes
+[2025-07-27T16:42:09.096Z] GET /api/visitors/stats 200 - 558ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:43:08.731Z] GET /api/visitors/daily 304 - 254ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:43:08.767Z] GET /api/visitors/stats 304 - 292ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:44:08.777Z] GET /api/visitors/daily 304 - 343ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:44:08.834Z] GET /api/visitors/stats 304 - 423ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:45:08.847Z] GET /api/visitors/daily 304 - 306ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:45:08.946Z] GET /api/visitors/stats 304 - 408ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:46:08.685Z] GET /api/visitors/daily 304 - 259ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:46:08.822Z] GET /api/visitors/stats 304 - 399ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:47:08.787Z] GET /api/visitors/daily 304 - 310ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:47:08.836Z] GET /api/visitors/stats 304 - 361ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:48:08.700Z] GET /api/visitors/daily 304 - 212ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:48:08.772Z] GET /api/visitors/stats 304 - 286ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:49:08.651Z] GET /api/visitors/daily 304 - 220ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:49:08.726Z] GET /api/visitors/stats 304 - 298ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:50:08.740Z] GET /api/visitors/daily 304 - 247ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:50:08.814Z] GET /api/visitors/stats 304 - 324ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:51:08.564Z] GET /api/visitors/daily 304 - 152ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:51:08.607Z] GET /api/visitors/stats 304 - 197ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:52:08.703Z] GET /api/visitors/daily 304 - 217ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:52:08.755Z] GET /api/visitors/stats 304 - 271ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:53:08.630Z] GET /api/visitors/daily 304 - 168ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:53:08.682Z] GET /api/visitors/stats 304 - 222ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:54:08.726Z] GET /api/visitors/daily 304 - 321ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:54:08.787Z] GET /api/visitors/stats 304 - 379ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:55:08.896Z] GET /api/visitors/daily 304 - 358ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:55:08.956Z] GET /api/visitors/stats 304 - 420ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:56:08.631Z] GET /api/visitors/daily 304 - 229ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:56:08.690Z] GET /api/visitors/stats 304 - 290ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:57:08.598Z] GET /api/visitors/daily 304 - 147ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:57:08.622Z] GET /api/visitors/stats 304 - 172ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:58:08.757Z] GET /api/visitors/daily 304 - 267ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:58:08.826Z] GET /api/visitors/stats 304 - 341ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:59:08.729Z] GET /api/visitors/daily 304 - 304ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T16:59:08.861Z] GET /api/visitors/stats 304 - 439ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T17:00:03.254Z] GET /api/products 304 - 265ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089345 bytes
+[2025-07-27T17:00:03.426Z] GET /api/visitors/daily 200 - 13ms - req: 0 bytes, res: 225 bytes, total: 225 bytes
+Total Bandwidth So Far: 1089570 bytes
+[2025-07-27T17:00:03.492Z] GET /api/visitors/stats 200 - 86ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:05.438Z] GET /api/favorite/121 304 - 32ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:05.493Z] GET /api/favorite/120 304 - 66ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:05.626Z] GET /api/orderItems 304 - 213ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:05.982Z] GET /api/favorite/132 304 - 122ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.091Z] GET /api/orderItems 304 - 171ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.268Z] GET /api/favorite/123 304 - 78ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.325Z] GET /api/favorite/125 304 - 78ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.386Z] GET /api/favorite/122 304 - 133ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.446Z] GET /api/favorite/128 304 - 190ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.510Z] GET /api/favorite/124 304 - 312ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.574Z] GET /api/favorite/129 304 - 342ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.710Z] GET /api/favorite/131 304 - 57ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.811Z] GET /api/favorite/127 304 - 145ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.865Z] GET /api/favorite/130 304 - 178ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:06.901Z] GET /api/favorite/126 304 - 207ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.013Z] GET /api/orderItems 304 - 317ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.155Z] GET /api/orderItems 304 - 81ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.299Z] GET /api/orderItems 304 - 48ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.417Z] GET /api/orderItems 304 - 53ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.552Z] GET /api/orderItems 304 - 24ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.634Z] GET /api/orderItems 304 - 32ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.699Z] GET /api/orderItems 304 - 26ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.806Z] GET /api/orderItems 304 - 62ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:07.916Z] GET /api/orderItems 304 - 61ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:08.018Z] GET /api/orderItems 304 - 32ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:08.079Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:16.906Z] GET /api/products 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:17.111Z] GET /api/visitors/daily 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:17.150Z] GET /api/visitors/stats 304 - 52ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.190Z] GET /api/favorite/121 304 - 17ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.246Z] GET /api/orderItems 304 - 65ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.293Z] GET /api/favorite/120 304 - 65ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.328Z] GET /api/favorite/132 304 - 46ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.392Z] GET /api/orderItems 304 - 28ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.437Z] GET /api/favorite/123 304 - 68ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.484Z] GET /api/favorite/129 304 - 110ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.660Z] GET /api/favorite/124 304 - 239ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.706Z] GET /api/favorite/122 304 - 281ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.765Z] GET /api/favorite/128 304 - 291ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.795Z] GET /api/favorite/125 304 - 280ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.869Z] GET /api/favorite/131 304 - 39ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.926Z] GET /api/favorite/130 304 - 94ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.963Z] GET /api/favorite/126 304 - 126ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:18.992Z] GET /api/favorite/127 304 - 130ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.043Z] GET /api/orderItems 304 - 179ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.096Z] GET /api/orderItems 304 - 23ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.158Z] GET /api/orderItems 304 - 28ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.222Z] GET /api/orderItems 304 - 33ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.292Z] GET /api/orderItems 304 - 33ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.375Z] GET /api/orderItems 304 - 33ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.446Z] GET /api/orderItems 304 - 16ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.492Z] GET /api/orderItems 304 - 18ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.538Z] GET /api/orderItems 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.584Z] GET /api/orderItems 304 - 20ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:19.630Z] GET /api/orderItems 304 - 18ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:47.682Z] GET /api/visitors/daily 304 - 266ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:00:47.728Z] GET /api/visitors/stats 304 - 315ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:01:17.624Z] GET /api/visitors/daily 304 - 221ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:01:17.666Z] GET /api/visitors/stats 304 - 264ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:01:47.750Z] GET /api/visitors/daily 304 - 320ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:01:47.813Z] GET /api/visitors/stats 304 - 385ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:02:17.646Z] GET /api/visitors/daily 304 - 232ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:02:17.700Z] GET /api/visitors/stats 304 - 293ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:03:08.660Z] GET /api/visitors/daily 304 - 249ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:03:08.707Z] GET /api/visitors/stats 304 - 302ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:04:08.693Z] GET /api/visitors/daily 304 - 285ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:04:08.762Z] GET /api/visitors/stats 304 - 355ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:05:08.814Z] GET /api/visitors/daily 304 - 390ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:05:08.896Z] GET /api/visitors/stats 304 - 475ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:06:08.554Z] GET /api/visitors/daily 304 - 156ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:06:08.590Z] GET /api/visitors/stats 304 - 194ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:07:08.581Z] GET /api/visitors/daily 304 - 182ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:07:08.629Z] GET /api/visitors/stats 304 - 232ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:08:08.602Z] GET /api/visitors/daily 304 - 203ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:08:08.646Z] GET /api/visitors/stats 304 - 248ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:09:08.694Z] GET /api/visitors/daily 304 - 275ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:09:08.769Z] GET /api/visitors/stats 304 - 353ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:10:08.605Z] GET /api/visitors/daily 304 - 207ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:10:08.661Z] GET /api/visitors/stats 304 - 265ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:11:08.583Z] GET /api/visitors/daily 304 - 184ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:11:08.629Z] GET /api/visitors/stats 304 - 228ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:12:04.805Z] GET /api/visitors/daily 304 - 466ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:12:04.901Z] GET /api/visitors/stats 304 - 565ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089624 bytes
+[2025-07-27T17:12:05.597Z] POST /api/visitors 201 - 1174ms - req: 0 bytes, res: 191 bytes, total: 191 bytes
+Total Bandwidth So Far: 1089815 bytes
+[2025-07-27T17:12:17.346Z] GET /api/visitors/daily 304 - 227ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089815 bytes
+[2025-07-27T17:12:17.397Z] GET /api/visitors/stats 200 - 281ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:12:47.338Z] GET /api/visitors/daily 304 - 229ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:12:47.386Z] GET /api/visitors/stats 304 - 280ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:13:17.323Z] GET /api/visitors/daily 304 - 212ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:13:17.376Z] GET /api/visitors/stats 304 - 268ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:13:47.272Z] GET /api/visitors/daily 304 - 170ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:13:47.318Z] GET /api/visitors/stats 304 - 218ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:14:17.537Z] GET /api/visitors/daily 304 - 143ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:14:17.584Z] GET /api/visitors/stats 304 - 191ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:14:47.531Z] GET /api/visitors/daily 304 - 135ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:14:47.557Z] GET /api/visitors/stats 304 - 162ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:16:08.604Z] GET /api/visitors/daily 304 - 196ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:16:08.644Z] GET /api/visitors/stats 304 - 238ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:17:08.517Z] GET /api/visitors/daily 304 - 124ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:17:08.545Z] GET /api/visitors/stats 304 - 153ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:18:08.554Z] GET /api/visitors/daily 304 - 114ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:18:08.583Z] GET /api/visitors/stats 304 - 145ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:19:08.522Z] GET /api/visitors/daily 304 - 125ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:19:08.551Z] GET /api/visitors/stats 304 - 155ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:20:08.653Z] GET /api/visitors/daily 304 - 170ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:20:08.691Z] GET /api/visitors/stats 304 - 210ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:21:08.534Z] GET /api/visitors/daily 304 - 130ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:21:08.564Z] GET /api/visitors/stats 304 - 161ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:21:55.884Z] GET /api/visitors/daily 304 - 313ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:21:55.919Z] GET /api/visitors/stats 304 - 350ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:22:17.570Z] GET /api/visitors/daily 304 - 172ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:22:17.603Z] GET /api/visitors/stats 304 - 206ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:22:47.537Z] GET /api/visitors/daily 304 - 138ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:22:47.572Z] GET /api/visitors/stats 304 - 175ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:23:17.595Z] GET /api/visitors/daily 304 - 182ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:23:17.628Z] GET /api/visitors/stats 304 - 217ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:24:08.543Z] GET /api/visitors/daily 304 - 133ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:24:08.575Z] GET /api/visitors/stats 304 - 167ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:25:08.615Z] GET /api/visitors/daily 304 - 200ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:25:08.656Z] GET /api/visitors/stats 304 - 243ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:26:08.582Z] GET /api/visitors/daily 304 - 181ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:26:08.617Z] GET /api/visitors/stats 304 - 217ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:27:08.596Z] GET /api/visitors/daily 304 - 186ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:27:08.684Z] GET /api/visitors/stats 304 - 276ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:28:08.746Z] GET /api/visitors/daily 304 - 246ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:28:08.805Z] GET /api/visitors/stats 304 - 308ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:29:08.508Z] GET /api/visitors/daily 304 - 112ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:29:08.543Z] GET /api/visitors/stats 304 - 148ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:30:08.517Z] GET /api/visitors/daily 304 - 115ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:30:08.543Z] GET /api/visitors/stats 304 - 143ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:31:08.632Z] GET /api/visitors/daily 304 - 221ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:31:08.692Z] GET /api/visitors/stats 304 - 283ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:32:08.506Z] GET /api/visitors/daily 304 - 108ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:32:08.542Z] GET /api/visitors/stats 304 - 145ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:33:08.585Z] GET /api/visitors/daily 304 - 144ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:33:08.621Z] GET /api/visitors/stats 304 - 181ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:34:08.584Z] GET /api/visitors/daily 304 - 183ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:34:08.625Z] GET /api/visitors/stats 304 - 226ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:35:08.550Z] GET /api/visitors/daily 304 - 147ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:35:08.580Z] GET /api/visitors/stats 304 - 178ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:36:08.501Z] GET /api/visitors/daily 304 - 97ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:36:08.527Z] GET /api/visitors/stats 304 - 124ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:37:08.541Z] GET /api/visitors/daily 304 - 128ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:37:08.570Z] GET /api/visitors/stats 304 - 159ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:38:08.556Z] GET /api/visitors/daily 304 - 118ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:38:08.587Z] GET /api/visitors/stats 304 - 150ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:39:08.613Z] GET /api/visitors/daily 304 - 197ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:39:08.658Z] GET /api/visitors/stats 304 - 244ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:40:08.551Z] GET /api/visitors/daily 304 - 154ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:40:08.581Z] GET /api/visitors/stats 304 - 186ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:41:08.559Z] GET /api/visitors/daily 304 - 153ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:41:08.606Z] GET /api/visitors/stats 304 - 202ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:42:08.514Z] GET /api/visitors/daily 304 - 116ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:42:08.552Z] GET /api/visitors/stats 304 - 155ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:43:08.637Z] GET /api/visitors/daily 304 - 158ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:43:08.670Z] GET /api/visitors/stats 304 - 193ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:44:08.546Z] GET /api/visitors/daily 304 - 146ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:44:08.581Z] GET /api/visitors/stats 304 - 182ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:45:08.548Z] GET /api/visitors/daily 304 - 138ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:45:08.588Z] GET /api/visitors/stats 304 - 179ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:46:08.606Z] GET /api/visitors/daily 304 - 196ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:46:08.632Z] GET /api/visitors/stats 304 - 223ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:47:08.534Z] GET /api/visitors/daily 304 - 136ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:47:08.562Z] GET /api/visitors/stats 304 - 165ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:48:08.590Z] GET /api/visitors/daily 304 - 146ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:48:08.617Z] GET /api/visitors/stats 304 - 175ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:49:08.551Z] GET /api/visitors/daily 304 - 155ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:49:08.587Z] GET /api/visitors/stats 304 - 193ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:50:08.548Z] GET /api/visitors/daily 304 - 151ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:50:08.581Z] GET /api/visitors/stats 304 - 186ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:51:08.638Z] GET /api/visitors/daily 304 - 240ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:51:08.663Z] GET /api/visitors/stats 304 - 266ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:52:08.541Z] GET /api/visitors/daily 304 - 144ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:52:08.567Z] GET /api/visitors/stats 304 - 171ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:53:08.554Z] GET /api/visitors/daily 304 - 152ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:53:08.581Z] GET /api/visitors/stats 304 - 181ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:54:08.539Z] GET /api/visitors/daily 304 - 138ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:54:08.572Z] GET /api/visitors/stats 304 - 173ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:55:08.837Z] GET /api/visitors/daily 304 - 291ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:55:08.875Z] GET /api/visitors/stats 304 - 331ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:56:08.512Z] GET /api/visitors/daily 304 - 106ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:56:08.544Z] GET /api/visitors/stats 304 - 139ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:57:08.616Z] GET /api/visitors/daily 304 - 213ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:57:08.652Z] GET /api/visitors/stats 304 - 252ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:58:08.610Z] GET /api/visitors/daily 304 - 166ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:58:08.637Z] GET /api/visitors/stats 304 - 194ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:59:08.645Z] GET /api/visitors/daily 304 - 232ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T17:59:08.701Z] GET /api/visitors/stats 304 - 291ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:00:08.669Z] GET /api/visitors/daily 304 - 251ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:00:08.731Z] GET /api/visitors/stats 304 - 317ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:01:09.072Z] GET /api/visitors/daily 304 - 360ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:01:09.138Z] GET /api/visitors/stats 304 - 430ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:02:08.696Z] GET /api/visitors/daily 304 - 255ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:02:08.782Z] GET /api/visitors/stats 304 - 345ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:03:08.697Z] GET /api/visitors/daily 304 - 202ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:03:08.748Z] GET /api/visitors/stats 304 - 254ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:04:08.702Z] GET /api/visitors/daily 304 - 274ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:04:08.874Z] GET /api/visitors/stats 304 - 452ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:05:08.753Z] GET /api/visitors/daily 304 - 291ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:05:08.794Z] GET /api/visitors/stats 304 - 334ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:06:08.704Z] GET /api/visitors/daily 304 - 206ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:06:08.756Z] GET /api/visitors/stats 304 - 260ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:07:08.522Z] GET /api/visitors/daily 304 - 123ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:07:08.554Z] GET /api/visitors/stats 304 - 157ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:08:08.566Z] GET /api/visitors/daily 304 - 153ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:08:08.599Z] GET /api/visitors/stats 304 - 189ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:09:08.561Z] GET /api/visitors/daily 304 - 153ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:09:08.597Z] GET /api/visitors/stats 304 - 190ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:10:08.607Z] GET /api/visitors/daily 304 - 195ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:10:08.646Z] GET /api/visitors/stats 304 - 236ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:11:08.632Z] GET /api/visitors/daily 304 - 167ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:11:08.671Z] GET /api/visitors/stats 304 - 207ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:12:08.624Z] GET /api/visitors/daily 304 - 225ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:12:08.696Z] GET /api/visitors/stats 304 - 299ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:13:08.875Z] GET /api/visitors/daily 304 - 383ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:13:08.947Z] GET /api/visitors/stats 304 - 504ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:13:38.457Z] GET /api/products 304 - 219ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1089869 bytes
+[2025-07-27T18:13:38.543Z] GET /api/visitors/daily 200 - 253ms - req: 0 bytes, res: 225 bytes, total: 225 bytes
+Total Bandwidth So Far: 1090094 bytes
+[2025-07-27T18:13:38.679Z] GET /api/visitors/stats 200 - 390ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.120Z] GET /api/favorite/121 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.182Z] GET /api/favorite/120 304 - 29ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.227Z] GET /api/favorite/129 304 - 72ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.272Z] GET /api/favorite/132 304 - 114ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.308Z] GET /api/favorite/123 304 - 145ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.373Z] GET /api/orderItems 304 - 208ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.408Z] GET /api/favorite/124 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.448Z] GET /api/favorite/122 304 - 47ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.479Z] GET /api/favorite/125 304 - 77ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.497Z] GET /api/favorite/128 304 - 93ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.527Z] GET /api/favorite/131 304 - 122ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.561Z] GET /api/favorite/130 304 - 156ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.598Z] GET /api/favorite/126 304 - 14ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.623Z] GET /api/favorite/127 304 - 35ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.656Z] GET /api/orderItems 304 - 64ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.741Z] GET /api/orderItems 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.778Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.805Z] GET /api/orderItems 304 - 9ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.833Z] GET /api/orderItems 304 - 13ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.854Z] GET /api/orderItems 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.880Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.907Z] GET /api/orderItems 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.936Z] GET /api/orderItems 304 - 13ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.967Z] GET /api/orderItems 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:39.999Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:40.026Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090148 bytes
+[2025-07-27T18:13:40.673Z] POST /api/visitors 201 - 992ms - req: 0 bytes, res: 248 bytes, total: 248 bytes
+Total Bandwidth So Far: 1090396 bytes
+[2025-07-27T18:14:08.572Z] GET /api/visitors/daily 304 - 171ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090396 bytes
+[2025-07-27T18:14:08.595Z] GET /api/visitors/stats 200 - 196ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:15:08.582Z] GET /api/visitors/daily 304 - 130ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:15:08.614Z] GET /api/visitors/stats 304 - 163ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:16:08.574Z] GET /api/visitors/daily 304 - 126ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:16:08.605Z] GET /api/visitors/stats 304 - 158ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:17:08.535Z] GET /api/visitors/daily 304 - 134ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:17:08.567Z] GET /api/visitors/stats 304 - 167ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:18:08.680Z] GET /api/visitors/daily 304 - 203ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:18:08.720Z] GET /api/visitors/stats 304 - 246ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:18:45.998Z] GET /api/products 304 - 236ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:18:46.070Z] GET /api/visitors/daily 304 - 268ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090450 bytes
+[2025-07-27T18:18:46.168Z] GET /api/visitors/stats 200 - 367ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.545Z] GET /api/favorite/121 304 - 12ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.567Z] GET /api/favorite/120 304 - 27ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.592Z] GET /api/favorite/132 304 - 49ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.612Z] GET /api/favorite/129 304 - 47ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.640Z] GET /api/orderItems 304 - 104ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.666Z] GET /api/favorite/124 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.691Z] GET /api/favorite/123 304 - 34ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.707Z] GET /api/favorite/122 304 - 47ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.722Z] GET /api/favorite/128 304 - 61ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.744Z] GET /api/favorite/125 304 - 82ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.761Z] GET /api/favorite/131 304 - 98ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.804Z] GET /api/favorite/130 304 - 24ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.821Z] GET /api/favorite/127 304 - 39ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.837Z] GET /api/favorite/126 304 - 54ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.862Z] GET /api/orderItems 304 - 61ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.885Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.907Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.928Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.951Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:46.974Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.001Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.024Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.056Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.090Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.121Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.161Z] GET /api/orderItems 304 - 15ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1090504 bytes
+[2025-07-27T18:18:47.476Z] POST /api/visitors 201 - 687ms - req: 0 bytes, res: 248 bytes, total: 248 bytes
+Total Bandwidth So Far: 1090752 bytes
+[2025-07-27T18:18:54.277Z] POST /api/users/login 200 - 87ms - req: 0 bytes, res: 230 bytes, total: 230 bytes
+Total Bandwidth So Far: 1090982 bytes
+[2025-07-27T18:18:55.616Z] GET /api/users/privateUser/8 200 - 11ms - req: 0 bytes, res: 261 bytes, total: 261 bytes
+Total Bandwidth So Far: 1091243 bytes
+[2025-07-27T18:18:55.630Z] GET /api/products 304 - 19ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091243 bytes
+[2025-07-27T18:18:55.658Z] GET /api/users/privateUser/8 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091243 bytes
+[2025-07-27T18:18:55.686Z] GET /api/visitors/daily 304 - 4ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091243 bytes
+[2025-07-27T18:18:55.721Z] GET /api/visitors/stats 200 - 40ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.167Z] GET /api/favorite/121 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.191Z] GET /api/favorite/120 304 - 27ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.226Z] GET /api/favorite/132 304 - 61ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.248Z] GET /api/favorite/123 304 - 59ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.283Z] GET /api/orderItems 304 - 122ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.307Z] GET /api/favorite/129 304 - 120ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.336Z] GET /api/favorite/124 304 - 32ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.358Z] GET /api/favorite/122 304 - 34ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.375Z] GET /api/favorite/128 304 - 50ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.409Z] GET /api/favorite/125 304 - 76ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.442Z] GET /api/favorite/131 304 - 108ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.461Z] GET /api/favorite/130 304 - 106ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.497Z] GET /api/favorite/126 304 - 39ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.514Z] GET /api/favorite/127 304 - 22ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.539Z] GET /api/orderItems 304 - 44ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.563Z] GET /api/orderItems 304 - 8ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.585Z] GET /api/orderItems 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.609Z] GET /api/orderItems 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.632Z] GET /api/orderItems 304 - 9ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.666Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.699Z] GET /api/orderItems 304 - 7ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.723Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.749Z] GET /api/orderItems 304 - 11ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.776Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.804Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:56.829Z] GET /api/orderItems 304 - 10ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091297 bytes
+[2025-07-27T18:18:57.847Z] POST /api/visitors 201 - 600ms - req: 0 bytes, res: 248 bytes, total: 248 bytes
+Total Bandwidth So Far: 1091545 bytes
+[2025-07-27T18:19:08.526Z] GET /api/visitors/daily 304 - 130ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091545 bytes
+[2025-07-27T18:19:08.541Z] GET /api/visitors/stats 200 - 146ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1091599 bytes
+[2025-07-27T18:19:25.779Z] GET /api/visitors/daily 304 - 121ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091599 bytes
+[2025-07-27T18:19:25.795Z] GET /api/visitors/stats 200 - 137ms - req: 0 bytes, res: 54 bytes, total: 54 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:19:55.812Z] GET /api/visitors/daily 304 - 147ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:19:55.833Z] GET /api/visitors/stats 304 - 169ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:08.599Z] GET /api/visitors/daily 304 - 136ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:08.625Z] GET /api/visitors/stats 304 - 163ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:25.783Z] GET /api/visitors/daily 304 - 121ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:25.808Z] GET /api/visitors/stats 304 - 147ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:55.799Z] GET /api/visitors/daily 304 - 137ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:20:55.828Z] GET /api/visitors/stats 304 - 167ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:08.647Z] GET /api/visitors/daily 304 - 201ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:08.671Z] GET /api/visitors/stats 304 - 225ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:25.768Z] GET /api/visitors/daily 304 - 107ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:25.788Z] GET /api/visitors/stats 304 - 128ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:55.781Z] GET /api/visitors/daily 304 - 128ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:21:55.803Z] GET /api/visitors/stats 304 - 151ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:22:08.528Z] GET /api/visitors/daily 304 - 132ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:22:08.554Z] GET /api/visitors/stats 304 - 159ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:22:25.834Z] GET /api/visitors/daily 304 - 182ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
+[2025-07-27T18:22:25.855Z] GET /api/visitors/stats 304 - 204ms - req: 0 bytes, res: 0 bytes, total: 0 bytes
+Total Bandwidth So Far: 1091653 bytes
